@@ -1,0 +1,12 @@
+dist/
+node_modules/
+.cloud-first-data/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+.DS_Store
+Thumbs.db

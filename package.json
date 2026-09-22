@@ -1,0 +1,28 @@
+{
+  "name": "cloud-first-consulting",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Public-safe fictional consulting website for GitHub Pages",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "pretest": "node scripts/catalogs.mjs && node scripts/navigation.mjs && node scripts/build-ui.mjs",
+    "build": "node scripts/build.mjs",
+    "dev": "npm run build && node server/index.mjs",
+    "start": "node server/index.mjs",
+    "briefs": "node scripts/generate-briefs.mjs",
+    "test": "node --check site/assets/app.js && node --check site/assets/contact.js && node --check site/assets/theme.js && node scripts/validate.mjs && node --test scripts/build.test.mjs scripts/validate-pages.test.mjs scripts/catalogs.test.mjs scripts/theme.test.mjs scripts/content-guidance.test.mjs server/contact.test.mjs",
+    "validate:pages": "node scripts/validate-pages.mjs"
+  },
+  "dependencies": {
+    "@fluentui/react-components": "9.60.0",
+    "@fluentui/react-icons": "2.0.292",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.0"
+  }
+}

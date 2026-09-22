@@ -1,0 +1,122 @@
+[
+  {
+    "slug":"security","category":"Security","kind":"Overview","title":"Security services","headline":"Stronger protection.|Clearer priorities.",
+    "summary":"Connect security investments to the risks that matter. Build a coordinated defense across identities, devices, data, cloud workloads, and AI.",
+    "capabilities":["AI Security and AI Governance for business applications and agents.","Entra Suite identity governance and risk-based access.","ZTNA, secure web gateway, and phased legacy VPN replacement.","Endpoint security and device management.","Data protection, threat response, and cloud security posture."],
+    "deliverables":["An exposure inventory and prioritized risk register.","A control-gap and detection coverage assessment.","A sequenced remediation roadmap.","Response runbooks and operational ownership."],
+    "outcome":"A clearer risk picture, consistent response decisions, and security that supports innovation. Agree on baselines before setting improvement targets.",
+    "startingPoint":"Start with a security posture assessment.",
+    "prepare":"Bring your critical services, security tooling, and priority concerns. Agree on scope, access, deliverables, and acceptance criteria before implementation.",
+    "technologies":["Defender","Sentinel","Entra Suite","Intune","Purview"],"service":"security.html"
+  },
+  {
+    "slug":"threat-protection","category":"Security","kind":"Capability","title":"Threat protection","headline":"Reduce exposure.|Strengthen your defense.",
+    "summary":"Connect identity, endpoint, email, and cloud protection through extended detection and response (XDR). Prioritize risks and give your team a clear response plan.",
+    "capabilities":["Identify important business systems and their protection needs.","Review identity, endpoint, email, and cloud protection coverage.","Assess prevention and high-risk configuration gaps.","Map protection decisions to relevant business threats.","Stage changes with operational owners and rollback criteria."],
+    "deliverables":["An in-scope asset and exposure inventory.","A protection-coverage and control-gap assessment.","A risk-ranked hardening and remediation backlog.","A phased implementation and verification plan."],
+    "outcome":"A more consistent defense and clearer remediation priorities. Discuss coverage, critical-gap closure, and backlog age; no breach-prevention guarantee is implied.",
+    "startingPoint":"Start with a threat-protection readiness review.",
+    "prepare":"Bring the critical services, existing protection tools, known exposure, and change constraints. Active incident response and specialist operational-technology assessment are separate scopes.",
+    "technologies":["Defender XDR","Defender for Office 365","Defender for Cloud","Microsoft Entra","Intune"],"service":"security.html#threat-protection"
+  },
+  {
+    "slug":"data-security","category":"Security","kind":"Capability","title":"Data security","headline":"Know your information.|Protect how it is used.",
+    "summary":"Make sensitive data visible and its handling deliberate. Connect discovery, ownership, classification, access, and protection to the way your organization collaborates and adopts AI.",
+    "capabilities":["Review data exposure, oversharing, and ownership.","Define a practical classification and labeling taxonomy.","Design supported DLP and information-protection policies.","Assess retention, audit, and insider-risk requirements.","Connect AI readiness to appropriate access and data use."],
+    "deliverables":["A scoped data-risk and repository assessment.","A classification and handling model.","A staged protection-policy and exception plan.","Control-to-evidence mapping and operational responsibilities."],
+    "outcome":"Clearer data boundaries and a practical protection roadmap. Discuss classification coverage, excess access, policy exceptions, and evidence completeness.",
+    "startingPoint":"Start with a data protection and readiness assessment.",
+    "prepare":"Bring priority repositories, information owners, collaboration patterns, and applicable obligations. Legal and privacy stakeholders determine requirements; configuration alone is not compliance.",
+    "technologies":["Microsoft Purview","Microsoft 365","Microsoft Entra","Microsoft Fabric"],"service":"security.html#data-security"
+  },
+  {
+    "slug":"modern-secops","category":"Security","kind":"Capability","title":"Modern security operations","headline":"Connect the signals.|Operationalize the response.",
+    "summary":"Modernize security operations with extended detection and response (XDR), relevant analytics, and controlled automation. Align responsibilities with the threats that matter.",
+    "capabilities":["Assess the security operating model and escalation paths.","Prioritize Sentinel data sources and detection use cases.","Engineer and tune analytics with XDR investigation context.","Design approval-controlled response automation.","Exercise runbooks and establish continuous improvement."],
+    "deliverables":["A security operations maturity and coverage assessment.","A detection-engineering backlog and data onboarding plan.","Investigation, escalation, and response runbooks.","A measurement framework and operations handover."],
+    "outcome":"More consistent triage, clearer ownership, and a measurable improvement cycle. Baseline alert quality, investigation time, and unresolved detection gaps.",
+    "startingPoint":"Start with a security operations modernization roadmap.",
+    "prepare":"Bring telemetry sources, recurring alert challenges, current workflows, and operational constraints. Monitoring hours, incident response, and service targets require a separate explicit agreement.",
+    "technologies":["Microsoft Sentinel","Defender XDR","Azure Logic Apps"],"service":"security.html#threat-protection"
+  },
+  {
+    "slug":"ai-business","category":"AI Business Solutions","kind":"Overview","title":"AI Business Solutions","headline":"Better ways to work.|A clearer case for AI.",
+    "summary":"Connect Microsoft 365 productivity, Viva employee experience, and business AI. Build a practical path to collaboration, adoption, and useful outcomes.",
+    "capabilities":["Microsoft 365, Viva, and Copilot readiness and adoption.","Business-process discovery and workflow transformation.","Custom AI grounded in approved organizational knowledge.","Governance, evaluation, and bounded system integrations.","Role-based learning and privacy-aware value measurement."],
+    "deliverables":["A prioritized use-case portfolio and pilot charter.","A readiness assessment and solution blueprint.","Evaluation criteria and an adoption playbook.","A sequenced improvement roadmap."],
+    "outcome":"Less process friction, more useful knowledge, and better-supported work. Measure quality and sustained adoption rather than equating usage with financial return.",
+    "startingPoint":"Start with an AI strategy and governance roadmap.",
+    "prepare":"Bring an important business challenge, its owner, and the systems and data involved. Define a focused pilot and the evidence needed for the next decision.",
+    "technologies":["Microsoft 365","Viva","Microsoft 365 Copilot","Power Platform","Foundry"],"service":"ai-business.html"
+  },
+  {
+    "slug":"copilot-readiness","category":"AI Business Solutions","kind":"Capability","title":"Copilot readiness and adoption","headline":"Prepare the foundation.|Make adoption useful.",
+    "summary":"Give Microsoft 365 Copilot a focused, protected path into everyday work. Align business use cases, information access, technical prerequisites, and adoption before broad rollout.",
+    "capabilities":["Prioritize role-based use cases and a bounded pilot.","Review licensing, identity, device, and information readiness.","Identify oversharing and relevant data-protection gaps.","Design enablement, support, and feedback processes.","Evaluate task quality and readiness before expanding."],
+    "deliverables":["A use-case portfolio and readiness assessment.","A prioritized protection and remediation plan.","A pilot charter with success and exit criteria.","An enablement playbook and adoption measurement plan."],
+    "outcome":"A deliberate adoption decision backed by evidence. Discuss task usefulness, output quality, readiness gaps, and sustained use without promising time or cost savings.",
+    "startingPoint":"Start with a focused Copilot readiness engagement.",
+    "prepare":"Bring the intended pilot roles, approved knowledge sources, relevant policies, and business owners. Validate supported capabilities and current licensing before implementation.",
+    "technologies":["Microsoft 365 Copilot","Microsoft Purview","Microsoft Entra","Intune"],"service":"ai-business.html#copilot"
+  },
+  {
+    "slug":"business-processes","category":"AI Business Solutions","kind":"Capability","title":"Business process transformation","headline":"Reduce the handoffs.|Keep decisions accountable.",
+    "summary":"Reimagine the process before automating it. Connect business records, workflow, and AI around a measurable outcome, with explicit ownership for decisions and exceptions.",
+    "capabilities":["Discover friction, repeated work, and approval dependencies.","Map current and future-state sales, service, or operations flows.","Integrate approved CRM, ERP, and collaboration records.","Define decision rights, approvals, and exception handling.","Plan testing, adoption, and an operational handover."],
+    "deliverables":["A process assessment and future-state map.","An integration design and implementation backlog.","A decision and approval matrix.","Acceptance criteria, runbooks, and measurement approach."],
+    "outcome":"Clearer ownership and less avoidable process friction. Agree on cycle time, rework, handoff volume, and service quality measures before implementation.",
+    "startingPoint":"Start with one important process and its business owner.",
+    "prepare":"Bring the workflow, systems, common exceptions, and desired outcome. Financial, contractual, or externally consequential actions need agreed authorization.",
+    "technologies":["Dynamics 365","Power Automate","Power Apps","Copilot Studio"],"service":"ai-business.html#processes"
+  },
+  {
+    "slug":"custom-ai","category":"AI Business Solutions","kind":"Capability","title":"Custom AI solutions and governance","headline":"Use your knowledge.|Bound the capability.",
+    "summary":"Design assistants and agents that use approved business context, respect access, and connect to the right tools. Make usefulness, quality, and safety part of the same decision.",
+    "capabilities":["Assess use-case feasibility, ownership, and data requirements.","Design answers based on approved sources and useful references.","Review MCP servers, approved integrations, and narrowly scoped tools.","Evaluate successful tasks, denied access, and harmful inputs.","Plan release decisions, monitoring, and retirement."],
+    "deliverables":["A solution and governance blueprint.","A scoped prototype and knowledge-source design.","An evaluation dataset and release criteria.","A production-readiness and improvement backlog."],
+    "outcome":"A clearer case for a useful, governed AI solution. Discuss groundedness, task success, safe failure, latency, and cost per useful interaction.",
+    "startingPoint":"Start with a scoped use case and clear boundaries.",
+    "prepare":"Bring the task, approved information, accountable owner, and intended integrations. A prototype is not production assurance; expanded permissions require explicit review.",
+    "technologies":["Copilot Studio","Microsoft Foundry","Microsoft Entra","Microsoft Purview"],"service":"ai-business.html#custom-ai"
+  },
+  {
+    "slug":"cloud-platforms","category":"Cloud and AI Platforms","kind":"Overview","title":"Cloud and AI Platforms","headline":"Modernize with purpose.|Innovate on solid ground.",
+    "summary":"Turn infrastructure, applications, and fragmented data into a foundation for business progress. Connect modernization to security, resilience, and useful intelligence.",
+    "capabilities":["Azure landing zones and governed platform foundations.","Application and infrastructure modernization.","Data integration, analytics, quality, and governance.","Secure AI application architecture and evaluation.","Reliability, operational ownership, and cost visibility."],
+    "deliverables":["A target-state architecture and design decisions.","A prioritized modernization backlog.","A phased implementation and readiness plan.","An operations and optimization roadmap."],
+    "outcome":"Less inherited complexity, more trusted data, and clearer operational control. Agree on reliability, quality, and cost measures before implementation.",
+    "startingPoint":"Start with a cloud and data modernization roadmap.",
+    "prepare":"Bring the application landscape, important data sources, and operational constraints. Prioritize the platform foundation and the first workload it needs to support.",
+    "technologies":["Microsoft Azure","Microsoft Fabric","Purview","Microsoft Foundry"],"service":"cloud-platforms.html"
+  },
+  {
+    "slug":"cloud-modernization","category":"Cloud and AI Platforms","kind":"Capability","title":"Cloud modernization","headline":"Move the business forward.|Not just the workload.",
+    "summary":"Connect portfolio decisions to a governed Azure foundation. Assess what to retain, retire, migrate, or modernize, then sequence change around business dependencies.",
+    "capabilities":["Assess applications, dependencies, and readiness constraints.","Design landing zone, identity, network, and policy foundations.","Define workload disposition and migration waves.","Plan security, performance, recovery, and cost requirements.","Establish pilot, cutover, rollback, and handover criteria."],
+    "deliverables":["A portfolio assessment and dependency map.","A target architecture and design-decision record.","A migration and modernization roadmap.","Operational acceptance and recovery requirements."],
+    "outcome":"A clearer path through technical debt and workload risk. Discuss readiness, validated reliability, recovery outcomes, and operating cost against a baseline.",
+    "startingPoint":"Start with a bounded portfolio or platform assessment.",
+    "prepare":"Bring business-critical workloads, technical dependencies, platform constraints, and upcoming change windows. Validate regional availability, licensing, and data residency requirements.",
+    "technologies":["Microsoft Azure","Azure Migrate","Azure SQL","Azure Policy"],"service":"cloud-platforms.html#modernization"
+  },
+  {
+    "slug":"governed-data","category":"Cloud and AI Platforms","kind":"Capability","title":"Governed data and analytics","headline":"Connect the information.|Preserve its meaning.",
+    "summary":"Build trusted data products for business intelligence (BI) and AI. Bring ingestion, transformation, meaning, access, and ownership into one governed design.",
+    "capabilities":["Assess sources, integration patterns, and data ownership.","Design lakehouse, warehouse, and semantic-model architecture.","Define quality, lineage, classification, and access requirements.","Prioritize useful analytical and AI knowledge foundations.","Establish data-product operations and change ownership."],
+    "deliverables":["A data-platform and integration blueprint.","Prioritized data products and shared definitions.","Quality, access, and acceptance criteria.","A reporting pilot and governance operating model."],
+    "outcome":"More trustworthy information and less reconciliation effort. Discuss freshness, quality-rule coverage, consistent definitions, and time to produce a reliable insight.",
+    "startingPoint":"Start with a business question and the data it needs.",
+    "prepare":"Bring source owners, current reports, access requirements, and known quality issues. Minimize personal data and validate permitted reuse before integrating sources.",
+    "technologies":["Microsoft Fabric","OneLake","Power BI","Microsoft Purview"],"service":"cloud-platforms.html#data-platforms"
+  },
+  {
+    "slug":"ai-platforms","category":"Cloud and AI Platforms","kind":"Capability","title":"AI application platforms","headline":"Make innovation deployable.|Make it operable.",
+    "summary":"Give AI applications a secure, observable foundation. Connect model choices, grounded context, integrations, evaluation, and operational requirements before production consideration.",
+    "capabilities":["Assess hosting, model, and workload requirements.","Design identity, knowledge access, and approved MCP integrations.","Review orchestration frameworks, workflow handoffs, and evaluations.","Establish release gates, monitoring, and failure handling.","Plan budgets, lifecycle management, and operational ownership."],
+    "deliverables":["An AI application reference architecture.","A scoped platform or application foundation.","Evaluation and release-readiness criteria.","Monitoring, cost, and operations requirements."],
+    "outcome":"A more deliberate route from prototype to an operable service. Agree on task quality, security findings, latency, availability objectives, and cost per useful task.",
+    "startingPoint":"Start with a use case and a production-readiness review.",
+    "prepare":"Bring the model and data needs, intended integrations, risk constraints, and operating requirements. Assess production readiness separately from prototype performance.",
+    "technologies":["Microsoft Foundry","Azure","Microsoft Entra","GitHub"],"service":"cloud-platforms.html#ai-platforms"
+  }
+]
