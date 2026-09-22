@@ -6,6 +6,18 @@ import { pagePath } from "../shared/urls.mjs";
 const sourceOrigin = "https://source.invalid/";
 const decodeAttribute = value => value.replaceAll("&amp;", "&").replaceAll("&quot;", '"').replaceAll("&#39;", "'");
 
+const clarityScript = `<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "ymik5mm11l");
+</script>`;
+
+export function injectClarity(html) {
+  return html.replace("</head>", `${clarityScript}</head>`);
+}
+
 export function rewritePageLinks(html, page) {
   const route = pagePath(page);
   const directory = route.endsWith("/") ? route : "";
@@ -46,6 +58,7 @@ export async function publishPages(source, destination, siteUrl) {
     const route = pagePath(page);
     const target = path.join(destination, route.endsWith("/") || !route ? route + "index.html" : route);
     let html = rewritePageLinks(await readFile(path.join(source, page), "utf8"), page);
+    html = injectClarity(html);
     if (page === "404.html") {
       const legacyPages = pages.filter(name => name !== "404.html").sort().join(" ");
       html = html.replace("<html ", `<html data-legacy-pages="${escapeHtml(legacyPages)}" `);

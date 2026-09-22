@@ -2,7 +2,7 @@
   "name": "cloud-first-consulting",
   "version": "1.0.0",
   "private": true,
-  "description": "Public-safe fictional consulting website for GitHub Pages",
+  "description": "Public-safe Cloud First Consulting website for GitHub Pages",
   "type": "module",
   "engines": {
     "node": ">=22"
