@@ -41,12 +41,16 @@ export function resolveErrorPageLinks(html, siteUrl) {
 
 export async function publishPages(source, destination, siteUrl) {
   await cp(source, destination, { recursive: true });
-  for (const page of await readdir(source)) {
-    if (!page.endsWith(".html")) continue;
+  const pages = (await readdir(source)).filter(page => page.endsWith(".html"));
+  for (const page of pages) {
     const route = pagePath(page);
     const target = path.join(destination, route.endsWith("/") || !route ? route + "index.html" : route);
     let html = rewritePageLinks(await readFile(path.join(source, page), "utf8"), page);
-    if (page === "404.html" && siteUrl) html = resolveErrorPageLinks(html, siteUrl);
+    if (page === "404.html") {
+      const legacyPages = pages.filter(name => name !== "404.html").sort().join(" ");
+      html = html.replace("<html ", `<html data-legacy-pages="${escapeHtml(legacyPages)}" `);
+      if (siteUrl) html = resolveErrorPageLinks(html, siteUrl);
+    }
     await mkdir(path.dirname(target), { recursive: true });
     await writeFile(target, html);
     const oldPath = path.join(destination, page);

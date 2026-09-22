@@ -77,7 +77,9 @@ export async function validatePages(directory, siteUrl) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  assert(process.env.SITE_URL, "Set SITE_URL to the Pages deployment URL before validating dist.");
-  const result = await validatePages(path.join(root, "dist"), process.env.SITE_URL);
-  console.log(`Validated GitHub Pages output: ${result.pages} pages and ${result.links} local references, including nested 404 recovery.`);
+  const output = process.argv[2] || "dist";
+  assert(["docs", "dist"].includes(output), "Expected docs or dist output.");
+  assert(process.env.SITE_URL, `Set SITE_URL to the Pages deployment URL before validating ${output}.`);
+  const result = await validatePages(path.join(root, output), process.env.SITE_URL);
+  console.log(`Validated GitHub Pages ${output}: ${result.pages} pages and ${result.links} local references, including nested 404 recovery.`);
 }

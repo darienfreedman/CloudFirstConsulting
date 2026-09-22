@@ -63,7 +63,7 @@ test("all website pages and assets resolve under a GitHub project path", async t
   const base = "https://demo.github.io/cloud-first-demo/";
   const directory = await mkdtemp(path.join(os.tmpdir(), "cloud-first-pages-site-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  await publishPages(fileURLToPath(new URL("../docs", import.meta.url)), directory, base);
+  await publishPages(fileURLToPath(new URL("../src/site", import.meta.url)), directory, base);
   const result = await validatePages(directory, base);
   assert(result.pages >= 58);
   assert(result.links > 6000);

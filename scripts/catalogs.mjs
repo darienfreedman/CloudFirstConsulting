@@ -159,9 +159,9 @@ export async function generateCatalogs() {
     ...catalogs.industries.map((industry) => [`industry-${industry.slug}.html`, renderIndustry(industry, catalogs.briefs)]),
     ...catalogs.briefs.map((brief) => [`brief-${brief.slug}.html`, renderBrief(brief)])
   ];
-  for (const [filename, content] of outputs) await writeFile(path.join(root, "docs", filename), content);
+  for (const [filename, content] of outputs) await writeFile(path.join(root, "src", "site", filename), content);
   for (const [index, filename] of ["security.html", "ai-business.html", "cloud-platforms.html"].entries()) {
-    const location = path.join(root, "docs", filename);
+    const location = path.join(root, "src", "site", filename);
     const source = await readFile(location, "utf8");
     const briefs = catalogs.briefs.filter((brief) => brief.category === categories[index]);
     const block = `<!-- capability-briefs:start --><section class="section-wrap capability-library" aria-label="Downloadable capability briefs"><p class="eyebrow">Service guides</p><h2>${escape(categories[index])} briefs</h2><div class="capability-links">${briefs.map((brief) => `<a href="brief-${brief.slug}.html"><strong>${escape(brief.title)}</strong><span>Read online or download a guide <span aria-hidden="true">&#8599;</span></span></a>`).join("")}</div></section><!-- capability-briefs:end -->\n    `;

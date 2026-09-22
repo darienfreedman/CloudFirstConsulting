@@ -239,7 +239,7 @@ export const footer = `<footer class="site-footer section-wrap"><div class="foot
 export async function syncNavigation() {
   const settings = await readSettings();
   await writeSettings(settings);
-  const site = path.join(root, "docs");
+  const site = path.join(root, "src", "site");
   for (const page of await readdir(site)) {
     if (!page.endsWith(".html")) continue;
     const filename = path.join(site, page);
