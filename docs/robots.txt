@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://darienfreedman.github.io/CloudFirstConsulting/sitemap.xml

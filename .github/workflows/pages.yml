@@ -15,6 +15,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      pages_build_type: ${{ steps.pages.outputs.build_type }}
     permissions:
       contents: read
       pages: read
@@ -25,26 +27,34 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Configure Pages
+      - name: Read Pages publishing mode
         id: pages
-        uses: actions/configure-pages@v5
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api "repos/$GITHUB_REPOSITORY/pages" --jq '"base_url=\(.html_url)\nbuild_type=\(.build_type)"' >> "$GITHUB_OUTPUT"
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
       - name: Validate site
         run: npm test
+        env:
+          SITE_URL: ${{ steps.pages.outputs.base_url }}
       - name: Build public assets only
         run: npm run build
         env:
           SITE_URL: ${{ steps.pages.outputs.base_url }}
       - name: Validate deployed paths and assets
-        run: npm run validate:pages
+        run: |
+          npm run validate:docs
+          npm run validate:pages
         env:
           SITE_URL: ${{ steps.pages.outputs.base_url }}
       - name: Upload site
+        if: steps.pages.outputs.build_type == 'workflow'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
   deploy:
+    if: needs.build.outputs.pages_build_type == 'workflow'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

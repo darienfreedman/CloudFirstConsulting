@@ -11,9 +11,9 @@ import { rewritePageLinks } from "./routes.mjs";
 import { pagePath } from "../shared/urls.mjs";
 
 test("retired menu, orbital hero, and resource layouts do not leave unused styles", () => {
-  const styles = readdirSync(new URL("../docs/assets", import.meta.url))
+  const styles = readdirSync(new URL("../src/site/assets", import.meta.url))
     .filter(name => name.endsWith(".css") && name !== "react-ui.css")
-    .map(name => readFileSync(new URL(`../docs/assets/${name}`, import.meta.url), "utf8"))
+    .map(name => readFileSync(new URL(`../src/site/assets/${name}`, import.meta.url), "utf8"))
     .join("\n");
   for (const name of [
     "service-nav-item", "service-menu-toggle", "service-menu", "service-menu-link",
@@ -26,9 +26,9 @@ test("retired menu, orbital hero, and resource layouts do not leave unused style
 });
 
 test("engagement highlights belong to recommendations, not URL fragments", () => {
-  const styles = readdirSync(new URL("../docs/assets", import.meta.url))
+  const styles = readdirSync(new URL("../src/site/assets", import.meta.url))
     .filter(name => name.endsWith(".css"))
-    .map(name => readFileSync(new URL(`../docs/assets/${name}`, import.meta.url), "utf8"))
+    .map(name => readFileSync(new URL(`../src/site/assets/${name}`, import.meta.url), "utf8"))
     .join("\n");
   assert(!/\.engagement-card:target\b/.test(styles), "Deep links must not leave a second highlight behind");
   assert(styles.includes(".engagement-card.is-recommended"), "Submitted recommendations need a visible highlight");
@@ -85,8 +85,8 @@ test("sitemap escapes XML attributes in paths", () => {
 });
 
 test("sitemap includes every customer page", () => {
-  const pages = readdirSync(new URL("../docs", import.meta.url)).filter((name) => name.endsWith(".html") && name !== "404.html"
-    && !readFileSync(new URL(`../docs/${name}`, import.meta.url), "utf8").includes('<meta name="robots" content="noindex">'));
+  const pages = readdirSync(new URL("../src/site", import.meta.url)).filter((name) => name.endsWith(".html") && name !== "404.html"
+    && !readFileSync(new URL(`../src/site/${name}`, import.meta.url), "utf8").includes('<meta name="robots" content="noindex">'));
   const base = "https://example.github.io/cloud-first/";
   const xml = sitemap(base);
   for (const page of pages) {
@@ -96,7 +96,7 @@ test("sitemap includes every customer page", () => {
 });
 
 test("error-page assets and navigation resolve from nested missing paths", () => {
-  const source = readFileSync(new URL("../docs/404.html", import.meta.url), "utf8");
+  const source = readFileSync(new URL("../src/site/404.html", import.meta.url), "utf8");
   for (const base of ["https://example.github.io/cloud-first/", "https://demo.example.com/"]) {
     const html = resolveErrorPageLinks(rewritePageLinks(source, "404.html"), base);
     assert(html.includes(`href="${base}assets/styles.css"`));
@@ -153,8 +153,8 @@ test("homepage tab title stays concise without changing the hero", () => {
 });
 
 test("Cloud First branding is consistent across pages and package metadata", () => {
-  for (const name of readdirSync(new URL("../docs", import.meta.url)).filter(name => name.endsWith(".html"))) {
-    const html = readFileSync(new URL(`../docs/${name}`, import.meta.url), "utf8");
+  for (const name of readdirSync(new URL("../src/site", import.meta.url)).filter(name => name.endsWith(".html"))) {
+    const html = readFileSync(new URL(`../src/site/${name}`, import.meta.url), "utf8");
     assert(name === "index.html"
       ? html.includes("<title>Cloud First Consulting</title>")
       : /<title>[^<]+ \| CFC<\/title>/.test(html), name);
@@ -170,13 +170,13 @@ test("Cloud First branding is consistent across pages and package metadata", () 
 });
 
 test("every page uses the logo-derived favicon, including the error page", () => {
-  const image = readFileSync(new URL("../docs/assets/favicon.png", import.meta.url));
+  const image = readFileSync(new URL("../src/site/assets/favicon.png", import.meta.url));
   assert.equal(image.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
   assert.equal(image.readUInt32BE(16), 64);
   assert.equal(image.readUInt32BE(20), 64);
   assert(image.length < 20000);
-  for (const name of readdirSync(new URL("../docs", import.meta.url)).filter(name => name.endsWith(".html"))) {
-    const html = readFileSync(new URL(`../docs/${name}`, import.meta.url), "utf8");
+  for (const name of readdirSync(new URL("../src/site", import.meta.url)).filter(name => name.endsWith(".html"))) {
+    const html = readFileSync(new URL(`../src/site/${name}`, import.meta.url), "utf8");
     assert(html.includes('<link rel="icon" href="assets/favicon.png" type="image/png" sizes="64x64">'), name);
   }
   const html = '<head><link rel="icon" href="assets/favicon.svg" type="image/svg+xml"></head>';
@@ -193,7 +193,7 @@ test("form CSP allows Microsoft frame hosts only when an embed is configured", (
 });
 
 test("Fluent-inspired color roles meet normal-text contrast thresholds", () => {
-  const css = readFileSync(new URL("../docs/assets/styles.css", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../src/site/assets/styles.css", import.meta.url), "utf8");
   const token = (name) => {
     const value = css.match(new RegExp(`--${name}:(#[0-9a-f]{6})`, "i"))?.[1];
     assert(value, `Missing color token: ${name}`);

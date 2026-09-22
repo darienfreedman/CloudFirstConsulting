@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const script = readFileSync(new URL("../docs/assets/app.js", import.meta.url), "utf8");
+const script = readFileSync(new URL("../src/site/assets/app.js", import.meta.url), "utf8");
 
 function fixture(hash = "#entra") {
   const events = { window: new Map(), document: new Map() };
@@ -113,4 +113,21 @@ test("clicking the current fragment realigns its panel after menus close", () =>
   assert.equal(card.scrolled.block, "start");
   assert.equal(card.scrolled.behavior, "instant");
   assert(!card.classList.contains("is-highlighted"));
+});
+
+test("explicit published index.html URLs canonicalize without changing source previews", () => {
+  for (const siteRoot of ["../", undefined]) {
+    let redirected;
+    const href = "https://demo.github.io/project/security/index.html?from=bookmark#identity";
+    vm.runInNewContext(script, {
+      URL, document: {
+        documentElement: { dataset: { siteRoot }, classList: { add() {} } },
+        querySelector: () => null, querySelectorAll: () => [], getElementById: () => null, addEventListener() {}
+      }, window: { location: {
+        href, pathname: "/project/security/index.html", hash: "#identity",
+        replace: value => { redirected = value; }
+      }, addEventListener() {} }
+    });
+    assert.equal(redirected, siteRoot === undefined ? undefined : "https://demo.github.io/project/security/?from=bookmark#identity");
+  }
 });

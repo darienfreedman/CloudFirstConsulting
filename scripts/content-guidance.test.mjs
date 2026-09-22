@@ -14,7 +14,7 @@ import { linkProductNames, productLink, products, renderProductGuide, syncHomepa
 const text = html => html.replace(/<[^>]+>/g, "");
 
 test("content cards share blue hover and keyboard-focus outlines without outlining forms or sections", () => {
-  const css = readFileSync(new URL("../docs/assets/production.css", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../src/site/assets/production.css", import.meta.url), "utf8");
   const rule = css.split("\n").find(line => line.includes(":is(.service-card,") && line.includes("outline:"));
   assert(rule);
   for (const selector of [
@@ -31,7 +31,7 @@ test("content cards share blue hover and keyboard-focus outlines without outlini
 });
 
 test("FAQs cover delivery decisions and accountable AI operations, not product explainers", () => {
-  const html = readFileSync(new URL("../docs/faq.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/faq.html", import.meta.url), "utf8");
   const items = [...html.matchAll(/<details><summary>([^<]+)<\/summary><div>([\s\S]*?)<\/div><\/details>/g)];
   assert.equal(items.length, 14);
   const questions = items.map(([, question]) => question);
@@ -72,7 +72,7 @@ test("contact embed sizes follow the form width without disabling scrolling or i
 });
 
 test("footer links are alphabetical within categories without a duplicate Privacy link", () => {
-  const html = readFileSync(new URL("../docs/index.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
   const footer = html.match(/<footer class="site-footer[\s\S]*?<\/footer>/)[0];
   for (const [, group] of footer.matchAll(/<nav\b[^>]*>([\s\S]*?)<\/nav>/g)) {
     const labels = [...group.matchAll(/<a\b[^>]*>([^<]+)<\/a>/g)].map(([, label]) => label);
@@ -85,7 +85,7 @@ test("footer links are alphabetical within categories without a duplicate Privac
 
 test("Insights category introductions share a heading with supporting text underneath", () => {
   for (const page of ["perspectives", "solutions-in-practice", "technology-deep-dives"]) {
-    const html = readFileSync(new URL(`../docs/${page}.html`, import.meta.url), "utf8");
+    const html = readFileSync(new URL(`../src/site/${page}.html`, import.meta.url), "utf8");
     const intro = html.match(/<div class="insight-collection-intro">([\s\S]*?)<\/div>/)?.[1];
     assert(intro, page);
     assert.match(intro, /^<p class="eyebrow">[^<]+<\/p><h2 id="[^"]+">[^<]+<\/h2><p>[^<]+<\/p>$/);
@@ -101,13 +101,13 @@ test("Insights collections live on separate pages with correct article ancestry"
   ];
   assert.deepEqual(resourceMenuGroups.find(group => group.id === "insights").links.map(([href]) => href), categories.map(([href]) => href));
   for (const [file, count, prefix] of categories) {
-    const html = readFileSync(new URL(`../docs/${file}`, import.meta.url), "utf8");
+    const html = readFileSync(new URL(`../src/site/${file}`, import.meta.url), "utf8");
     const cards = [...html.matchAll(/<article class="service-card editorial-card"[^>]*>([\s\S]*?)<\/article>/g)];
     assert.equal(cards.length, count, file);
     for (const [, card] of cards) {
       const article = card.match(/href="([^"]+)"/)[1];
       assert(article.startsWith(prefix), article);
-      const content = readFileSync(new URL(`../docs/${article}`, import.meta.url), "utf8");
+      const content = readFileSync(new URL(`../src/site/${article}`, import.meta.url), "utf8");
       const breadcrumbs = content.match(/<nav class="breadcrumbs"[\s\S]*?<\/nav>/)[0];
       assert(breadcrumbs.includes(`href="${file}"`), article);
     }
@@ -115,7 +115,7 @@ test("Insights collections live on separate pages with correct article ancestry"
 });
 
 test("old Insights category bookmarks redirect to standalone pages", () => {
-  const script = readFileSync(new URL("../docs/assets/app.js", import.meta.url), "utf8");
+  const script = readFileSync(new URL("../src/site/assets/app.js", import.meta.url), "utf8");
   for (const id of ["perspectives", "solutions-in-practice", "technology-deep-dives"]) {
     let redirected;
     const link = { dataset: { resourceFragment: id }, href: `https://demo.github.io/demo/${id}/` };
@@ -132,32 +132,32 @@ test("old Insights category bookmarks redirect to standalone pages", () => {
 });
 
 test("technology and solution cards have distinct names and article destinations", () => {
-  const html = readFileSync(new URL("../docs/technology-deep-dives.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/technology-deep-dives.html", import.meta.url), "utf8");
   for (const topic of technologyTopics) {
     const card = html.match(new RegExp(`<article class="service-card editorial-card" id="${topic.id}">([\\s\\S]*?)</article>`))[1];
     assert(card.includes(`<p class="card-kicker">${escapeHtml(topic.name)}</p>`));
     assert(card.includes(`href="deep-dive-${topic.id}.html"`));
     assert(!card.includes('class="article-body"'));
-    const page = readFileSync(new URL(`../docs/deep-dive-${topic.id}.html`, import.meta.url), "utf8");
+    const page = readFileSync(new URL(`../src/site/deep-dive-${topic.id}.html`, import.meta.url), "utf8");
     assert.equal(syncResourceBreadcrumbs(page, `deep-dive-${topic.id}.html`), page);
     assert(page.includes('href="technology-deep-dives.html">Technology deep dives</a>'));
   }
   for (const name of ["AI portfolio governance", "Protected knowledge", "Security modernization"]) {
-    assert(readFileSync(new URL("../docs/solutions-in-practice.html", import.meta.url), "utf8").includes(`<p class="card-kicker">${name}</p>`));
+    assert(readFileSync(new URL("../src/site/solutions-in-practice.html", import.meta.url), "utf8").includes(`<p class="card-kicker">${name}</p>`));
   }
   assert(!html.includes('<p class="card-kicker">Solution example</p>'));
 });
 
 test("Insights has three category links and products occupy a standalone page", () => {
-  const insights = readFileSync(new URL("../docs/insights.html", import.meta.url), "utf8");
-  const productsPage = readFileSync(new URL("../docs/sources.html", import.meta.url), "utf8");
-  const resources = readFileSync(new URL("../docs/resources.html", import.meta.url), "utf8");
+  const insights = readFileSync(new URL("../src/site/insights.html", import.meta.url), "utf8");
+  const productsPage = readFileSync(new URL("../src/site/sources.html", import.meta.url), "utf8");
+  const resources = readFileSync(new URL("../src/site/resources.html", import.meta.url), "utf8");
   const directory = resources.match(/<section class="resource-hub-group" id="insights"[\s\S]*?<\/section>/)[0];
   assert.deepEqual([...directory.matchAll(/href="([^"]+)"/g)].map(([, href]) => href),
     ["perspectives.html", "solutions-in-practice.html", "technology-deep-dives.html"]);
   assert(!insights.includes('class="service-card editorial-card"'));
   for (const id of technologyTopicIds) {
-    assert(readFileSync(new URL("../docs/technology-deep-dives.html", import.meta.url), "utf8").includes(`<article class="service-card editorial-card" id="${id}">`));
+    assert(readFileSync(new URL("../src/site/technology-deep-dives.html", import.meta.url), "utf8").includes(`<article class="service-card editorial-card" id="${id}">`));
     assert(!productsPage.includes(`<section id="${id}">`));
   }
   assert(productsPage.includes('<h1 id="product-guide-title">Start with the problem, then choose the product.</h1>'));
@@ -167,13 +167,13 @@ test("Insights has three category links and products occupy a standalone page", 
   assert(!productsPage.includes('aria-label="Technical resources sections"'));
   assert.deepEqual(resourceMenuGroups.find(group => group.id === "guidance").links.map(([, name]) => name),
     ["Products explained", "Security and privacy", "Website privacy"]);
-  const css = readFileSync(new URL("../docs/assets/production.css", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../src/site/assets/production.css", import.meta.url), "utf8");
   assert(/\.product-guide\{padding-top:0\}/.test(css));
   assert(!/\.resource-section-nav\{[^}]*border-bottom/.test(css));
 });
 
 test("bookmarked glossary fragments redirect from products without affecting product anchors", () => {
-  const script = readFileSync(new URL("../docs/assets/app.js", import.meta.url), "utf8");
+  const script = readFileSync(new URL("../src/site/assets/app.js", import.meta.url), "utf8");
   for (const [fragment, target] of [
     ["technology-glossary", "technology-deep-dives"], ["mcp-servers", "mcp-servers"],
     ["azure", null], ["product-group-0", null], ["", null]
@@ -202,7 +202,7 @@ test("industry navigation groups every industry under a working category link", 
   const panel = nav.match(/id="nav-panel-industries"[\s\S]*?(?=<div class="nav-entry" data-nav-section="resources")/)[0];
   assert(!panel.includes("<input"));
   assert(!panel.includes("Find your industry"));
-  const directory = readFileSync(new URL("../docs/industries.html", import.meta.url), "utf8");
+  const directory = readFileSync(new URL("../src/site/industries.html", import.meta.url), "utf8");
   for (const group of industryGroups) {
     assert(panel.includes(`href="industries.html#${group.id}"`));
     const column = panel.match(new RegExp(`<section class="nav-column"><h3><a href="industries.html#${group.id}">[\\s\\S]*?</section>`))[0];
@@ -214,18 +214,18 @@ test("industry navigation groups every industry under a working category link", 
 });
 
 test("consolidated resources retain content and redirect old links with fragments", () => {
-  const insights = readFileSync(new URL("../docs/solutions-in-practice.html", import.meta.url), "utf8");
-  const sources = readFileSync(new URL("../docs/sources.html", import.meta.url), "utf8");
+  const insights = readFileSync(new URL("../src/site/solutions-in-practice.html", import.meta.url), "utf8");
+  const sources = readFileSync(new URL("../src/site/sources.html", import.meta.url), "utf8");
   assert(insights.includes('id="solutions-in-practice"'));
   for (const slug of ["security", "data-ai", "ai-governance"]) assert(insights.includes(`href="scenario-${slug}.html"`));
   assert(!sources.includes('id="technology-glossary"'));
   assert(!sources.includes('id="technology-deep-dives"'));
-  assert(readFileSync(new URL("../docs/technology-deep-dives.html", import.meta.url), "utf8").includes('id="technology-deep-dives"'));
+  assert(readFileSync(new URL("../src/site/technology-deep-dives.html", import.meta.url), "utf8").includes('id="technology-deep-dives"'));
   const input = '<a href="stories.html">Examples</a><a href="technology-explained.html#grounding">Grounding</a>';
   assert.equal(consolidateResourceLinks(input), '<a href="solutions-in-practice.html">Examples</a><a href="technology-deep-dives.html#grounding">Grounding</a>');
   assert.equal(consolidateResourceLinks('<a href="sources.html#grounding">Topic</a><a href="sources.html#azure">Product</a>'),
     '<a href="technology-deep-dives.html#grounding">Topic</a><a href="sources.html#azure">Product</a>');
-  const script = readFileSync(new URL("../docs/assets/resource-redirect.js", import.meta.url), "utf8");
+  const script = readFileSync(new URL("../src/site/assets/resource-redirect.js", import.meta.url), "utf8");
   for (const [destination, hash, expected] of [
     ["technology-deep-dives/", "#mcp-servers", "technology-deep-dives/?from=bookmark#mcp-servers"],
     ["technology-deep-dives/", "#technology-glossary", "technology-deep-dives/?from=bookmark#technology-deep-dives"],
@@ -256,7 +256,7 @@ test("resource migrations preserve queries and point directly to the current des
     assert.equal(result, `<a href="${newHref}">Read</a>`);
     assert.equal(consolidateResourceLinks(result), result);
   }
-  const security = readFileSync(new URL("../docs/security.html", import.meta.url), "utf8");
+  const security = readFileSync(new URL("../src/site/security.html", import.meta.url), "utf8");
   assert(security.includes('href="technology-deep-dives.html#ai-security">AI and integration terms explained'));
 });
 
@@ -267,7 +267,7 @@ test("Resources links and Insights cards use the same alphabetical topic order",
     const labels = group.links.map(([, label]) => label);
     assert.deepEqual(labels, [...labels].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })));
   }
-  const html = readFileSync(new URL("../docs/perspectives.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/perspectives.html", import.meta.url), "utf8");
   const cards = [...html.matchAll(/<article class="service-card editorial-card">([\s\S]*?)<\/article>/g)];
   const links = cards.map(([, card]) => card.match(/href="([^"]+)"/)[1]).filter(href => href.startsWith("insight-"));
   assert.deepEqual(links, perspectiveLinks.map(([href]) => href));
@@ -276,7 +276,7 @@ test("Resources links and Insights cards use the same alphabetical topic order",
 });
 
 test("technology deep-dive articles preserve definitions and links to perspectives", () => {
-  const html = readFileSync(new URL("../docs/technology-deep-dives.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/technology-deep-dives.html", import.meta.url), "utf8");
   for (const [id, insight] of [
     ["copilot", "copilot-readiness"], ["copilot-model-choice", "ai-governance"],
     ["copilot-evaluation", "copilot-readiness"], ["modern-workplace", "copilot-readiness"],
@@ -286,7 +286,7 @@ test("technology deep-dive articles preserve definitions and links to perspectiv
     ["access-and-data-protection", "identity-security"], ["secure-access", "global-secure-access"]
   ]) {
     assert(html.includes(`id="${id}"`), `Keep existing deep link: ${id}`);
-    const article = readFileSync(new URL(`../docs/deep-dive-${id}.html`, import.meta.url), "utf8");
+    const article = readFileSync(new URL(`../src/site/deep-dive-${id}.html`, import.meta.url), "utf8");
     const section = article.match(/<article class="article-body">([\s\S]*?)<\/article>/)[1];
     assert(section.includes(`href="insight-${insight}.html"`), id);
     assert(section.includes("<h2>Further reading</h2>"), `Keep related guidance discoverable: ${id}`);
@@ -298,7 +298,7 @@ test("technology deep-dive articles preserve definitions and links to perspectiv
 
 test("all technology deep dives provide structured technical explanations and examples", () => {
   for (const topic of technologyTopics) {
-    const html = readFileSync(new URL(`../docs/deep-dive-${topic.id}.html`, import.meta.url), "utf8");
+    const html = readFileSync(new URL(`../src/site/deep-dive-${topic.id}.html`, import.meta.url), "utf8");
     const article = html.match(/<article class="article-body">([\s\S]*?)<\/article>/)[1];
     const headings = [...article.matchAll(/<h2>([^<]+)<\/h2>/g)].map(([, heading]) => heading);
     assert.equal(headings.length, 5, topic.id);
@@ -317,15 +317,15 @@ test("Insights has one overview destination and all registered perspectives are 
   assert.equal(group.links.length, 3);
   assert(!group.links.some(([href]) => href === group.href));
   assert(!header("insights.html").includes("All insights"));
-  const overview = readFileSync(new URL("../docs/insights.html", import.meta.url), "utf8");
+  const overview = readFileSync(new URL("../src/site/insights.html", import.meta.url), "utf8");
   const main = overview.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)[1];
   assert.equal([...main.matchAll(/class="service-card"/g)].length, 0);
   assert(main.includes('id="insights-destination" href="resources.html#insights"'));
   assert(overview.includes('<meta name="robots" content="noindex">'));
-  const perspectives = readFileSync(new URL("../docs/perspectives.html", import.meta.url), "utf8");
+  const perspectives = readFileSync(new URL("../src/site/perspectives.html", import.meta.url), "utf8");
   for (const [page] of perspectiveLinks) {
     assert(perspectives.includes(`href="${page}"`));
-    const html = readFileSync(new URL(`../docs/${page}`, import.meta.url), "utf8");
+    const html = readFileSync(new URL(`../src/site/${page}`, import.meta.url), "utf8");
     assert.equal(syncResourceBreadcrumbs(html, page), html);
     assert(!html.includes('class="article-meta"'));
   }
@@ -334,13 +334,13 @@ test("Insights has one overview destination and all registered perspectives are 
     ["insight-ai-security.html", ["Agent 365", "sources.html#entra", "sources.html#purview", "security.html#ai-security"]],
     ["insight-global-secure-access.html", ["Entra ID Governance", "Zero Trust Network Access", "secure web gateway", "security.html#secure-access"]]
   ]) {
-    const html = readFileSync(new URL(`../docs/${page}`, import.meta.url), "utf8");
+    const html = readFileSync(new URL(`../src/site/${page}`, import.meta.url), "utf8");
     for (const phrase of phrases) assert(html.includes(phrase), `${page}: ${phrase}`);
   }
 });
 
 test("compliance readiness distinguishes obligations and Microsoft shared responsibilities", () => {
-  const html = readFileSync(new URL("../docs/insight-compliance-readiness.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/insight-compliance-readiness.html", import.meta.url), "utf8");
   assert(html.includes('<h1>Make compliance<br><span class="accent">an operating discipline.</span></h1>'));
   assert(html.includes('class="section-wrap article-layout"><article class="article-body">'));
   const article = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)[1];
@@ -349,14 +349,14 @@ test("compliance readiness distinguishes obligations and Microsoft shared respon
     assert(article.includes(phrase), phrase);
   }
   assert(perspectiveLinks.some(([page]) => page === "insight-compliance-readiness.html"));
-  const security = readFileSync(new URL("../docs/security.html", import.meta.url), "utf8");
+  const security = readFileSync(new URL("../src/site/security.html", import.meta.url), "utf8");
   assert(security.includes('href="insight-compliance-readiness.html"'));
   assert(html.includes('href="security.html#data-security"'));
 });
 
 test("the compliance guide includes ten alphabetical anchored references and real industry examples", () => {
   const industries = JSON.parse(readFileSync(new URL("../content/industries.json", import.meta.url), "utf8"));
-  const html = readFileSync(new URL("../docs/insight-compliance-readiness.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/insight-compliance-readiness.html", import.meta.url), "utf8");
   const guide = renderFrameworkGuide(industries);
   const labels = frameworks.map(item => item.name);
   assert.deepEqual(labels, [...labels].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })));
@@ -379,8 +379,8 @@ test("the compliance guide includes ten alphabetical anchored references and rea
 });
 
 test("framework cards follow the complete article and sidebar in a responsive full-width section", () => {
-  const html = readFileSync(new URL("../docs/insight-compliance-readiness.html", import.meta.url), "utf8");
-  const css = readFileSync(new URL("../docs/assets/editorial.css", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/insight-compliance-readiness.html", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../src/site/assets/editorial.css", import.meta.url), "utf8");
   const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)[1];
   const section = main.indexOf('<section class="section-wrap article-body framework-section"');
   assert(section > main.indexOf("</article>"));
@@ -396,7 +396,7 @@ test("framework cards follow the complete article and sidebar in a responsive fu
 });
 
 test("MITRE deep dive distinguishes mapped techniques from tested detection and intelligence", () => {
-  const html = readFileSync(new URL("../docs/deep-dive-mitre-attack.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/deep-dive-mitre-attack.html", import.meta.url), "utf8");
   const article = html.match(/<article class="article-body">([\s\S]*?)<\/article>/)[1];
   for (const phrase of ["MITRE ATT&amp;CK", "Sentinel", "Defender XDR", "threat analytics",
     "Available content is not deployed protection", "provenance", "confidence", "expiry",
@@ -404,24 +404,24 @@ test("MITRE deep dive distinguishes mapped techniques from tested detection and 
     assert(article.includes(phrase), phrase);
   }
   assert(technologyTopics.some(topic => topic.id === "mitre-attack"));
-  const security = readFileSync(new URL("../docs/security.html", import.meta.url), "utf8");
+  const security = readFileSync(new URL("../src/site/security.html", import.meta.url), "utf8");
   assert(security.includes('href="technology-deep-dives.html#mitre-attack"'));
   assert(html.includes('href="security.html#threat-protection"'));
 });
 
 test("brief calls to action prioritize online reading and related services", () => {
   const briefs = JSON.parse(readFileSync(new URL("../content/briefs.json", import.meta.url), "utf8"));
-  const library = readFileSync(new URL("../docs/briefs.html", import.meta.url), "utf8");
+  const library = readFileSync(new URL("../src/site/briefs.html", import.meta.url), "utf8");
   for (const brief of briefs) {
     assert(library.includes(`<a class="button" href="brief-${brief.slug}.html">Read online`));
     assert(library.includes(`<a class="text-link" href="downloads/cloud-first-${brief.slug}-brief.pdf" download>Download PDF`));
-    const html = readFileSync(new URL(`../docs/brief-${brief.slug}.html`, import.meta.url), "utf8");
+    const html = readFileSync(new URL(`../src/site/brief-${brief.slug}.html`, import.meta.url), "utf8");
     assert(html.includes('<p class="brief-brand">Cloud First <span>Consulting</span></p>'));
     const actions = html.match(/<div class="brief-actions">([\s\S]*?)<\/div>/)[1];
     assert(actions.startsWith(`<a class="button" href="${brief.service}">Explore the related service`));
     assert(actions.includes(`<a class="text-link" href="downloads/cloud-first-${brief.slug}-brief.pdf" download>Download one-page PDF`));
   }
-  const css = readFileSync(new URL("../docs/assets/briefs.css", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../src/site/assets/briefs.css", import.meta.url), "utf8");
   const sizes = [...css.matchAll(/\.brief-brand span\{([^}]+)\}/g)];
   assert.equal(sizes.length, 1);
   assert(sizes[0][1].includes("font-size:inherit"));
@@ -431,7 +431,7 @@ test("brief calls to action prioritize online reading and related services", () 
 });
 
 test("Perspectives contains articles without the unrelated resource cards", () => {
-  const html = readFileSync(new URL("../docs/perspectives.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/perspectives.html", import.meta.url), "utf8");
   const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)[1];
   assert(!main.includes('aria-label="Further resources"'));
   for (const slug of ["copilot-readiness", "identity-security", "ai-governance"]) {
@@ -445,7 +445,7 @@ test("all industry use-case technologies have exact product explanations and ren
   let cases = 0;
   let links = 0;
   for (const industry of industries) {
-    const html = readFileSync(new URL(`../docs/industry-${industry.slug}.html`, import.meta.url), "utf8");
+    const html = readFileSync(new URL(`../src/site/industry-${industry.slug}.html`, import.meta.url), "utf8");
     industry.cases.forEach((useCase, index) => {
       const card = html.match(new RegExp(`<article class="use-case catalog-card" id="use-case-${index + 1}"[\\s\\S]*?</article>`))?.[0];
       assert(card, `${industry.slug}: ${useCase.title}`);
@@ -482,7 +482,7 @@ test("endpoint use cases use the consolidated Defender XDR explanation", () => {
 });
 
 test("homepage categories match the explanations with Azure services summarized by Azure", () => {
-  const home = readFileSync(new URL("../docs/index.html", import.meta.url), "utf8");
+  const home = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
   const seen = [];
   for (const [id, category] of Object.entries(homepageProductGroups)) {
     const card = home.match(new RegExp(`<article class="platform-group" aria-labelledby="${id}">([\\s\\S]*?)</article>`))[1];
@@ -504,10 +504,10 @@ test("homepage categories match the explanations with Azure services summarized 
 
 test("Security Copilot is connected to security services and the operations brief", () => {
   const link = productLink("Security Copilot");
-  const home = readFileSync(new URL("../docs/index.html", import.meta.url), "utf8");
+  const home = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
   const card = home.match(/<article class="platform-group" aria-labelledby="platform-security-title">([\s\S]*?)<\/article>/)[1];
   assert(card.includes(link));
-  const security = readFileSync(new URL("../docs/security.html", import.meta.url), "utf8");
+  const security = readFileSync(new URL("../src/site/security.html", import.meta.url), "utf8");
   const service = security.match(/<section class="practice" id="threat-protection"[\s\S]*?<\/section>/)[0];
   assert(service.includes(link));
   assert(service.includes("analyst review criteria"));
@@ -515,7 +515,7 @@ test("Security Copilot is connected to security services and the operations brie
   const brief = briefs.find(brief => brief.slug === "modern-secops");
   assert(brief.technologies.includes("Security Copilot"));
   assert(brief.capabilities.some(capability => capability.includes("Security Copilot")));
-  assert(readFileSync(new URL("../docs/brief-modern-secops.html", import.meta.url), "utf8").includes(link));
+  assert(readFileSync(new URL("../src/site/brief-modern-secops.html", import.meta.url), "utf8").includes(link));
 });
 
 test("GitHub Copilot connects developer services, product guidance, and the platform brief", () => {
@@ -527,7 +527,7 @@ test("GitHub Copilot connects developer services, product guidance, and the plat
   const link = productLink("GitHub Copilot");
   assert.equal(link, '<a href="sources.html#github-copilot">GitHub Copilot</a>');
   for (const page of ["cloud-platforms.html", "deep-dive-copilot.html", "brief-ai-platforms.html"]) {
-    assert(readFileSync(new URL(`../docs/${page}`, import.meta.url), "utf8").includes(link), page);
+    assert(readFileSync(new URL(`../src/site/${page}`, import.meta.url), "utf8").includes(link), page);
   }
   const briefs = JSON.parse(readFileSync(new URL("../content/briefs.json", import.meta.url), "utf8"));
   const brief = briefs.find(brief => brief.slug === "ai-platforms");
@@ -583,7 +583,7 @@ test("Power Platform is covered through specific products rather than a duplicat
     assert(products.some(product => product.id === id));
   }
   for (const file of ["brief-ai-business.html", "ai-business.html", "industry-media-entertainment.html"]) {
-    const html = readFileSync(new URL(`../docs/${file}`, import.meta.url), "utf8");
+    const html = readFileSync(new URL(`../src/site/${file}`, import.meta.url), "utf8");
     assert(!html.includes('href="sources.html#power-platform"'), file);
     assert(html.includes(productLink("Power Apps")), file);
     assert(html.includes(productLink("Power Automate")), file);
@@ -597,7 +597,7 @@ test("service product chips are alphabetical and keep their explanation destinat
     ["Defender XDR", "Entra", "Foundry", "Purview"].map(productLink).join("") + "</div>");
   assert.equal(linkProductNames(result), result);
   for (const file of ["security.html", "ai-business.html", "cloud-platforms.html"]) {
-    const html = readFileSync(new URL(`../docs/${file}`, import.meta.url), "utf8");
+    const html = readFileSync(new URL(`../src/site/${file}`, import.meta.url), "utf8");
     for (const [, group] of html.matchAll(/<div class="product-tags">([\s\S]*?)<\/div>/g)) {
       const names = [...group.matchAll(/<a[^>]+>([^<]+)<\/a>/g)].map(([, name]) => name);
       assert.deepEqual(names, [...names].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base", numeric: true })), file);
@@ -611,7 +611,7 @@ test("connected capability products are alphabetical by displayed name", () => {
   assert.deepEqual([...result.matchAll(/<a[^>]+>([^<]+)<\/a>/g)].map(([, name]) => name),
     ["Agent 365", "Copilot Studio", "Microsoft 365 Copilot"]);
   assert.equal(linkProductNames(result), result);
-  const home = readFileSync(new URL("../docs/index.html", import.meta.url), "utf8");
+  const home = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
   for (const [, list] of home.matchAll(/<ul class="platform-products">([\s\S]*?)<\/ul>/g)) {
     const names = [...list.matchAll(/<a[^>]+>([^<]+)<\/a>/g)].map(([, name]) => name);
     assert.deepEqual(names, [...names].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base", numeric: true })));
@@ -633,7 +633,7 @@ test("product explanations are alphabetical within the existing category order",
 });
 
 test("homepage introductions explain outcomes before products and match capability order", () => {
-  const html = readFileSync(new URL("../docs/index.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
   const cards = [...html.matchAll(/<article class="service-card home-service">([\s\S]*?)<\/article>/g)];
   assert.equal(cards.length, 3);
   for (const [, card] of cards) assert(!/Microsoft 365|Viva|Copilot|Azure|Fabric|Foundry/.test(text(card)));
@@ -642,8 +642,8 @@ test("homepage introductions explain outcomes before products and match capabili
 });
 
 test("the sections around Clear scope do not add a dividing border", () => {
-  const production = readFileSync(new URL("../docs/assets/production.css", import.meta.url), "utf8");
-  const styles = readFileSync(new URL("../docs/assets/styles.css", import.meta.url), "utf8");
+  const production = readFileSync(new URL("../src/site/assets/production.css", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../src/site/assets/styles.css", import.meta.url), "utf8");
   assert(!/\.ai-focus-section\s*\{[^}]*border/.test(production));
   assert(/\.home-company\s*\{[^}]*border-block:0/.test(styles));
 });
@@ -683,10 +683,10 @@ test("Defender for Cloud has a distinct explanation and service destination", ()
 });
 
 test("cloud capabilities and briefs connect to Defender for Cloud", () => {
-  const home = readFileSync(new URL("../docs/index.html", import.meta.url), "utf8");
+  const home = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
   const securityCard = home.match(/<article class="platform-group" aria-labelledby="platform-security-title">([\s\S]*?)<\/article>/)[1];
   assert(securityCard.includes(productLink("Defender for Cloud")));
-  const cloud = readFileSync(new URL("../docs/cloud-platforms.html", import.meta.url), "utf8");
+  const cloud = readFileSync(new URL("../src/site/cloud-platforms.html", import.meta.url), "utf8");
   for (const id of ["landing-zones", "modernization", "operations"]) {
     const section = cloud.match(new RegExp(`<section class="practice" id="${id}"[\\s\\S]*?</section>`))[0];
     assert(section.includes(productLink("Defender for Cloud")), id);
@@ -790,7 +790,7 @@ test("technical resources use the homepage Copilot group name without a duplicat
   assert(guide.includes('<h2 id="product-group-2">Copilot &amp; agents</h2>'));
   assert(guide.includes('<a href="#product-group-2">Copilot &amp; agents</a>'));
   assert.equal(products.filter(product => product.group === "Copilot & agents").length, 7);
-  const source = readFileSync(new URL("../docs/sources.html", import.meta.url), "utf8");
+  const source = readFileSync(new URL("../src/site/sources.html", import.meta.url), "utf8");
   assert(!source.includes("Further planning and architecture guidance"));
   assert(!guide.includes("For broader concepts and terminology"));
 });

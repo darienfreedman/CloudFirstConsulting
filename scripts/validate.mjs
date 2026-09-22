@@ -9,7 +9,7 @@ import { products, productLink, homepageProductGroups, homepageProductsInGroup }
 import { expandAcronyms } from "./acronyms.mjs";
 import { technologyTopics } from "../shared/resource-topics.mjs";
 
-const site = fileURLToPath(new URL("../docs", import.meta.url));
+const site = fileURLToPath(new URL("../src/site", import.meta.url));
 const catalogs = await readCatalogs();
 validateCatalogs(catalogs);
 
