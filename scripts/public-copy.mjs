@@ -1,8 +1,8 @@
 const headings = {
   "about.html": "About Cloud First Consulting",
-  "security.html": "Security Consulting",
-  "ai-business.html": "AI Business Solutions Consulting",
-  "cloud-platforms.html": "Cloud and AI Platforms Consulting",
+  "security.html": "Security consulting",
+  "ai-business.html": "AI Business Solutions consulting",
+  "cloud-platforms.html": "Cloud and AI Platforms consulting",
   "insights.html": "Insights and practical guidance",
   "stories.html": "Solutions in practice",
   "faq.html": "Frequently asked questions",
@@ -11,9 +11,11 @@ const headings = {
 
 export function normalizeProductNames(text) {
   return text
+    .replace(/\bDefender\b(?!\s+(?:XDR|for)\b)/g, "Defender XDR")
     .replace(/\bMicrosoft\s+(?=(?:Entra|Viva|Azure|Fabric|Foundry|Purview|Defender|Sentinel|Intune|Agent 365|Agent Framework|Graph|Copilot|Teams|Forms|Bookings|Power BI|Power Apps|Power Automate|Power Platform|Windows|SharePoint|OneDrive|Exchange|Outlook)\b)/g, "")
-    .replace(/\bMicrosoft technical resources\b/g, "Technical resources")
-    .replace(/\bMicrosoft resources\b/g, "Technical resources")
+    .replace(/\bMicrosoft technical resources\b/g, "Products explained")
+    .replace(/\bMicrosoft resources\b/g, "Products explained")
+    .replace(/\bTechnical resources\b/g, "Products explained")
     .replace(/\bMicrosoft consulting services\b/g, "Consulting services")
     .replace(/\bMicrosoft technology\b/g, "Technology")
     .replace(/\bMicrosoft security\b/g, "Security")
@@ -51,8 +53,13 @@ export function publicCopy(html, filename) {
   }
   if (filename === "index.html") {
     result = result.replace(/<title>[\s\S]*?<\/title>/, "<title>Cloud First Consulting</title>");
+  } else {
+    result = result.replace(/<title>([\s\S]*?)<\/title>/, (_, title) =>
+      `<title>${title.replace(/\s*\|\s*(?:Cloud First Consulting|CFC)$/, "")} | CFC</title>`);
   }
-  result = result.replace(/<p class="article-meta">[\s\S]*?<\/p>/g, '<p class="article-meta"><time datetime="2026-09-21">September 21, 2026</time></p>');
+  if (filename === "insights.html" || filename.startsWith("insight-")) {
+    result = result.replace(/<p class="article-meta">[\s\S]*?<\/p>/g, "");
+  }
   result = result.replace(/<p\b([^>]*)>([\s\S]*?)<\/p>/g, (paragraph, attributes, text) => {
     if (/\b(?:fictional|illustrative|local preview|not a client case study)\b/i.test(text)) {
       if (/class="(?:eyebrow|card-kicker)"/.test(attributes)) return `<p${attributes}>Solution example</p>`;

@@ -12,7 +12,7 @@
 .catalog-card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow4);padding:28px;min-width:0}
 .catalog-card:hover{border-color:var(--colorBrandStroke2);box-shadow:var(--shadow16)}
 .catalog-card h2,.catalog-card h3{font-size:24px;line-height:1.33;margin-bottom:16px}
-.catalog-card h2 a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+.catalog-card h2 a:hover,.catalog-card h3 a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .catalog-card p:not(.eyebrow),.catalog-card li{font-size:16px;line-height:1.7;color:var(--muted)}
 .catalog-card ul{padding-left:20px;margin:0 0 24px}
 .catalog-card li{margin-bottom:8px}
@@ -36,12 +36,16 @@
 .use-case ul{padding-left:20px;color:var(--muted);margin:0 0 24px}
 .use-case li{margin-bottom:8px}
 .use-case-measure{border-top:1px solid #e6e6e6;padding-top:20px}
-.use-case-boundary{padding:16px;border-radius:4px;background:var(--panel-light);color:#24435e}
 .use-case strong{font-weight:600;color:var(--text)}
 .use-case .product-tags{margin-top:auto;padding-top:8px}
 .use-case-links{display:flex;flex-wrap:wrap;gap:12px 24px}
 .use-case-links a{font-size:14px;font-weight:600;line-height:1.5;color:var(--accent);padding-block:8px}
 .use-case-links a:hover{text-decoration:underline;text-underline-offset:4px}
+.framework-context{font-size:14px;line-height:1.7;margin-bottom:24px;color:var(--muted)}
+.framework-context a,.use-case-frameworks a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.use-case-frameworks a{font-weight:600}
+.use-case-frameworks li>span{display:block;margin-top:4px}
+.use-case{scroll-margin-top:24px}
 @media(max-width:1100px){.catalog-grid{grid-template-columns:1fr 1fr}.catalog-card{padding:24px}}
 @media(max-width:900px){.catalog-toolbar{align-items:stretch}.catalog-search,.catalog-filters{flex-basis:100%}.catalog-clear{align-self:flex-start}.use-case{padding:24px}.use-case h2{font-size:24px}}
 @media(max-width:600px){.catalog-grid,.brief-grid,.use-case-grid{grid-template-columns:1fr}.catalog-toolbar{padding:20px;gap:16px}.catalog-filters{gap:8px}.catalog-filters button{flex:1 1 auto}.catalog-card,.use-case{padding:24px}.catalog-group .section-heading{display:block}.catalog-group .section-heading>p{margin-top:12px}.brief-card-actions{align-items:stretch;flex-direction:column;gap:8px}}

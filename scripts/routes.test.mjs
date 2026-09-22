@@ -4,6 +4,26 @@ import { readdirSync, readFileSync } from "node:fs";
 import { pagePath, pageHref, localContactEndpoint } from "../shared/urls.mjs";
 import { rewritePageLinks } from "./routes.mjs";
 
+test("every authored page is reachable or an intentional compatibility or error page", () => {
+  const directory = new URL("../docs/", import.meta.url);
+  const pages = new Map(readdirSync(directory).filter(name => name.endsWith(".html"))
+    .map(name => [name, readFileSync(new URL(name, directory), "utf8")]));
+  const reserved = new Set(["404.html", "industry-professional-services.html", "insights.html", "stories.html", "technology-explained.html"]);
+  const reached = new Set();
+  const pending = ["index.html"];
+  while (pending.length) {
+    const page = pending.pop();
+    if (reached.has(page)) continue;
+    assert(pages.has(page), `Linked page is missing: ${page}`);
+    reached.add(page);
+    for (const [, destination] of pages.get(page).matchAll(/href="([a-z0-9-]+\.html)(?:[?#][^"]*)?"/g)) {
+      pending.push(destination);
+    }
+  }
+  for (const page of pages.keys()) assert(reached.has(page) || reserved.has(page), `Unused page: ${page}`);
+  for (const page of reserved) assert(pages.has(page), `Preserve reserved route: ${page}`);
+});
+
 test("every source page has an extensionless public route except the required 404 file", () => {
   const pages = readdirSync(new URL("../docs", import.meta.url)).filter(name => name.endsWith(".html"));
   for (const page of pages) {

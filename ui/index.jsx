@@ -8,6 +8,7 @@ import {
 import { ClipboardTask24Regular, ShieldLock24Regular } from "@fluentui/react-icons";
 import { serviceOptions, validateInquiry } from "../shared/inquiry.mjs";
 import { microsoftFormsUrls } from "../shared/forms.mjs";
+import { industryGroups } from "../shared/industry-groups.mjs";
 import { pageHref, localContactEndpoint } from "../shared/urls.mjs";
 import "./ui.css";
 
@@ -290,7 +291,34 @@ function ContactForm() {
 
 function CatalogControls({ element, controls, cards, filters, groups, originalStatus }) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("all");
+  const initialIndustryGroup = () => element.dataset.catalog === "industry"
+    ? industryGroups.find(group => `#${group.id}` === window.location.hash) : undefined;
+  const [category, setCategory] = useState(() => initialIndustryGroup()?.title || "all");
+  useEffect(() => {
+    if (element.dataset.catalog !== "industry") return;
+    const followGroup = () => {
+      const group = industryGroups.find(group => `#${group.id}` === window.location.hash);
+      if (group) {
+        setQuery("");
+        setCategory(group.title);
+        requestAnimationFrame(() => document.getElementById(group.id)?.scrollIntoView());
+      }
+    };
+    const followSameGroup = event => {
+      const link = event.target.closest("a[href]");
+      if (!link) return;
+      const url = new URL(link.href);
+      if (url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash === window.location.hash) {
+        followGroup();
+      }
+    };
+    window.addEventListener("hashchange", followGroup);
+    document.addEventListener("click", followSameGroup);
+    return () => {
+      window.removeEventListener("hashchange", followGroup);
+      document.removeEventListener("click", followSameGroup);
+    };
+  }, [element]);
   const units = { industry: ["industry", "industries"], brief: ["brief", "briefs"], "use-case": ["use case", "use cases"] }[element.dataset.catalog];
   useEffect(() => {
     let count = 0;
@@ -305,7 +333,7 @@ function CatalogControls({ element, controls, cards, filters, groups, originalSt
     element.querySelector("#catalog-status").textContent = !term && category === "all" ? originalStatus : `${count} ${units[count === 1 ? 0 : 1]} match your selection.`;
   }, [query, category, element, cards, groups, originalStatus, units]);
   return <div className="react-catalog-controls">
-    <Field label={{ children: controls.label, htmlFor: "catalog-search" }} className="react-catalog-search"><Input id="catalog-search" type="search" size="large" placeholder="Search topics or technologies" value={query} onChange={(_, data) => setQuery(data.value)} /></Field>
+    <Field label={{ children: controls.label, htmlFor: "catalog-search" }} className="react-catalog-search"><Input id="catalog-search" type="search" size="large" placeholder={element.dataset.catalog === "brief" ? "Search topics or technologies" : "Search topics, technologies, or frameworks"} value={query} onChange={(_, data) => setQuery(data.value)} /></Field>
     <div className="react-filter-group" role="group" aria-label="Filter catalog">{filters.map(filter => <ToggleButton key={filter.value} data-filter={filter.value} appearance={category === filter.value ? "primary" : "secondary"} checked={category === filter.value} onClick={() => setCategory(filter.value)}>{filter.label}</ToggleButton>)}</div>
     <Button id="catalog-clear" appearance="subtle" onClick={() => { setQuery(""); setCategory("all"); document.getElementById("catalog-search").focus(); }}>Clear filters</Button>
   </div>;

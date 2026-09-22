@@ -3,7 +3,7 @@ export const blueprints = {
     title: "From security signals to an authorized response",
     description: "A reference workflow for aligning detection, investigation, and response responsibilities.",
     steps: [
-      ["Collect signals", "Identity, endpoint, application, and cloud telemetry.", "Entra and Defender"],
+      ["Collect signals", "Identity, endpoint, application, and cloud telemetry.", "Entra and Defender XDR"],
       ["Correlate activity", "Connect related events and prioritize relevant incidents.", "Defender XDR and Sentinel"],
       ["Investigate", "Review evidence, business impact, and the proposed action.", "Security operations"],
       ["Authorize response", "Apply approved actions and record the outcome.", "Incident and service owners"]
@@ -30,6 +30,6 @@ export const blueprints = {
       ["Intelligence", "Approved models, knowledge sources, and integrations.", "Foundry"],
       ["Operations", "Monitoring, recovery, change control, and cost visibility.", "Service ownership"]
     ],
-    note: "Security and governance apply across the architecture, not as a final deployment step."
+    note: "Security and governance apply across the architecture, not as a final deployment step. Plan Defender for Cloud posture assessment and protection for supported workloads, with clear remediation and response ownership."
   }
 };

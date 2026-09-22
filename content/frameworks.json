@@ -1,0 +1,92 @@
+[
+  {
+    "id": "nist-csf",
+    "name": "NIST CSF 2.0",
+    "title": "NIST Cybersecurity Framework 2.0",
+    "kind": "Cybersecurity risk framework",
+    "summary": "The National Institute of Standards and Technology Cybersecurity Framework organizes outcomes across Govern, Identify, Protect, Detect, Respond, and Recover. Use current and target profiles to connect business priorities to security improvements; its implementation tiers describe risk-governance and management practices, not a certification score.",
+    "application": "Useful across industries for risk discussions, response readiness, recovery planning, and supplier oversight. Select supporting controls separately: NIST SP 800-53 and SP 800-171 have different purposes and are not interchangeable with the CSF.",
+    "sources": [["NIST Cybersecurity Framework", "https://www.nist.gov/cyberframework"]]
+  },
+  {
+    "id": "nist-ai-rmf",
+    "name": "NIST AI RMF",
+    "title": "NIST AI Risk Management Framework",
+    "kind": "Voluntary AI risk framework",
+    "summary": "The NIST AI Risk Management Framework 1.0 uses Govern, Map, Measure, and Manage to address risks to people, organizations, and society throughout the AI lifecycle. It supports context, accountable ownership, evaluation, and ongoing risk decisions rather than prescribing one product stack.",
+    "application": "Use for assistants, agents, and custom AI applications, with evaluation tied to intended use and affected people. It is voluntary guidance, not proof of compliance with an AI law or a substitute for professional judgment.",
+    "sources": [["NIST AI Risk Management Framework and playbook", "https://www.nist.gov/itl/ai-risk-management-framework"]]
+  },
+  {
+    "id": "cisa-ztmm",
+    "name": "CISA ZTMM",
+    "title": "CISA Zero Trust Maturity Model",
+    "kind": "Security architecture maturity model",
+    "summary": "The Cybersecurity and Infrastructure Security Agency Zero Trust Maturity Model 2.0 addresses Identity, Devices, Networks, Applications and Workloads, and Data. Visibility and Analytics, Automation and Orchestration, and Governance span those five pillars.",
+    "application": "Use it to sequence improvements across access, device posture, application boundaries, and data protection. It supports federal Zero Trust planning and can inform other sectors, but a maturity assessment is not a certification or an automatic mandate for every organization.",
+    "sources": [["CISA Zero Trust Maturity Model", "https://www.cisa.gov/zero-trust-maturity-model"]]
+  },
+  {
+    "id": "iso-27001",
+    "name": "ISO/IEC 27001:2022",
+    "title": "ISO/IEC 27001:2022 information security management",
+    "kind": "Certifiable management-system standard",
+    "summary": "ISO/IEC 27001:2022 defines requirements for an information security management system, including leadership, risk treatment, performance evaluation, and continual improvement. Certification concerns a defined organizational scope, not an isolated product or a list of enabled settings.",
+    "application": "Connect information risks, control ownership, documented operating evidence, internal audits, and corrective actions. A cloud provider's certification does not certify your organization or every workload you deploy; confirm the applicable edition and assessment scope.",
+    "sources": [["ISO/IEC 27001 information security management", "https://www.iso.org/standard/27001"]]
+  },
+  {
+    "id": "cmmc",
+    "name": "CMMC 2.0",
+    "title": "CMMC 2.0 and defense-supply-chain readiness",
+    "kind": "Contract-driven cybersecurity assessment program",
+    "summary": "Cybersecurity Maturity Model Certification addresses protection of federal contract information and controlled unclassified information in the defense supply chain. Required levels, assessment routes, and timing depend on current program rules and contract clauses, not simply membership in an industry.",
+    "application": "Identify in-scope information, systems, suppliers, and evidence before planning an assessment. The published Level 2 baseline references NIST SP 800-171 Revision 2; publication of Revision 3 does not automatically change a contract's baseline. Verify current program guidance and assessment requirements.",
+    "sources": [["Official CMMC requirements and updates", "https://dodcio.defense.gov/CMMC/About/"], ["NIST SP 800-171 Revision 3", "https://csrc.nist.gov/pubs/sp/800/171/r3/final"]]
+  },
+  {
+    "id": "pci-dss",
+    "name": "PCI DSS 4.0",
+    "title": "PCI DSS 4.0 family and payment-data protection",
+    "kind": "Payment-card security standard",
+    "summary": "The Payment Card Industry Data Security Standard applies to entities that store, process, or transmit cardholder data or sensitive authentication data, and systems that can affect the cardholder data environment. The 4.0 family includes the 4.0.1 update; confirm the currently applicable version and validation requirements.",
+    "application": "Map payment flows, service-provider responsibilities, segmentation, access, logging, and evidence with payment stakeholders. Outsourcing payments may reduce scope but does not automatically eliminate obligations. A generic retail or finance workload is not necessarily a payment-card environment.",
+    "sources": [["PCI Security Standards Council: PCI DSS", "https://www.pcisecuritystandards.org/standards/pci-dss/"]]
+  },
+  {
+    "id": "gdpr",
+    "name": "GDPR",
+    "title": "General Data Protection Regulation",
+    "kind": "European Union data-protection regulation",
+    "summary": "The General Data Protection Regulation establishes obligations for personal-data processing within its territorial scope. Controller and processor roles, lawful basis, purpose limitation, data minimization, rights, security, and accountability must be considered together.",
+    "application": "Confirm applicability with privacy counsel, including relevant processing by organizations outside the European Union. Map data flows, retention, requests, transfers, and incident procedures. A privacy tool or consent checkbox does not establish every lawful basis or satisfy every obligation.",
+    "sources": [["GDPR: official regulation text", "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng"]]
+  },
+  {
+    "id": "eu-ai-act",
+    "name": "EU AI Act",
+    "title": "EU AI Act and risk-based AI governance",
+    "kind": "European Union AI regulation",
+    "summary": "The EU AI Act sets requirements according to intended use and the responsibilities of providers, deployers, and other actors. Assess prohibited uses, high-risk requirements, transparency duties, and applicable general-purpose AI model obligations rather than treating every assistant as the same risk category.",
+    "application": "Determine territorial scope, organizational role, use classification, and applicable effective dates before deployment. Record oversight, evaluation, documentation, and incident responsibilities where required. NIST AI RMF can inform risk work but does not itself establish compliance with the Act.",
+    "sources": [["European Commission: AI Act", "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai"], ["EU AI Act: official regulation text", "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng"]]
+  },
+  {
+    "id": "purdue-model",
+    "name": "Purdue Model",
+    "title": "Purdue Model for OT/ICS architecture",
+    "kind": "Industrial reference architecture",
+    "summary": "The Purdue Model helps describe operational technology (OT) and industrial control systems (ICS), from physical processes and control through operations management and enterprise business systems, commonly using levels 0 through 5. It is a reference for discussing system roles and boundaries, not a regulation or a complete modern security architecture.",
+    "application": "Use it to map approved data flows, remote-access paths, and separation between business and operational technology. Apply risk-based zones and conduits, including ISA/IEC 62443 concepts where appropriate, with industrial specialists. Cloud connectivity does not remove safety, availability, or separately authorized assessment requirements.",
+    "sources": [["NIST SP 800-82 Revision 3: operational technology security", "https://csrc.nist.gov/pubs/sp/800/82/r3/final"]]
+  },
+  {
+    "id": "cjis",
+    "name": "CJIS Security Policy",
+    "title": "CJIS Security Policy v6.0 reference",
+    "kind": "Criminal-justice information security policy",
+    "summary": "The FBI Criminal Justice Information Services Security Policy addresses protection of criminal justice information. Version 6.0 is a reference baseline, not a claim that it remains the latest governing revision. Confirm the applicable version, agency requirements, agreements, and personnel and access conditions with the responsible authority.",
+    "application": "Apply it where criminal justice information is in scope, not automatically to every public-sector workload. Cloud suitability depends on covered services, agreements, architecture, and customer-operated controls. No generic government-cloud label or universal Microsoft compliance score replaces agency approval and operating evidence.",
+    "sources": [["FBI CJIS Security Policy resource center", "https://le.fbi.gov/cjis-division/cjis-security-policy-resource-center"], ["Microsoft's CJIS agreements and customer responsibilities", "https://learn.microsoft.com/en-us/azure/compliance/offerings/offering-cjis"]]
+  }
+]

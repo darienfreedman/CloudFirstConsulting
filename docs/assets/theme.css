@@ -40,33 +40,33 @@
   :root[data-theme="dark"] .theme-toggle .theme-icon-light{display:block}
   :root[data-theme="dark"] :is(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline-color:var(--accent)}
   :root[data-theme="dark"] ::selection{background:#315675;color:#fff}
-  :root[data-theme="dark"] :is(.accent,.service-icon,.label-icon,.capability-icon){color:var(--accent)}
-  :root[data-theme="dark"] :is(.service-card,.engagement-card,.catalog-card,.use-case,.source-entry,.orbit-label,.service-menu,.nav-panel,.platform-products a,.finder-result,.blueprint-flow li,.react-contact-form){
+  :root[data-theme="dark"] :is(.accent,.capability-icon){color:var(--accent)}
+  :root[data-theme="dark"] :is(.service-card,.engagement-card,.catalog-card,.use-case,.source-entry,.nav-panel,.platform-products a,.finder-result,.blueprint-flow li,.react-contact-form){
     background:var(--panel);border-color:var(--line);
   }
-  :root[data-theme="dark"] :is(.platform-group,.company-section,.approach-section,.deliverable,.service-blueprint,.service-menu-link,.faq-list details[open]){
+  :root[data-theme="dark"] :is(.platform-group,.company-section,.approach-section,.deliverable,.service-blueprint,.faq-list details[open]){
     background:var(--panel);border-color:var(--line);
   }
   :root[data-theme="dark"] :is(.catalog-toolbar:has(.react-surface),.engagement-finder:has(.react-surface)){background:var(--panel);border-color:var(--line)}
   :root[data-theme="dark"] :is(.capability-icon,.product-tags>span,.product-tags>a,.blueprint-number){background:var(--panel-light);color:var(--accent);border-color:var(--colorBrandStroke2)}
-  :root[data-theme="dark"] .use-case-boundary{color:var(--text)}
-  :root[data-theme="dark"] :is(.hero-planning,.hero-visual){background:var(--panel)}
+  :root[data-theme="dark"] .hero-planning{background:var(--panel)}
   :root[data-theme="dark"] :is(.secondary-button,.menu-toggle,.catalog-filters button:not([aria-pressed="true"]),.service-switch button:not([aria-pressed="true"])){
     background:var(--panel);border-color:#657892;color:var(--text);
   }
   :root[data-theme="dark"] :is(.secondary-button:hover,.menu-toggle:hover,.service-card:hover,.catalog-card:hover){border-color:var(--accent)}
-  :root[data-theme="dark"] :is(.secondary-button:hover,.nav-trigger:hover,.nav-trigger[aria-expanded="true"],.site-header .nav-direct:not(.button):hover,.nav-column li a:hover,.nav-industry-list a:hover,.nav-column a[aria-current],.nav-industry-list a[aria-current],.platform-products a:hover,.service-menu-link:hover){
+  :root[data-theme="dark"] :is(.secondary-button:hover,.nav-trigger:hover,.nav-trigger[aria-expanded="true"],.site-header .nav-direct:not(.button):hover,.nav-column li a:hover,.nav-column a[aria-current],.platform-products a:hover){
     background:var(--panel-light);
   }
-  :root[data-theme="dark"] :is(.finder-fields select,.catalog-search input,.nav-industry-search input){background:var(--panel);color:var(--text);border-color:#657892}
+  :root[data-theme="dark"] :is(.finder-fields select,.catalog-search input){background:var(--panel);color:var(--text);border-color:#657892}
   :root[data-theme="dark"] :is(input,textarea)::placeholder{color:#a9bdd1;opacity:1}
   :root[data-theme="dark"] :is(.button:disabled){background:#263449;color:#a9bdd1;border-color:var(--line)}
-  :root[data-theme="dark"] :is(.site-header,.site-footer,.footer-bottom,.page-hero,.document-hero,.platform-strip,.card-link,.engagement-card dl,.directory-row,.directory-row nav a,.outcome-strip,.practice-nav,.practice,.capability-library,.service-next aside>a,.nav-panel-heading,.blueprint-context,.use-case-measure){border-color:var(--line)}
-  :root[data-theme="dark"] :is(.platform-strip>div>span,.visual-heading,.visual-bottom,.coordinate,.blueprint-context,.blueprint-note,.contact-form-heading p,.receipt-reference,.contact-form-loading,.microsoft-form-tools p,.microsoft-form-help){color:var(--muted)}
+  :root[data-theme="dark"] :is(.site-header,.site-footer,.footer-bottom,.page-hero,.card-link,.engagement-card dl,.directory-row,.directory-row nav a,.outcome-strip,.practice-nav,.practice,.capability-library,.service-next aside>a,.nav-panel-heading,.blueprint-context,.use-case-measure){border-color:var(--line)}
+  :root[data-theme="dark"] :is(.blueprint-context,.blueprint-note,.contact-form-heading p,.receipt-reference,.contact-form-loading,.microsoft-form-tools p,.microsoft-form-help){color:var(--muted)}
   :root[data-theme="dark"] .react-surface{color:var(--text)}
   :root[data-theme="dark"] .react-surface a:not(.fui-Button){color:var(--accent)}
   :root[data-theme="dark"] .integration-error{background:#3a1d29;color:#ffc4c4;border-color:#b66675}
   :root[data-theme="dark"] .engagement-card.is-recommended{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  :root[data-theme="dark"] :is(.product-entry,.editorial-card).is-highlighted{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
   :root[data-theme="dark"] :is(.brief-sheet,.brief-sheet h2){background:var(--panel);color:var(--text);border-color:var(--line)}
   :root[data-theme="dark"] :is(.brief-sheet p,.brief-sheet li,.brief-sheet .brief-disclosure){color:var(--muted)}
   :root[data-theme="dark"] :is(.brief-sheet .brief-kicker,.brief-brand,.brief-platforms){color:var(--accent)!important}

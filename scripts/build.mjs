@@ -1,5 +1,5 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { syncNavigation } from "./navigation.mjs";
@@ -29,7 +29,8 @@ export function normalizeSiteUrl(value) {
 }
 
 export function sitemap(siteUrl) {
-  const publicPages = readdirSync(source).filter((page) => page.endsWith(".html") && !["index.html", "404.html"].includes(page)).sort();
+  const publicPages = readdirSync(source).filter((page) => page.endsWith(".html") && !["index.html", "404.html"].includes(page)
+    && !/<meta name="robots" content="noindex">/.test(readFileSync(path.join(source, page), "utf8"))).sort();
   const urls = ["", ...publicPages].map((page) =>
     `  <url><loc>${escapeXml(new URL(pagePath(page), siteUrl).href)}</loc></url>`
   );

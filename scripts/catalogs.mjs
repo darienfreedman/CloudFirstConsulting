@@ -7,10 +7,12 @@ import { publicCopy } from "./public-copy.mjs";
 import { escapeHtml as escape } from "../shared/html.mjs";
 import { renderIcon } from "./icons.mjs";
 import { productLink } from "./products.mjs";
+import { industryGroups } from "../shared/industry-groups.mjs";
+import { frameworkById, frameworkSearchText, renderFrameworkConnections } from "./frameworks.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 export const categories = ["Security", "AI Business Solutions", "Cloud and AI Platforms"];
-const segments = ["Business & services", "Public & social", "Industry & infrastructure"];
+const segments = industryGroups.map(group => group.title);
 const list = (items) => `<ul>${items.map((item) => `<li>${escape(item)}</li>`).join("")}</ul>`;
 const tags = (items) => `<div class="product-tags">${items.map((item) => `<span>${escape(item)}</span>`).join("")}</div>`;
 
@@ -54,6 +56,14 @@ export function validateCatalogs({ industries, briefs }) {
       assert(briefs.some((brief) => brief.slug === useCase.brief));
       assert(useCase.deliverables.length >= 2); useCase.deliverables.forEach(text);
       assert(useCase.tech.length >= 2); useCase.tech.forEach(text);
+      if (useCase.frameworks !== undefined) {
+        assert(Array.isArray(useCase.frameworks) && useCase.frameworks.length > 0 && useCase.frameworks.length <= 3, "Use-case framework connections must contain one to three references");
+        assert.equal(new Set(useCase.frameworks.map(item => item.id)).size, useCase.frameworks.length, "Duplicate use-case framework connection");
+        for (const reference of useCase.frameworks) {
+          frameworkById(reference.id);
+          text(reference.reason);
+        }
+      }
     }
   }
 }
@@ -65,7 +75,7 @@ function page(filename, title, description, body, extraCss = "catalog.css", scri
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="${escape(description)}"><meta name="theme-color" content="#0078d4"><meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>${escape(title)} | Cloud First Consulting</title><link rel="icon" href="assets/favicon.png" type="image/png" sizes="64x64"><link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/${extraCss}"><script src="assets/app.js" defer></script>${script ? '<script src="assets/react-ui.js" defer></script>' : ""}
+  <title>${escape(title)} | CFC</title><link rel="icon" href="assets/favicon.png" type="image/png" sizes="64x64"><link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/${extraCss}"><script src="assets/app.js" defer></script>${script ? '<script src="assets/react-ui.js" defer></script>' : ""}
 </head>
 <body><a class="skip-link" href="#main">Skip to content</a>${header(filename)}
 <main id="main">${body}</main>${footer}
@@ -82,15 +92,15 @@ function controls(label, filters) {
 }
 
 function useCaseSearchText(item) {
-  return [item.title, item.challenge, item.approach, ...item.deliverables, ...item.tech, item.brief.replaceAll("-", " ")].join(" ");
+  return [item.title, item.challenge, item.approach, ...item.deliverables, ...item.tech, frameworkSearchText(item.frameworks), item.brief.replaceAll("-", " ")].join(" ");
 }
 
 export function renderIndustries(industries) {
   const useCaseCount = industries.reduce((total, industry) => total + industry.cases.length, 0);
-  const cards = [...industries].sort((a, b) => a.name.localeCompare(b.name)).map((industry) => `<article class="catalog-card industry-card" data-category="${escape(industry.segment)}" data-search="${escape([industry.name, industry.intro, ...industry.priorities, ...industry.cases.map(useCaseSearchText)].join(" "))}">${renderIcon(industry.slug)}<p class="eyebrow">${escape(industry.segment)}</p><h2><a href="industry-${industry.slug}.html">${escape(industry.name)}</a></h2><p>${escape(industry.intro)}</p>${list(industry.priorities)}<a class="card-link" href="industry-${industry.slug}.html">Explore ${industry.cases.length} use cases <span aria-hidden="true">&#8599;</span></a></article>`).join("\n");
+  const cards = industryGroups.map(group => `<section class="catalog-group" id="${group.id}" data-catalog-group><div class="section-heading"><h2>${escape(group.title)}</h2></div><div class="catalog-grid">${industries.filter(industry => industry.segment === group.title).sort((a, b) => a.name.localeCompare(b.name)).map((industry) => `<article class="catalog-card industry-card" data-category="${escape(industry.segment)}" data-search="${escape([industry.name, industry.intro, ...industry.priorities, ...industry.cases.map(useCaseSearchText)].join(" "))}">${renderIcon(industry.slug)}<p class="eyebrow">${escape(industry.segment)}</p><h3><a href="industry-${industry.slug}.html">${escape(industry.name)}</a></h3><p>${escape(industry.intro)}</p>${list(industry.priorities)}<a class="card-link" href="industry-${industry.slug}.html">Explore ${industry.cases.length} use cases <span aria-hidden="true">&#8599;</span></a></article>`).join("\n")}</div></section>`).join("\n");
   return page("industries.html", "Industry use cases", `Explore ${useCaseCount} practical security, business AI, and cloud use cases across ${industries.length} industry and business portfolios.`, `
     <section class="section-wrap page-hero">${crumbs("Industries")}<p class="eyebrow">Industry solutions</p><h1>Technology for your industry</h1><p>Explore security, AI, and cloud use cases for ${industries.length} industries. Find relevant services, delivery requirements, and measures for your organization.</p></section>
-    <section class="section-wrap section-space" data-catalog="industry" aria-label="Industry directory">${controls("Find your industry", segments)}<p class="catalog-status" id="catalog-status" role="status" aria-live="polite">${industries.length} industries with ${useCaseCount} defined use cases</p><div class="catalog-grid" id="catalog-items">${cards}</div><div class="catalog-empty" id="catalog-empty" hidden><h2>No matching industries</h2><p>Try a broader term or clear the filters.</p></div></section>
+    <section class="section-wrap section-space" data-catalog="industry" aria-label="Industry directory">${controls("Find your industry", segments)}<p class="catalog-status" id="catalog-status" role="status" aria-live="polite">${industries.length} industries with ${useCaseCount} defined use cases</p><div id="catalog-items">${cards}</div><div class="catalog-empty" id="catalog-empty" hidden><h2>No matching industries</h2><p>Try a broader term or clear the filters.</p></div></section>
     <section class="section-wrap closing-section"><div><p class="eyebrow">Start with your priorities</p><h2>Turn a relevant use case<br>into a focused conversation.</h2></div><a class="button" href="contact.html">Contact us <span aria-hidden="true">&#8599;</span></a></section>`, "catalog.css", true);
 }
 
@@ -98,25 +108,25 @@ export function renderIndustry(industry, briefs) {
   const availableCategories = categories.filter((category) => industry.cases.some((item) => briefs.find((brief) => brief.slug === item.brief).category === category));
   const useCases = industry.cases.map((item, index) => {
     const brief = briefs.find((entry) => entry.slug === item.brief);
-    return `<article class="use-case catalog-card" id="use-case-${index + 1}" data-category="${escape(brief.category)}" data-search="${escape(`${useCaseSearchText(item)} ${brief.category}`)}"><p class="eyebrow">${escape(brief.category)}</p><h2>${escape(item.title)}</h2><p class="use-case-challenge">${escape(item.challenge)}</p><h3>Approach</h3><p>${escape(item.approach)}</p><h3>Deliverables</h3>${list(item.deliverables)}<p class="use-case-measure"><strong>Success measures:</strong> ${escape(item.measure)}</p><details class="use-case-requirements"><summary>Requirements to consider</summary><p>${escape(item.guardrail)}</p></details>${tags(item.tech)}<div class="use-case-links"><a href="${escape(item.service)}">Related service <span aria-hidden="true">&#8599;</span></a><a href="brief-${item.brief}.html">Read the one-pager <span aria-hidden="true">&#8599;</span></a></div></article>`;
+    return `<article class="use-case catalog-card" id="use-case-${index + 1}" data-category="${escape(brief.category)}" data-search="${escape(`${useCaseSearchText(item)} ${brief.category}`)}"><p class="eyebrow">${escape(brief.category)}</p><h2>${escape(item.title)}</h2><p class="use-case-challenge">${escape(item.challenge)}</p><h3>Approach</h3><p>${escape(item.approach)}</p><h3>Deliverables</h3>${list(item.deliverables)}<p class="use-case-measure"><strong>Success measures:</strong> ${escape(item.measure)}</p><details class="use-case-requirements"><summary>Requirements to consider</summary><p>${escape(item.guardrail)}</p></details>${renderFrameworkConnections(item.frameworks)}${tags(item.tech)}<div class="use-case-links"><a href="${escape(item.service)}">Related service <span aria-hidden="true">&#8599;</span></a><a href="brief-${item.brief}.html">Read the one-pager <span aria-hidden="true">&#8599;</span></a></div></article>`;
   }).join("\n");
   return page(`industry-${industry.slug}.html`, `${industry.name} use cases`, industry.intro, `
     <section class="section-wrap page-hero">${crumbs(industry.name, ["industries.html", "Industries"])}${renderIcon(industry.slug)}<p class="eyebrow">Industry solutions</p><h1>${escape(industry.name)}</h1><p>${escape(industry.intro)}</p><div class="priority-tags">${industry.priorities.map((priority) => `<span>${escape(priority)}</span>`).join("")}</div></section>
-    <section class="section-wrap section-space" data-catalog="use-case" aria-label="${escape(industry.name)} use cases">${controls(`Find a use case for ${industry.name}`, availableCategories)}<p class="catalog-status" id="catalog-status" role="status" aria-live="polite">${industry.cases.length} use cases across ${availableCategories.length} service areas</p><div class="use-case-grid" id="catalog-items">${useCases}</div><div class="catalog-empty" id="catalog-empty" hidden><h2>No matching use cases</h2><p>Try a broader topic or Microsoft technology, or clear the filters.</p></div></section>
+    <section class="section-wrap section-space" data-catalog="use-case" aria-label="${escape(industry.name)} use cases">${controls(`Find a use case for ${industry.name}`, availableCategories)}<p class="catalog-status" id="catalog-status" role="status" aria-live="polite">${industry.cases.length} use cases across ${availableCategories.length} service areas</p><p class="framework-context">Framework connections explain relevant planning considerations, not a certification or a finding that a rule applies. Confirm scope and obligations with accountable stakeholders. <a href="insight-compliance-readiness.html">Explore the ten framework references</a>.</p><div class="use-case-grid" id="catalog-items">${useCases}</div><div class="catalog-empty" id="catalog-empty" hidden><h2>No matching use cases</h2><p>Try a broader topic, framework, or Microsoft technology, or clear the filters.</p></div></section>
     <section class="section-wrap service-next"><div><p class="eyebrow">From context to a next step</p><h2>Choose the challenge<br>that matters to your organization.</h2><p>Bring the business owner, relevant systems and data, and your constraints. Define a bounded assessment or pilot with success criteria and an accountable decision.</p><a class="button" href="contact.html">Prepare a conversation <span aria-hidden="true">&#8599;</span></a></div><aside><h3>Explore further</h3><a href="engagements.html">Engagement options <span>&#8599;</span></a><a href="briefs.html">All service one-pagers <span>&#8599;</span></a><a href="industries.html">Browse all industries <span>&#8599;</span></a></aside></section>`, "catalog.css", true);
 }
 
 export function renderBrief(brief) {
   return page(`brief-${brief.slug}.html`, `${brief.title} brief`, brief.summary, `
     <div class="section-wrap brief-page">${crumbs(brief.title, ["briefs.html", "Service briefs"])}<p class="brief-format-note">Read the guide below or download it in Portable Document Format (PDF).</p>
-    <article class="brief-sheet"><p class="brief-brand">Cloud First <span>CONSULTING</span></p><p class="brief-kicker">${escape(brief.category)}</p><h1>${escape(brief.title)}</h1><p class="brief-lead">${escape(brief.summary)}</p><div class="brief-columns"><section><h2>Capabilities</h2>${list(brief.capabilities)}</section><section><h2>Deliverables</h2>${list(brief.deliverables)}<h2>Business value</h2><p>${escape(brief.outcome)}</p></section></div><section class="brief-next"><h2>${escape(brief.startingPoint)}</h2><p>${escape(brief.prepare)}</p></section><p class="brief-platforms">${brief.technologies.map(productLink).join(", ")}</p><p class="brief-disclosure">&copy; 2026 Cloud First Consulting</p></article>
-    <div class="brief-actions"><a class="button" href="downloads/cloud-first-${brief.slug}-brief.pdf" download>Download one-page PDF <span aria-hidden="true">&#8595;</span></a><a class="text-link" href="${escape(brief.service)}">Explore the related service <span aria-hidden="true">&#8599;</span></a></div></div>`, "briefs.css");
+    <article class="brief-sheet"><p class="brief-brand">Cloud First <span>Consulting</span></p><p class="brief-kicker">${escape(brief.category)}</p><h1>${escape(brief.title)}</h1><p class="brief-lead">${escape(brief.summary)}</p><div class="brief-columns"><section><h2>Capabilities</h2>${list(brief.capabilities)}</section><section><h2>Deliverables</h2>${list(brief.deliverables)}<h2>Business value</h2><p>${escape(brief.outcome)}</p></section></div><section class="brief-next"><h2>${escape(brief.startingPoint)}</h2><p>${escape(brief.prepare)}</p></section><p class="brief-platforms">${brief.technologies.map(productLink).join(", ")}</p><p class="brief-disclosure">&copy; 2026 Cloud First Consulting</p></article>
+    <div class="brief-actions"><a class="button" href="${escape(brief.service)}">Explore the related service <span aria-hidden="true">&#8599;</span></a><a class="text-link" href="downloads/cloud-first-${brief.slug}-brief.pdf" download>Download one-page PDF <span aria-hidden="true">&#8595;</span></a></div></div>`, "briefs.css");
 }
 
 export function renderBriefs(briefs) {
-  const groups = categories.map((category) => `<section class="catalog-group" data-catalog-group><div class="section-heading"><h2>${escape(category)}</h2><p>Service overviews and capability guides.</p></div><div class="brief-grid">${briefs.filter((brief) => brief.category === category).map((brief) => `<article class="catalog-card brief-card" data-category="${escape(category)}" data-search="${escape(`${brief.title} ${brief.summary} ${brief.technologies.join(" ")}`)}"><p class="eyebrow">${escape(brief.kind)} brief</p><h3>${escape(brief.title)}</h3><p>${escape(brief.summary)}</p><div class="brief-card-actions"><a class="button" href="downloads/cloud-first-${brief.slug}-brief.pdf" download>Download PDF <span aria-hidden="true">&#8595;</span></a><a class="text-link" href="brief-${brief.slug}.html">Read online <span aria-hidden="true">&#8599;</span></a></div></article>`).join("\n")}</div></section>`).join("\n");
-  return page("briefs.html", "Download service briefs", "Twelve one-page service briefs covering Security, AI Business Solutions, and Cloud and AI Platforms, with accessible web versions.", `
-    <section class="section-wrap page-hero">${crumbs("Service briefs", ["resources.html#plan-your-project", "Plan your project"])}<p class="eyebrow">Service guides</p><h1>Download a service brief</h1><p>Review the scope, deliverables, and requirements for each service. Download a one-page guide in Portable Document Format (PDF), or read the web version.</p></section>
+  const groups = categories.map((category) => `<section class="catalog-group" data-catalog-group><div class="section-heading"><h2>${escape(category)}</h2><p>Service overviews and capability guides.</p></div><div class="brief-grid">${briefs.filter((brief) => brief.category === category).map((brief) => `<article class="catalog-card brief-card" data-category="${escape(category)}" data-search="${escape(`${brief.title} ${brief.summary} ${brief.technologies.join(" ")}`)}"><p class="eyebrow">${escape(brief.kind)} brief</p><h3>${escape(brief.title)}</h3><p>${escape(brief.summary)}</p><div class="brief-card-actions"><a class="button" href="brief-${brief.slug}.html">Read online <span aria-hidden="true">&#8599;</span></a><a class="text-link" href="downloads/cloud-first-${brief.slug}-brief.pdf" download>Download PDF <span aria-hidden="true">&#8595;</span></a></div></article>`).join("\n")}</div></section>`).join("\n");
+  return page("briefs.html", "Service briefs", "Twelve one-page service briefs covering Security, AI Business Solutions, and Cloud and AI Platforms, with accessible web versions.", `
+    <section class="section-wrap page-hero">${crumbs("Service briefs", ["resources.html#plan-your-project", "Planning"])}<p class="eyebrow">Service guides</p><h1>Service briefs</h1><p>Explore the scope, deliverables, and requirements for each service. Read online or download a one-page guide in Portable Document Format (PDF).</p></section>
     <section class="section-wrap section-space" data-catalog="brief" aria-label="Service brief library">${controls("Find a service brief", categories)}<p class="catalog-status" id="catalog-status" role="status" aria-live="polite">12 briefs across 3 service areas</p><div id="catalog-items">${groups}</div><div class="catalog-empty" id="catalog-empty" hidden><h2>No matching briefs</h2><p>Try a broader term or clear the filters.</p></div></section>`, "catalog.css", true);
 }
 
