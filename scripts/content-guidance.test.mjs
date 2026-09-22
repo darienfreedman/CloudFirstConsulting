@@ -100,7 +100,7 @@ test("technical resources use the homepage Copilot group name without a duplicat
   assert(guide.includes('<h2 id="product-group-2">Copilot &amp; agents</h2>'));
   assert(guide.includes('<a href="#product-group-2">Copilot &amp; agents</a>'));
   assert.equal(products.filter(product => product.group === "Copilot & agents").length, 8);
-  const source = readFileSync(new URL("../site/sources.html", import.meta.url), "utf8");
+  const source = readFileSync(new URL("../docs/sources.html", import.meta.url), "utf8");
   assert(!source.includes("Further planning and architecture guidance"));
   assert(guide.includes('href="technology-explained.html"'));
 });

@@ -9,7 +9,7 @@ export async function buildUI() {
   const output = await build({
     absWorkingDir: root,
     entryPoints: ["ui/index.jsx"],
-    outfile: "site/assets/react-ui.js",
+    outfile: "docs/assets/react-ui.js",
     bundle: true,
     format: "iife",
     jsx: "automatic",
@@ -44,7 +44,7 @@ export async function buildUI() {
     if (!license) throw new Error(`Missing distribution license for ${metadata.name}.`);
     notices.push(`${metadata.name} ${metadata.version}\n${license}`);
   }
-  await writeFile(path.join(root, "site", "assets", "THIRD_PARTY_NOTICES.txt"), notices.join("\n\n"));
+  await writeFile(path.join(root, "docs", "assets", "THIRD_PARTY_NOTICES.txt"), notices.join("\n\n"));
   console.log("Built React and Fluent UI controls.");
 }
 

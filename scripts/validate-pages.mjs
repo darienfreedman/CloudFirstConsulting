@@ -30,6 +30,7 @@ export async function validatePages(directory, siteUrl) {
     const text = await readFile(path.join(directory, ...file.split("/")), "utf8");
     documents.set(file, text);
     if (file.endsWith(".html")) {
+      assert(file === "404.html" || file === "index.html" || file.endsWith("/index.html"), `Page must use a clean directory route: ${file}`);
       anchors.set(file, new Set([...text.matchAll(/\bid="([^"]+)"/g)].map(([, id]) => decodeAttribute(id))));
     }
   }
@@ -42,6 +43,7 @@ export async function validatePages(directory, siteUrl) {
     assert.equal(url.protocol, "https:", `Unsupported public URL: ${source}: ${value}`);
     if (url.origin !== base.origin) return;
     assert(url.pathname.startsWith(base.pathname), `URL escapes GitHub Pages base path: ${source}: ${value}`);
+    assert(!url.pathname.endsWith(".html") || url.pathname === `${base.pathname}404.html`, `Public link still exposes .html: ${source}: ${value}`);
     let target = decodeURIComponent(url.pathname.slice(base.pathname.length));
     if (!target || target.endsWith("/")) target += "index.html";
     // Compare exact names even when validation runs on a case-insensitive filesystem.
@@ -52,7 +54,7 @@ export async function validatePages(directory, siteUrl) {
     links += 1;
   }
   for (const [file, text] of documents) {
-    const pageUrl = new URL(file, base);
+    const pageUrl = new URL(file === "index.html" ? "" : file.replace(/\/index\.html$/, "/"), base);
     if (file.endsWith(".css")) {
       for (const [, value] of text.matchAll(/url\(\s*["']?([^"')]+?)["']?\s*\)/g)) {
         check(value, pageUrl, file);

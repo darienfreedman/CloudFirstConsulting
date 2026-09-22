@@ -8,7 +8,7 @@ import { normalizeProductNames } from "./public-copy.mjs";
 import { products, productLink } from "./products.mjs";
 import { expandAcronyms } from "./acronyms.mjs";
 
-const site = fileURLToPath(new URL("../site", import.meta.url));
+const site = fileURLToPath(new URL("../docs", import.meta.url));
 const catalogs = await readCatalogs();
 validateCatalogs(catalogs);
 

@@ -7,11 +7,13 @@ import { microsoftFormsUrls } from "../shared/forms.mjs";
 import { replaceIcons } from "./icons.mjs";
 import { publicCopy } from "./public-copy.mjs";
 import { syncAppearance } from "./navigation.mjs";
+import { rewritePageLinks } from "./routes.mjs";
+import { pagePath } from "../shared/urls.mjs";
 
 test("engagement highlights belong to recommendations, not URL fragments", () => {
-  const styles = readdirSync(new URL("../site/assets", import.meta.url))
+  const styles = readdirSync(new URL("../docs/assets", import.meta.url))
     .filter(name => name.endsWith(".css"))
-    .map(name => readFileSync(new URL(`../site/assets/${name}`, import.meta.url), "utf8"))
+    .map(name => readFileSync(new URL(`../docs/assets/${name}`, import.meta.url), "utf8"))
     .join("\n");
   assert(!/\.engagement-card:target\b/.test(styles), "Deep links must not leave a second highlight behind");
   assert(styles.includes(".engagement-card.is-recommended"), "Submitted recommendations need a visible highlight");
@@ -58,8 +60,8 @@ test("rejects insecure or ambiguous deployment URLs", () => {
 test("sitemap retains the project base path and excludes error pages", () => {
   const xml = sitemap("https://example.github.io/cloud-first/");
   assert(xml.includes("<loc>https://example.github.io/cloud-first/</loc>"));
-  assert(xml.includes("<loc>https://example.github.io/cloud-first/sources.html</loc>"));
-  assert(xml.includes("<loc>https://example.github.io/cloud-first/trust.html</loc>"));
+  assert(xml.includes("<loc>https://example.github.io/cloud-first/sources/</loc>"));
+  assert(xml.includes("<loc>https://example.github.io/cloud-first/trust/</loc>"));
   assert(!xml.includes("404.html"));
 });
 
@@ -68,25 +70,25 @@ test("sitemap escapes XML attributes in paths", () => {
 });
 
 test("sitemap includes every customer page", () => {
-  const pages = readdirSync(new URL("../site", import.meta.url)).filter((name) => name.endsWith(".html") && name !== "404.html");
+  const pages = readdirSync(new URL("../docs", import.meta.url)).filter((name) => name.endsWith(".html") && name !== "404.html");
   const base = "https://example.github.io/cloud-first/";
   const xml = sitemap(base);
   for (const page of pages) {
-    assert(xml.includes(`<loc>${base}${page === "index.html" ? "" : page}</loc>`), `Missing sitemap page: ${page}`);
+    assert(xml.includes(`<loc>${base}${pagePath(page)}</loc>`), `Missing sitemap page: ${page}`);
   }
   assert.equal([...xml.matchAll(/<loc>/g)].length, pages.length);
 });
 
 test("error-page assets and navigation resolve from nested missing paths", () => {
-  const source = readFileSync(new URL("../site/404.html", import.meta.url), "utf8");
+  const source = readFileSync(new URL("../docs/404.html", import.meta.url), "utf8");
   for (const base of ["https://example.github.io/cloud-first/", "https://demo.example.com/"]) {
-    const html = resolveErrorPageLinks(source, base);
+    const html = resolveErrorPageLinks(rewritePageLinks(source, "404.html"), base);
     assert(html.includes(`href="${base}assets/styles.css"`));
     assert(html.includes(`href="${base}assets/favicon.png"`));
     assert(html.includes(`href="${base}assets/theme.css"`));
     assert(html.includes(`src="${base}assets/theme.js"`));
-    assert(html.includes(`href="${base}services.html"`));
-    assert(html.includes(`href="${base}index.html" data-site-home`));
+    assert(html.includes(`href="${base}services/"`));
+    assert(html.includes(`href="${base}" data-site-home`));
     assert(!/\b(?:href|src)="(?!https:)/.test(html), "Error page must not depend on the missing URL's depth");
   }
 });
@@ -135,8 +137,8 @@ test("homepage tab title stays concise without changing the hero", () => {
 });
 
 test("Cloud First branding is consistent across pages and package metadata", () => {
-  for (const name of readdirSync(new URL("../site", import.meta.url)).filter(name => name.endsWith(".html"))) {
-    const html = readFileSync(new URL(`../site/${name}`, import.meta.url), "utf8");
+  for (const name of readdirSync(new URL("../docs", import.meta.url)).filter(name => name.endsWith(".html"))) {
+    const html = readFileSync(new URL(`../docs/${name}`, import.meta.url), "utf8");
     assert(html.match(/<title>[^<]*Cloud First Consulting<\/title>/), name);
     assert(html.includes('aria-label="Cloud First Consulting home"'), name);
     assert(html.includes('>Cloud First<span class="brand-sub">CONSULTING</span>'), name);
@@ -150,13 +152,13 @@ test("Cloud First branding is consistent across pages and package metadata", () 
 });
 
 test("every page uses the logo-derived favicon, including the error page", () => {
-  const image = readFileSync(new URL("../site/assets/favicon.png", import.meta.url));
+  const image = readFileSync(new URL("../docs/assets/favicon.png", import.meta.url));
   assert.equal(image.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
   assert.equal(image.readUInt32BE(16), 64);
   assert.equal(image.readUInt32BE(20), 64);
   assert(image.length < 20000);
-  for (const name of readdirSync(new URL("../site", import.meta.url)).filter(name => name.endsWith(".html"))) {
-    const html = readFileSync(new URL(`../site/${name}`, import.meta.url), "utf8");
+  for (const name of readdirSync(new URL("../docs", import.meta.url)).filter(name => name.endsWith(".html"))) {
+    const html = readFileSync(new URL(`../docs/${name}`, import.meta.url), "utf8");
     assert(html.includes('<link rel="icon" href="assets/favicon.png" type="image/png" sizes="64x64">'), name);
   }
   const html = '<head><link rel="icon" href="assets/favicon.svg" type="image/svg+xml"></head>';
@@ -173,7 +175,7 @@ test("form CSP allows Microsoft frame hosts only when an embed is configured", (
 });
 
 test("Fluent-inspired color roles meet normal-text contrast thresholds", () => {
-  const css = readFileSync(new URL("../site/assets/styles.css", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../docs/assets/styles.css", import.meta.url), "utf8");
   const token = (name) => {
     const value = css.match(new RegExp(`--${name}:(#[0-9a-f]{6})`, "i"))?.[1];
     assert(value, `Missing color token: ${name}`);

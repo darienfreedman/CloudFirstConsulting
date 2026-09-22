@@ -1,12 +1,13 @@
 import { createServer } from "node:http";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { validateInquiry } from "../shared/inquiry.mjs";
 import { contentPolicy } from "../scripts/integrations.mjs";
+import { resolveErrorPageLinks } from "../scripts/routes.mjs";
 
 const maximumBody = 16384;
-const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".svg": "image/svg+xml", ".webp": "image/webp", ".pdf": "application/pdf", ".txt": "text/plain; charset=utf-8", ".xml": "application/xml" };
+const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".svg": "image/svg+xml", ".png": "image/png", ".webp": "image/webp", ".pdf": "application/pdf", ".txt": "text/plain; charset=utf-8", ".xml": "application/xml" };
 
 class BodyError extends Error {
   constructor(status, message) { super(message); this.status = status; }
@@ -40,7 +41,7 @@ export async function createContactServer({ siteDir, dataDir, settings, allowedO
   if (privateRoot === publicRoot || privateRoot.startsWith(publicRoot + path.sep)) {
     throw new Error("Contact records must be stored outside the public website.");
   }
-  const errorPage = await readFile(path.join(publicRoot, "404.html"));
+  const errorPage = await readFile(path.join(publicRoot, "404.html"), "utf8");
   await mkdir(privateRoot, { recursive: true, mode: 0o700 });
   const configuredOrigins = new Set(allowedOrigins.map(origin => {
     const parsed = new URL(origin);
@@ -59,7 +60,11 @@ export async function createContactServer({ siteDir, dataDir, settings, allowedO
       response.end(JSON.stringify(body));
     };
     let pathname;
-    try { pathname = decodeURIComponent(new URL(request.url, "http://127.0.0.1").pathname); }
+    let requestUrl;
+    try {
+      requestUrl = new URL(request.url, "http://127.0.0.1");
+      pathname = decodeURIComponent(requestUrl.pathname);
+    }
     catch (error) {
       if (!(error instanceof URIError || error instanceof TypeError)) throw error;
       json(400, { error: "Invalid request address." }); return;
@@ -121,6 +126,10 @@ export async function createContactServer({ siteDir, dataDir, settings, allowedO
     const filename = path.resolve(publicRoot, `.${pathname.endsWith("/") ? pathname + "index.html" : pathname}`);
     if (!filename.startsWith(publicRoot + path.sep)) { json(403, { error: "Access denied." }); return; }
     try {
+      if (!pathname.endsWith("/") && (await stat(filename)).isDirectory()) {
+        response.writeHead(301, { Location: `http://127.0.0.1:${server.address().port}${requestUrl.pathname}/${requestUrl.search}` });
+        response.end(); return;
+      }
       const bytes = await readFile(filename);
       response.writeHead(200, { "Content-Type": types[path.extname(filename)] || "application/octet-stream", "Content-Length": bytes.length });
       response.end(request.method === "HEAD" ? undefined : bytes);
@@ -130,7 +139,7 @@ export async function createContactServer({ siteDir, dataDir, settings, allowedO
         json(500, { error: "This resource is temporarily unavailable." }); return;
       }
       response.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
-      response.end(request.method === "HEAD" ? undefined : errorPage);
+      response.end(request.method === "HEAD" ? undefined : resolveErrorPageLinks(errorPage, `http://127.0.0.1:${server.address().port}/`));
     }
   });
   server.requestTimeout = 15000;

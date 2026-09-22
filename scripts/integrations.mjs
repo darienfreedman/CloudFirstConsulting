@@ -24,5 +24,5 @@ export function contentPolicy(settings) {
 }
 
 export async function writeSettings(settings) {
-  await writeFile(fileURLToPath(new URL("../site/assets/integrations.js", import.meta.url)), `"use strict";\nwindow.cloudFirstIntegrations = Object.freeze(${JSON.stringify(settings, null, 2)});\n`);
+  await writeFile(fileURLToPath(new URL("../docs/assets/integrations.js", import.meta.url)), `"use strict";\nwindow.cloudFirstIntegrations = Object.freeze(${JSON.stringify(settings, null, 2)});\n`);
 }

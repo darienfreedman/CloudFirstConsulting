@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { syncAppearance } from "./navigation.mjs";
 
-const script = readFileSync(new URL("../site/assets/theme.js", import.meta.url), "utf8");
+const script = readFileSync(new URL("../docs/assets/theme.js", import.meta.url), "utf8");
 const key = "cloud-first-color-theme";
 
 function browser({ saved, systemDark = false, loading = false, storageError } = {}) {
