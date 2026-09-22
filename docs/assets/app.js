@@ -1,6 +1,45 @@
 "use strict";
 
 document.documentElement.classList.add("js");
+const followMovedCategory = () => {
+  const link = [...document.querySelectorAll("[data-resource-fragment]")]
+    .find(link => `#${link.dataset.resourceFragment}` === window.location.hash);
+  if (link) {
+    const destination = new URL(link.href);
+    destination.search = window.location.search;
+    window.location.replace(destination.href);
+  }
+};
+followMovedCategory();
+window.addEventListener("hashchange", followMovedCategory);
+const legacyTopicDestination = document.getElementById("legacy-topic-destination");
+if (legacyTopicDestination) {
+  const followMovedTopic = () => {
+    const fragment = window.location.hash.slice(1);
+    const topics = legacyTopicDestination.dataset.topics.split(" ");
+    if (topics.includes(fragment) || ["technology-glossary", "technology-glossary-title"].includes(fragment)) {
+      const destination = new URL(legacyTopicDestination.href);
+      if (topics.includes(fragment)) destination.hash = fragment;
+      destination.search = window.location.search;
+      window.location.replace(destination.href);
+    }
+  };
+  followMovedTopic();
+  window.addEventListener("hashchange", followMovedTopic);
+}
+const insightsDestination = document.getElementById("insights-destination");
+if (insightsDestination) {
+  const fragment = window.location.hash.slice(1);
+  const isCategory = [...document.querySelectorAll("[data-resource-fragment]")]
+    .some(link => link.dataset.resourceFragment === fragment);
+  const isTopic = legacyTopicDestination?.dataset.topics.split(" ").includes(fragment)
+    || ["technology-glossary", "technology-glossary-title"].includes(fragment);
+  if (!isCategory && !isTopic) {
+    const destination = new URL(insightsDestination.href);
+    destination.search = window.location.search;
+    window.location.replace(destination.href);
+  }
+}
 const menuButton = document.querySelector(".menu-toggle");
 const navigation = document.getElementById("primary-nav");
 
@@ -13,25 +52,11 @@ if (menuButton && navigation) {
     panel: element.querySelector(".nav-panel"),
     fallback: element.querySelector(".nav-fallback")
   }));
-  const industrySearch = document.getElementById("nav-industry-search");
-  const industryItems = [...document.querySelectorAll("[data-industry-name]")];
-  const industryStatus = document.getElementById("nav-industry-status");
-  function filterIndustries() {
-    const query = industrySearch.value.trim().toLocaleLowerCase();
-    let count = 0;
-    for (const item of industryItems) {
-      item.hidden = !item.dataset.industryName.includes(query);
-      if (!item.hidden) count += 1;
-    }
-    industryStatus.textContent = count ? `${count} ${count === 1 ? "industry" : "industries"}` : "No matching industries. Try another name.";
-  }
   function closePanels() {
     for (const group of groups) {
       group.trigger.setAttribute("aria-expanded", "false");
       group.panel.hidden = true;
     }
-    industrySearch.value = "";
-    filterIndustries();
   }
   function openPanel(group) {
     closePanels();
@@ -58,7 +83,6 @@ if (menuButton && navigation) {
       (group.panel.querySelector("input") || group.panel.querySelector("a")).focus();
     });
   }
-  industrySearch.addEventListener("input", filterIndustries);
   menuButton.hidden = false;
   menuButton.addEventListener("click", () => {
     if (menuButton.getAttribute("aria-expanded") === "true") { closeNavigation(); return; }
@@ -85,3 +109,65 @@ if (menuButton && navigation) {
   });
   desktop.addEventListener("change", closeNavigation);
 }
+
+const stickyHeader = document.querySelector(".site-header");
+if (stickyHeader) {
+  const updateScrollOffset = () => {
+    document.documentElement.style.setProperty("--header-scroll-offset", `${stickyHeader.getBoundingClientRect().height}px`);
+  };
+  updateScrollOffset();
+  new ResizeObserver(updateScrollOffset).observe(stickyHeader);
+}
+
+function fragmentTarget() {
+  try {
+    return document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+  } catch (error) {
+    if (!(error instanceof URIError)) throw error;
+    console.warn("Unable to navigate to an invalid page fragment.");
+    return null;
+  }
+}
+
+const highlightedDestinations = ".product-entry, .editorial-card";
+const scrollDestinations = `${highlightedDestinations}, .resource-hub-group, .practice, .catalog-group, .product-guide-group, .use-case`;
+
+function clearDestinationHighlight() {
+  document.querySelectorAll(".is-highlighted").forEach(card => card.classList.remove("is-highlighted"));
+}
+
+function highlightDestination() {
+  clearDestinationHighlight();
+  const target = fragmentTarget();
+  const panel = target?.closest(highlightedDestinations);
+  if (!document.hidden && panel) panel.classList.add("is-highlighted");
+}
+
+highlightDestination();
+window.addEventListener("hashchange", () => {
+  highlightDestination();
+  scrollToDestination();
+});
+window.addEventListener("pagehide", clearDestinationHighlight);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) clearDestinationHighlight();
+});
+document.addEventListener("click", event => {
+  if (event.defaultPrevented || event.button > 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  const link = event.target.closest("a[href]");
+  if (!link || link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
+  const destination = new URL(link.href, window.location.href);
+  if (destination.origin === window.location.origin && destination.pathname === window.location.pathname
+    && destination.search === window.location.search && destination.hash === window.location.hash) {
+    highlightDestination();
+    scrollToDestination();
+  }
+});
+function scrollToDestination() {
+  // Let native fragment scrolling, collapsed menus, and filtered groups settle first.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const target = fragmentTarget();
+    if (target?.closest(scrollDestinations)) target.scrollIntoView({ block: "start", behavior: "instant" });
+  }));
+}
+window.addEventListener("load", scrollToDestination);

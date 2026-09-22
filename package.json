@@ -13,7 +13,7 @@
     "dev": "npm run build && node server/index.mjs",
     "start": "node server/index.mjs",
     "briefs": "node scripts/generate-briefs.mjs",
-    "test": "node --check docs/assets/app.js && node --check docs/assets/contact.js && node --check docs/assets/theme.js && node scripts/validate.mjs && node --test scripts/build.test.mjs scripts/routes.test.mjs scripts/validate-pages.test.mjs scripts/catalogs.test.mjs scripts/theme.test.mjs scripts/content-guidance.test.mjs server/contact.test.mjs",
+    "test": "node --check docs/assets/app.js && node --check docs/assets/contact.js && node --check docs/assets/theme.js && node scripts/validate.mjs && node --test scripts/build.test.mjs scripts/routes.test.mjs scripts/validate-pages.test.mjs scripts/catalogs.test.mjs scripts/theme.test.mjs scripts/content-guidance.test.mjs scripts/page-navigation.test.mjs server/contact.test.mjs",
     "validate:pages": "node scripts/validate-pages.mjs"
   },
   "dependencies": {

@@ -6,6 +6,7 @@ import { serviceBlueprint } from "./product-visuals.mjs";
 import { header, resourceMenuGroups, sentenceCaseLabel, serviceMenuGroups, syncServiceNavigation, syncResourceBreadcrumbs } from "./navigation.mjs";
 import { normalizeProductNames, publicCopy, standardizeTerminology } from "./public-copy.mjs";
 import { renderIcon } from "./icons.mjs";
+import { frameworks, frameworkById, frameworkHref, renderFrameworkConnections } from "./frameworks.mjs";
 
 const catalogs = await readCatalogs();
 
@@ -80,6 +81,62 @@ test("use-case search data includes technical mappings and solution approaches",
   }
 });
 
+test("all ten frameworks have scoped connections across the industry portfolio", () => {
+  const ids = new Set();
+  for (const industry of catalogs.industries) {
+    assert(industry.cases.some(item => item.frameworks?.length), industry.slug);
+    for (const item of industry.cases) for (const reference of item.frameworks || []) {
+      ids.add(reference.id);
+      assert(reference.reason.length >= 50, item.title);
+      if (reference.id === "cmmc") assert.match(reference.reason, /[Ii]f.*defense/);
+      if (reference.id === "pci-dss") assert.match(reference.reason, /payment|cardholder/);
+      if (reference.id === "gdpr") assert.match(reference.reason, /Where.*GDPR scope/);
+      if (reference.id === "eu-ai-act") assert.match(reference.reason, /Where the Act applies/);
+      if (reference.id === "cjis") {
+        assert.equal(industry.slug, "government");
+        assert.match(reference.reason, /criminal justice information/);
+      }
+      if (reference.id === "purdue-model") {
+        assert(["manufacturing", "energy-resources"].includes(industry.slug));
+        assert.match(reference.reason, /specialist/);
+      }
+    }
+  }
+  assert.deepEqual([...ids].sort(), ["nist-csf", "nist-ai-rmf", "cisa-ztmm", "iso-27001", "cmmc", "pci-dss", "gdpr", "eu-ai-act", "purdue-model", "cjis"].sort());
+  assert.equal(frameworks.length, 10);
+});
+
+test("framework connections render linked explanations and support case and industry search", () => {
+  const directory = renderIndustries(catalogs.industries);
+  for (const industry of catalogs.industries) {
+    const html = renderIndustry(industry, catalogs.briefs);
+    const searches = [...html.matchAll(/data-search="([^"]+)"/g)].map(([, value]) => value);
+    for (const [index, item] of industry.cases.entries()) {
+      for (const reference of item.frameworks || []) {
+        assert(html.includes(`href="${frameworkHref(reference.id)}"`), item.title);
+        assert(searches[index].includes(frameworkById(reference.id).name), item.title);
+        assert(directory.includes(frameworkById(reference.id).name), industry.slug);
+      }
+    }
+  }
+  const escaped = renderFrameworkConnections([{ id: "gdpr", reason: '<img src=x onerror="bad">' }]);
+  assert(!escaped.includes("<img"));
+  assert(escaped.includes("&lt;img"));
+  assert.equal(renderFrameworkConnections(), "");
+});
+
+test("invalid framework mappings fail rather than publishing misleading links", () => {
+  for (const references of [
+    [{ id: "unknown", reason: "Not a registered framework" }],
+    [{ id: "gdpr", reason: "" }],
+    [{ id: "gdpr", reason: "First reference" }, { id: "gdpr", reason: "Duplicate reference" }]
+  ]) {
+    const copy = structuredClone(catalogs);
+    copy.industries[0].cases[0].frameworks = references;
+    assert.throws(() => validateCatalogs(copy));
+  }
+});
+
 test("briefs have matching downloads, copyright, and straightforward service titles", () => {
   for (const brief of catalogs.briefs) {
     const html = renderBrief(brief);
@@ -116,7 +173,10 @@ test("global navigation exposes every industry and service capability without sa
     for (const [href] of group.links) assert(html.includes(`href="${href}"`));
   }
   assert(html.includes('data-nav-trigger="industries"'));
-  assert(html.includes('id="nav-industry-search"'));
+  assert(!html.includes('id="nav-industry-search"'));
+  for (const id of ["business-services", "public-social", "industry-infrastructure"]) {
+    assert(html.includes(`href="industries.html#${id}"`));
+  }
   assert(!/sample-|deliverables\.html|service-menu-toggle/.test(html));
 });
 
@@ -124,7 +184,7 @@ test("resource breadcrumbs match menu categories and keep briefs out of Insights
   const source = '<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><a href="insights.html">Insights</a><span aria-current="page">Service briefs</span></nav>';
   const briefs = syncResourceBreadcrumbs(source, "briefs.html");
   assert(briefs.includes('href="resources.html">Resources</a>'));
-  assert(briefs.includes('href="resources.html#plan-your-project">Plan your project</a>'));
+  assert(briefs.includes('href="resources.html#plan-your-project">Planning</a>'));
   assert(!briefs.includes('href="insights.html"'));
   assert.equal(syncResourceBreadcrumbs(briefs, "briefs.html"), briefs);
   const individual = syncResourceBreadcrumbs(source, "brief-security.html");
@@ -223,6 +283,8 @@ test("product names keep Microsoft only in Microsoft 365 product names", () => {
 test("service catalog includes identity governance and distinct secure-access delivery", () => {
   const links = serviceMenuGroups[0].links.map(([href]) => href);
   assert.equal(links.indexOf("security.html#secure-access"), links.indexOf("security.html#identity") + 1);
+  assert.deepEqual(serviceMenuGroups[0].links.find(([href]) => href === "security.html#secure-access"), ["security.html#secure-access", "Secure network access"]);
+  assert(header("security.html").includes('href="security.html#secure-access">Secure network access</a>'));
   const business = catalogs.briefs.find(brief => brief.slug === "ai-business");
   assert(business.technologies.includes("Viva"));
   const security = catalogs.briefs.find(brief => brief.slug === "security");
@@ -233,7 +295,7 @@ test("service catalog includes identity governance and distinct secure-access de
 test("consulting page headings and browser titles use the same X Consulting format", () => {
   for (const group of serviceMenuGroups) {
     const source = "<title>Old page title</title><h1>Inconsistent consulting heading</h1><p>Keep the body.</p>";
-    const expected = `<title>${group.title} Consulting | Cloud First Consulting</title><h1>${group.title} Consulting</h1><p>Keep the body.</p>`;
+    const expected = `<title>${group.title} consulting | CFC</title><h1>${group.title} consulting</h1><p>Keep the body.</p>`;
     assert.equal(publicCopy(source, group.href), expected);
     assert.equal(publicCopy(expected, group.href), expected);
   }

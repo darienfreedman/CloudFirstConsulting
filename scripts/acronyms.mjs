@@ -22,8 +22,7 @@ const terms = {
   ID: "identity",
   PC: "personal computer",
   FinOps: "cloud financial operations",
-  SecOps: "security operations",
-  AI: "artificial intelligence"
+  SecOps: "security operations"
 };
 const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const pattern = new RegExp(`\\b(${Object.keys(terms).map(escape).join("|")})(s)?\\b`, "g");
@@ -43,6 +42,7 @@ function branded(text, offset, key) {
 
 function normalizeDefinitions(body) {
   let result = body.replace(/<span data-acronym="([^"]+)">[^<]*<\/span>/g, (_, key) => key);
+  result = result.replace(/\bartificial intelligence\s*\(AI\)/gi, "AI");
   result = result.replace(/\bInternet Protocol\s*\(IP\)/g, "IP");
   for (const [key, full] of Object.entries(terms)) {
     result = result
@@ -54,7 +54,7 @@ function normalizeDefinitions(body) {
   return result;
 }
 
-function expandScope(html, homepageHeroException) {
+function expandScope(html) {
   const blocks = [];
   const counts = new Map();
   html.replace(paragraphs, (whole, tag, attributes, body) => {
@@ -76,8 +76,6 @@ function expandScope(html, homepageHeroException) {
     const expanded = body.replace(/(<[^>]+>)|([^<]+)/g, (segment, element, text, segmentOffset) => {
       if (element) return element;
       return text.replace(pattern, (token, key, plural, offset) => {
-        if (homepageHeroException && tag === "p" && /\bclass="hero-description"/.test(attributes)
-          && key === "AI" && !plural && /\bagentic\s+$/.test(text.slice(0, offset))) return token;
         const meaning = sense(text, offset, key, token.length);
         if (branded(text, offset, key) || seen.has(meaning)) return token;
         seen.add(meaning);
@@ -95,10 +93,12 @@ function expandScope(html, homepageHeroException) {
   });
 }
 
-export function expandAcronyms(html, page = "") {
+export function expandAcronyms(html) {
+  html = html.replace(/<span data-acronym="AI">[^<]*<\/span>/g, "AI")
+    .replace(/\bartificial intelligence\s*\(AI\)/gi, "AI");
   return html.replace(/(<main\b[^>]*>)([\s\S]*?)(<\/main>)/, (_, open, body, close) => {
     // Cards, FAQs, and downloadable briefs must make sense independently.
     const parts = body.split(/(<article\b[\s\S]*?<\/article>|<details\b[\s\S]*?<\/details>)/g);
-    return open + parts.map(part => expandScope(part, page === "index.html")).join("") + close;
+    return open + parts.map(part => expandScope(part)).join("") + close;
   });
 }

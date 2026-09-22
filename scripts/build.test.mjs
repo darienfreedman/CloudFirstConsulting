@@ -10,6 +10,21 @@ import { syncAppearance } from "./navigation.mjs";
 import { rewritePageLinks } from "./routes.mjs";
 import { pagePath } from "../shared/urls.mjs";
 
+test("retired menu, orbital hero, and resource layouts do not leave unused styles", () => {
+  const styles = readdirSync(new URL("../docs/assets", import.meta.url))
+    .filter(name => name.endsWith(".css") && name !== "react-ui.css")
+    .map(name => readFileSync(new URL(`../docs/assets/${name}`, import.meta.url), "utf8"))
+    .join("\n");
+  for (const name of [
+    "service-nav-item", "service-menu-toggle", "service-menu", "service-menu-link",
+    "hero-visual", "orbital-art", "orbit-label", "platform-strip", "service-icon",
+    "resource-section-nav", "resource-grid", "resource-format", "nav-industry-search",
+    "nav-industry-list", "use-case-boundary", "document-hero"
+  ]) {
+    assert(!new RegExp(`\\.${name}(?![a-z0-9-])`).test(styles), name);
+  }
+});
+
 test("engagement highlights belong to recommendations, not URL fragments", () => {
   const styles = readdirSync(new URL("../docs/assets", import.meta.url))
     .filter(name => name.endsWith(".css"))
@@ -70,7 +85,8 @@ test("sitemap escapes XML attributes in paths", () => {
 });
 
 test("sitemap includes every customer page", () => {
-  const pages = readdirSync(new URL("../docs", import.meta.url)).filter((name) => name.endsWith(".html") && name !== "404.html");
+  const pages = readdirSync(new URL("../docs", import.meta.url)).filter((name) => name.endsWith(".html") && name !== "404.html"
+    && !readFileSync(new URL(`../docs/${name}`, import.meta.url), "utf8").includes('<meta name="robots" content="noindex">'));
   const base = "https://example.github.io/cloud-first/";
   const xml = sitemap(base);
   for (const page of pages) {
@@ -139,7 +155,9 @@ test("homepage tab title stays concise without changing the hero", () => {
 test("Cloud First branding is consistent across pages and package metadata", () => {
   for (const name of readdirSync(new URL("../docs", import.meta.url)).filter(name => name.endsWith(".html"))) {
     const html = readFileSync(new URL(`../docs/${name}`, import.meta.url), "utf8");
-    assert(html.match(/<title>[^<]*Cloud First Consulting<\/title>/), name);
+    assert(name === "index.html"
+      ? html.includes("<title>Cloud First Consulting</title>")
+      : /<title>[^<]+ \| CFC<\/title>/.test(html), name);
     assert(html.includes('aria-label="Cloud First Consulting home"'), name);
     assert(html.includes('>Cloud First<span class="brand-sub">CONSULTING</span>'), name);
     assert(html.includes("&copy; 2026 Cloud First Consulting"), name);

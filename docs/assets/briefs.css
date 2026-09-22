@@ -3,7 +3,7 @@
 .brief-sheet{background:#fff;color:#242424;border:1px solid #d1d1d1;border-top:8px solid #0078d4;padding:40px;max-width:920px;margin:auto;border-radius:8px;box-shadow:var(--shadow4);font-size:16px}
 .brief-sheet p,.brief-sheet li{color:#51565e;font-size:15px;line-height:1.7}
 .brief-brand{font-size:30px!important;font-weight:600;letter-spacing:-1px;margin:0 0 24px;color:#005a9e!important}
-.brief-brand span{font-size:10px;font-weight:500;letter-spacing:2px;margin-left:10px}
+.brief-brand span{font-size:inherit;font-weight:inherit;letter-spacing:inherit}
 .brief-sheet .brief-kicker{color:#005a9e;font-size:12px;font-weight:600;letter-spacing:.03em;margin-bottom:16px}
 .brief-sheet h1{font-size:42px;line-height:1.1;margin-bottom:20px}
 .brief-sheet .brief-lead{font-size:16px;margin-bottom:25px}
@@ -25,7 +25,6 @@
   .brief-page{width:100%;max-width:none;margin:0;padding:0}
   .brief-sheet{max-width:none;padding:6mm 0 0;border:0;border-radius:0;border-top:2mm solid #0078d4;background:white;box-shadow:none}
   .brief-brand{font-size:22pt!important;margin-bottom:5mm}
-  .brief-brand span{font-size:8pt}
   .brief-sheet .brief-kicker{font-size:8pt;margin-bottom:3mm}
   .brief-sheet h1{font-size:28pt;margin-bottom:4mm}
   .brief-sheet .brief-lead{font-size:11pt;margin-bottom:6mm}

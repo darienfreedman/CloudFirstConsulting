@@ -5,8 +5,9 @@ import { fileURLToPath } from "node:url";
 import { readCatalogs, validateCatalogs } from "./catalogs.mjs";
 import { resourceMenuGroups, serviceMenuGroups, syncResourceBreadcrumbs } from "./navigation.mjs";
 import { normalizeProductNames } from "./public-copy.mjs";
-import { products, productLink } from "./products.mjs";
+import { products, productLink, homepageProductGroups, homepageProductsInGroup } from "./products.mjs";
 import { expandAcronyms } from "./acronyms.mjs";
+import { technologyTopics } from "../shared/resource-topics.mjs";
 
 const site = fileURLToPath(new URL("../docs", import.meta.url));
 const catalogs = await readCatalogs();
@@ -63,6 +64,11 @@ for (const file of files) {
     const stylesheets = [...text.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)];
     assert.equal(stylesheets.at(-1)?.[1], "assets/theme.css", `Theme styles must load last: ${file}`);
     const copy = text.replace(/<(script|style|svg)\b[\s\S]*?<\/\1>/g, "").replace(/<[^>]+>/g, " ");
+    assert(!/artificial intelligence\s*\(AI\)/i.test(copy), `AI should not be expanded: ${file}`);
+    assert(!text.includes('data-acronym="AI"'), `AI expansion marker remains: ${file}`);
+    if (/^insight(?:s|-.*)\.html$/.test(path.basename(file))) {
+      assert(!/<time\b|class="article-meta"/.test(text), `Remove dates from perspectives: ${file}`);
+    }
     assert.equal(normalizeProductNames(copy), copy, `Inconsistent product prefix in visible copy: ${file}`);
     assert(!/\bMicrosoft\s+(?!365\b|Corporation\b)[A-Z][A-Za-z]+/.test(copy), `Review an unexpected Microsoft-prefixed name: ${file}`);
     for (const [, value] of text.matchAll(/\b(?:aria-label|alt|title|placeholder)="([^"]*)"/g)) {
@@ -134,23 +140,12 @@ assert.equal(platformGroups.length, 4, "Group the Microsoft ecosystem into four 
 assert.deepEqual(platformGroups.map(([, id]) => id), [
   "platform-workplace-title", "platform-security-title", "platform-agents-title", "platform-cloud-title"
 ], "Ecosystem boxes must follow the requested desktop and mobile reading order");
-const platformLabels = {
-  "platform-security-title": "Threat protection &amp; data security",
-  "platform-agents-title": "Copilot &amp; agents",
-  "platform-cloud-title": "Cloud, data &amp; AI",
-  "platform-workplace-title": "Modern workplace"
-};
-const platformProducts = {
-  "platform-security-title": ["Entra", "Purview", "Defender", "Sentinel"],
-  "platform-workplace-title": ["Microsoft 365", "Viva", "Windows 365", "Intune"],
-  "platform-agents-title": ["Microsoft 365 Copilot", "Copilot Studio", "Agent 365"],
-  "platform-cloud-title": ["Azure", "Fabric", "Foundry", "Power BI"]
-};
 for (const [, id, group] of platformGroups) {
-  assert(platformProducts[id], `Unexpected ecosystem category: ${id}`);
-  assert.equal(group.match(/<p class="eyebrow">([^<]+)<\/p>/)?.[1], platformLabels[id], `Incorrect ecosystem label: ${id}`);
+  const category = homepageProductGroups[id];
+  assert(category, `Unexpected ecosystem category: ${id}`);
+  assert.equal(group.match(/<p class="eyebrow">([^<]+)<\/p>/)?.[1], category.replaceAll("&", "&amp;"), `Incorrect ecosystem label: ${id}`);
   const links = [...group.matchAll(/<a href="([^"]+)">([^<]+)<\/a>/g)];
-  assert.deepEqual(links.map(([, , label]) => label), platformProducts[id], `Missing or misplaced products in ${id}`);
+  assert.deepEqual(links.map(([, , label]) => label), homepageProductsInGroup(category).map(product => product.name), `Missing, misplaced, or unsorted products in ${id}`);
   for (const [, href, label] of links) assert.equal(`<a href="${href}">${label}</a>`, productLink(label), `Product needs its explanation: ${label}`);
   assert(!/\bM365\b/.test(homepage), "Use Microsoft 365 in homepage product names and copy");
   assert(!/home-copilot|copilot-callout|copilot-explained-title/.test(homepage), "Removed homepage Copilot callout must not return");
@@ -182,8 +177,8 @@ assert(!/<p class="eyebrow">\d+\s*\//.test(directory), "Numbered service directo
 const directoryRows = [...directory.matchAll(/<section class="directory-row"[^>]*>([\s\S]*?)<\/section>/g)];
 for (const [index, group] of serviceMenuGroups.entries()) {
   const content = pages.get(path.join(site, group.href)).text;
-  assert.equal(content.match(/<h1(?:\s[^>]*)?>([^<]+)<\/h1>/)?.[1], `${group.title} Consulting`, `Standardize the consulting page title: ${group.href}`);
-  assert.equal(content.match(/<title>([^<]+)<\/title>/)?.[1], `${group.title} Consulting | Cloud First Consulting`, `Standardize the browser title: ${group.href}`);
+  assert.equal(content.match(/<h1(?:\s[^>]*)?>([^<]+)<\/h1>/)?.[1], `${group.title} consulting`, `Standardize the consulting page title: ${group.href}`);
+  assert.equal(content.match(/<title>([^<]+)<\/title>/)?.[1], `${group.title} consulting | CFC`, `Standardize the browser title: ${group.href}`);
   const sections = [...content.matchAll(/<section class="practice" id="([^"]+)"[^>]*>([\s\S]*?)<\/section>/g)];
   assert.deepEqual(sections.map(([, id]) => `${group.href}#${id}`), group.links.map(([href]) => href), `Capability ordering differs from the service catalog: ${group.href}`);
   assert.deepEqual(sections.map(([, , section]) => section.match(/<p class="eyebrow">([^<]+)<\/p>/)?.[1]), group.links.map(([, title]) => title), `Capability titles differ from the service catalog: ${group.href}`);
@@ -201,13 +196,13 @@ for (const [index, group] of serviceMenuGroups.entries()) {
     assert(html.includes(`href="${group.href}">${group.cta} <span`), `Inconsistent service CTA: ${group.href}`);
   }
 }
-const technologyGuide = pages.get(path.join(site, "technology-explained.html")).text;
-const guideTopics = [...technologyGuide.matchAll(/<section id="[^"]+">([\s\S]*?)<\/section>/g)];
-assert.equal(guideTopics.length, 14, "Expected fourteen technology guide topics");
-for (const [, topic] of guideTopics) {
-  assert(/^<div class="icon-label">[\s\S]*?<\/div><h2>[^<]+<\/h2>/.test(topic), "Every technology topic needs an icon, label, and descriptive heading");
+const technologyGuide = pages.get(path.join(site, "technology-deep-dives.html")).text;
+for (const topic of technologyTopics) {
+  assert(technologyGuide.includes(`id="${topic.id}"`), `Preserve topic bookmark: ${topic.id}`);
+  assert(technologyGuide.includes(`href="deep-dive-${topic.id}.html"`), `Missing deep-dive card: ${topic.id}`);
+  assert(pages.has(path.join(site, `deep-dive-${topic.id}.html`)), `Missing deep-dive article: ${topic.id}`);
 }
-for (const file of ["index.html", "ai-business.html", "technology-explained.html", "faq.html", "sources.html", "brief-ai-business.html"]) {
+for (const file of ["index.html", "ai-business.html", "sources.html", "brief-ai-business.html"]) {
   assert(pages.get(path.join(site, file)).text.includes("Viva"), `Missing Viva coverage: ${file}`);
 }
 const secureAccess = pages.get(path.join(site, "security.html")).text.match(/<section class="practice" id="secure-access"[\s\S]*?<\/section>/)?.[0];
@@ -247,7 +242,7 @@ for (const [file, { text }] of pages) {
     assert(navigation.includes(`data-nav-trigger="${section}"`) && navigation.includes(`id="nav-panel-${section}"`), `Missing navigation section ${section}: ${file}`);
   }
   const destinations = new Set([...navigation.matchAll(/href="([^"]+)"/g)].map((match) => match[1]));
-  for (const href of ["services.html", "industries.html", "resources.html", "insights.html", "about.html", "contact.html", ...catalogs.industries.map(industry => `industry-${industry.slug}.html`), ...serviceMenuGroups.flatMap(group => [group.href, ...group.links.map(([href]) => href)]), ...resourceMenuGroups.flatMap(group => [group.href, ...group.links.map(([href]) => href)])]) {
+  for (const href of ["services.html", "industries.html", "resources.html", "resources.html#insights", "about.html", "contact.html", ...catalogs.industries.map(industry => `industry-${industry.slug}.html`), ...serviceMenuGroups.flatMap(group => [group.href, ...group.links.map(([href]) => href)]), ...resourceMenuGroups.flatMap(group => [group.href, ...group.links.map(([href]) => href)])]) {
     assert(destinations.has(href), `Navigation hides destination ${href}: ${file}`);
   }
   if (path.basename(file) !== "index.html") assert(text.includes('aria-label="Breadcrumb"'), `Missing breadcrumbs: ${file}`);
