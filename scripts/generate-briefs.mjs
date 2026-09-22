@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { syncNavigation } from "./navigation.mjs";
 import { generateCatalogs } from "./catalogs.mjs";
 
-const root = fileURLToPath(new URL("../site", import.meta.url));
+const root = fileURLToPath(new URL("../docs", import.meta.url));
 const browser = process.env.CLOUD_FIRST_BROWSER || "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
 await access(browser);
 const { briefs } = await generateCatalogs();

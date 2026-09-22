@@ -16,7 +16,12 @@ async function fixture(t, rateLimit = 100) {
   const dataDir = path.join(directory, "private");
   await mkdir(siteDir);
   await writeFile(path.join(siteDir, "index.html"), "<h1>Cloud First</h1>");
-  await writeFile(path.join(siteDir, "404.html"), "<h1>Not found</h1>");
+  await writeFile(path.join(siteDir, "404.html"), '<h1>Not found</h1><a href="./">Home</a><link href="assets/styles.css">');
+  await mkdir(path.join(siteDir, "security"));
+  await mkdir(path.join(siteDir, "assets"));
+  await writeFile(path.join(siteDir, "security", "index.html"), '<h1>Security</h1><a href="../">Home</a>');
+  await writeFile(path.join(siteDir, "assets", "styles.css"), "body{color:black}");
+  await writeFile(path.join(siteDir, "assets", "favicon.png"), "image fixture");
   const server = await createContactServer({ siteDir, dataDir, settings, rateLimit });
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
@@ -83,4 +88,29 @@ test("rate limiting rejects excess submissions", async t => {
 
 test("intake refuses a storage directory inside the public site", async () => {
   await assert.rejects(createContactServer({ siteDir: "public", dataDir: path.join("public", "inquiries"), settings }), /outside the public/);
+});
+
+test("local preview serves clean routes, redirects bare paths, and preserves query strings", async t => {
+  const { origin } = await fixture(t);
+  for (const method of ["GET", "HEAD"]) {
+    const redirect = await fetch(`${origin}/security?from=home`, { method, redirect: "manual" });
+    assert.equal(redirect.status, 301);
+    assert.equal(redirect.headers.get("location"), `${origin}/security/?from=home`);
+    const page = await fetch(`${origin}/security/`, { method });
+    assert.equal(page.status, 200);
+    assert.match(page.headers.get("content-type"), /text\/html/);
+    assert.equal(await page.text(), method === "HEAD" ? "" : '<h1>Security</h1><a href="../">Home</a>');
+  }
+  const image = await fetch(`${origin}/assets/favicon.png`);
+  assert.equal(image.headers.get("content-type"), "image/png");
+});
+
+test("nested missing routes retain working recovery links and styles", async t => {
+  const { origin } = await fixture(t);
+  const response = await fetch(`${origin}/missing/deep/page`);
+  assert.equal(response.status, 404);
+  const html = await response.text();
+  assert(html.includes(`href="${origin}/"`));
+  assert(html.includes(`href="${origin}/assets/styles.css"`));
+  assert.equal((await fetch(`${origin}/assets/styles.css`)).status, 200);
 });

@@ -8,7 +8,10 @@ import {
 import { ClipboardTask24Regular, ShieldLock24Regular } from "@fluentui/react-icons";
 import { serviceOptions, validateInquiry } from "../shared/inquiry.mjs";
 import { microsoftFormsUrls } from "../shared/forms.mjs";
+import { pageHref, localContactEndpoint } from "../shared/urls.mjs";
 import "./ui.css";
+
+const pageLink = value => pageHref(value, document.documentElement.dataset.siteRoot);
 
 const theme = {
   ...webLightTheme,
@@ -123,10 +126,10 @@ function AIFocusGuide() {
     <div id="ai-focus-panel" role="tabpanel" aria-labelledby={`ai-priority-${selected}`}>
       <p className="ai-focus-introduction">{priority.introduction}</p>
       <div className="ai-focus-cards">
-        <Card appearance="outline" className="ai-focus-card"><span className="capability-icon"><ShieldLock24Regular aria-hidden="true" /></span><h3>AI Security</h3><p>{priority.security}</p><a className="text-link" href="security.html#ai-security">Explore AI Security</a></Card>
-        <Card appearance="outline" className="ai-focus-card"><span className="capability-icon"><ClipboardTask24Regular aria-hidden="true" /></span><h3>AI Governance</h3><p>{priority.governance}</p><a className="text-link" href="security.html#ai-governance">Explore AI Governance</a></Card>
+        <Card appearance="outline" className="ai-focus-card"><span className="capability-icon"><ShieldLock24Regular aria-hidden="true" /></span><h3>AI Security</h3><p>{priority.security}</p><a className="text-link" href={pageLink("security.html#ai-security")}>Explore AI Security</a></Card>
+        <Card appearance="outline" className="ai-focus-card"><span className="capability-icon"><ClipboardTask24Regular aria-hidden="true" /></span><h3>AI Governance</h3><p>{priority.governance}</p><a className="text-link" href={pageLink("security.html#ai-governance")}>Explore AI Governance</a></Card>
       </div>
-      <a className="text-link" href="technology-explained.html">Connected tools, AI agents, and orchestration explained</a>
+      <a className="text-link" href={pageLink("technology-explained.html")}>Connected tools, AI agents, and orchestration explained</a>
     </div>
   </div>;
 }
@@ -171,7 +174,7 @@ function submissionEndpoint() {
     return url.href;
   }
   if (["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)) {
-    return new URL("api/contact", new URL(".", window.location.href)).href;
+    return localContactEndpoint(window.location.href, document.documentElement.dataset.siteRoot);
   }
   throw new Error("The contact service is temporarily unavailable. Please try again later.");
 }
@@ -274,7 +277,7 @@ function ContactForm() {
         <Textarea id="contact-message" name="message" rows={6} maxLength={3000} resize="vertical" size="large" value={values.message} onChange={(_, data) => change("message", data.value)} />
       </Field>
       <Field validationState={errors.consent ? "error" : "none"} validationMessage={errors.consent}>
-        <Checkbox id="contact-consent" name="consent" checked={values.consent} onChange={(_, data) => change("consent", data.checked === true)} label={<>I agree that Cloud First Consulting may use these details to respond to my inquiry. <a href="trust.html">Privacy information</a></>} />
+        <Checkbox id="contact-consent" name="consent" checked={values.consent} onChange={(_, data) => change("consent", data.checked === true)} label={<>I agree that Cloud First Consulting may use these details to respond to my inquiry. <a href={pageLink("trust.html")}>Privacy information</a></>} />
       </Field>
       <div className="react-form-actions">
         <Button appearance="primary" size="large" type="submit" disabled={state === "sending"}>{state === "sending" ? "Sending inquiry" : "Send inquiry"}</Button>
