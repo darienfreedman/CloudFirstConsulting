@@ -13,6 +13,22 @@ import { linkProductNames, productLink, products, renderProductGuide, syncHomepa
 
 const text = html => html.replace(/<[^>]+>/g, "");
 
+test("Clarity disclosure lives on the privacy page without adding footer copy", () => {
+  const html = readFileSync(new URL("../src/site/trust.html", import.meta.url), "utf8");
+  const disclosure = html.match(/<section id="clarity-disclosure">([\s\S]*?)<\/section>/)?.[1];
+  assert(disclosure);
+  for (const phrase of ["Site disclosure", "Privacy policy disclosure", "behavioral metrics", "heatmaps",
+    "session replays", "first-party and third-party cookies", "other tracking technologies",
+    'href="https://privacy.microsoft.com/en-us/privacystatement"']) {
+    assert(disclosure.includes(phrase), phrase);
+  }
+  assert(!html.match(/<footer\b[\s\S]*?<\/footer>/)[0].includes("Clarity"));
+  assert(!html.includes("does not use advertising trackers or analytics cookies"));
+  assert(html.indexOf('id="clarity-disclosure"') > html.indexOf("<h2>Service information</h2>"));
+  assert(!html.includes("device and browser details"));
+  assert(!/\bconsent\b/i.test(html));
+});
+
 test("content cards share blue hover and keyboard-focus outlines without outlining forms or sections", () => {
   const css = readFileSync(new URL("../src/site/assets/production.css", import.meta.url), "utf8");
   const rule = css.split("\n").find(line => line.includes(":is(.service-card,") && line.includes("outline:"));
