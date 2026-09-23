@@ -2,21 +2,11 @@ import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { escapeHtml } from "../shared/html.mjs";
 import { pagePath } from "../shared/urls.mjs";
+import { injectClarity } from "./clarity.mjs";
+export { injectClarity } from "./clarity.mjs";
 
 const sourceOrigin = "https://source.invalid/";
 const decodeAttribute = value => value.replaceAll("&amp;", "&").replaceAll("&quot;", '"').replaceAll("&#39;", "'");
-
-const clarityScript = `<script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "ymik5mm11l");
-</script>`;
-
-export function injectClarity(html) {
-  return html.replace("</head>", `${clarityScript}</head>`);
-}
 
 export function rewritePageLinks(html, page) {
   const route = pagePath(page);

@@ -5,9 +5,9 @@ import vm from "node:vm";
 import { pagePath, pageHref, localContactEndpoint } from "../shared/urls.mjs";
 import { rewritePageLinks } from "./routes.mjs";
 
-test("the docs branch folder contains generated directory indexes, not flat authoring pages", () => {
+test("the Actions artifact contains generated directory indexes, not flat authoring pages", () => {
   const source = new URL("../src/site/", import.meta.url);
-  const output = new URL("../docs/", import.meta.url);
+  const output = new URL("../dist/", import.meta.url);
   const pages = readdirSync(source).filter(name => name.endsWith(".html"));
   assert.deepEqual(readdirSync(output).filter(name => name.endsWith(".html")).sort(), ["404.html", "index.html"]);
   for (const page of pages) {
@@ -23,16 +23,18 @@ test("the docs branch folder contains generated directory indexes, not flat auth
   assert(existsSync(new URL(".nojekyll", output)));
 });
 
-test("branch and Actions publishing contain the same generated files", () => {
-  const files = directory => readdirSync(directory, { withFileTypes: true }).flatMap(entry => entry.isDirectory()
-    ? files(new URL(`${entry.name}/`, directory)).map(name => `${entry.name}/${name}`)
-    : [entry.name]).sort();
-  const docs = new URL("../docs/", import.meta.url);
-  const dist = new URL("../dist/", import.meta.url);
-  assert.deepEqual(files(docs), files(dist));
-  for (const file of files(docs)) {
-    assert.deepEqual(readFileSync(new URL(file, docs)), readFileSync(new URL(file, dist)), file);
-  }
+test("build and workflow use only the Actions artifact, not branch publishing", () => {
+  const build = readFileSync(new URL("./build.mjs", import.meta.url), "utf8");
+  const workflow = readFileSync(new URL("../.github/workflows/pages.yml", import.meta.url), "utf8");
+  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  assert(!build.includes("branchDestination"));
+  assert(!build.includes('"docs"'));
+  assert(!("validate:docs" in pkg.scripts));
+  assert(workflow.includes("uses: actions/configure-pages@v5"));
+  assert(workflow.includes("path: dist"));
+  assert(workflow.includes("uses: actions/deploy-pages@v4"));
+  assert(!workflow.includes("build_type"));
+  assert(!workflow.includes("validate:docs"));
 });
 
 test("legacy HTML bookmarks redirect only to known clean pages under the same site root", () => {

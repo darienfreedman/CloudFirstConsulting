@@ -245,7 +245,7 @@ export async function syncNavigation() {
     const filename = path.join(site, page);
     const content = await readFile(filename, "utf8");
     if (page === "404.html") {
-      const updated = syncAppearance(content);
+      const updated = syncAppearance(content.replace(/http-equiv="Content-Security-Policy" content="[^"]+"/, `http-equiv="Content-Security-Policy" content="${contentPolicy(settings)}"`));
       if (updated !== content) await writeFile(filename, updated);
       continue;
     }

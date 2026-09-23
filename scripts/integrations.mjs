@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { microsoftFormsOrigins, microsoftFormsUrls } from "../shared/forms.mjs";
+import { clarityScriptHash, clarityScriptOrigins, clarityConnectOrigins, clarityImageOrigins } from "./clarity.mjs";
 
 export async function readSettings() {
   const settings = JSON.parse(await readFile(new URL("../config/site.json", import.meta.url), "utf8"));
@@ -16,13 +17,11 @@ export async function readSettings() {
   return settings;
 }
 
-const clarityScriptHash = "'sha256-nGKrGl7M/84A2KTHEg2G2lWVtp1cww+qdkKDKzFLWtc='";
-
 export function contentPolicy(settings) {
-  const connections = ["'self'", "https://*.clarity.ms"];
+  const connections = ["'self'", ...clarityConnectOrigins];
   if (settings.contactEndpoint) connections.push(new URL(settings.contactEndpoint).origin);
   const frames = microsoftFormsUrls(settings.contactFormUrl) ? microsoftFormsOrigins.join(" ") : "'none'";
-  return `default-src 'none'; script-src 'self' https://www.clarity.ms ${clarityScriptHash}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src ${connections.join(" ")}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src ${frames}`;
+  return `default-src 'none'; script-src 'self' ${clarityScriptOrigins.join(" ")} ${clarityScriptHash}; style-src 'self' 'unsafe-inline'; img-src 'self' data: ${clarityImageOrigins.join(" ")}; font-src 'self'; connect-src ${connections.join(" ")}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src ${frames}`;
 }
 
 export async function writeSettings(settings) {

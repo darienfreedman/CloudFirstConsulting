@@ -126,3 +126,12 @@ test("Fluent surfaces and card outlines keep their shared visual contract", () =
   }
   assert(css.includes(".react-surface a:not(.fui-Button)"), "Link rules must not recolor Fluent action buttons");
 });
+
+test("mobile service tabs align short and wrapped labels in equal grid cells", () => {
+  const css = readFileSync(new URL("../ui/ui.css", import.meta.url), "utf8");
+  const mobile = css.split("\n").find(line => line.startsWith("@media(max-width:600px)") && line.includes(".react-service-tabs"));
+  assert(mobile);
+  assert(mobile.includes("grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr"));
+  assert(mobile.includes(".react-service-tabs button{justify-content:start;text-align:left;width:100%}"));
+  assert(mobile.includes(".react-service-tabs :is(.fui-Tab__content,.fui-Tab__content--reserved-space){white-space:normal;text-align:left}"));
+});

@@ -1,4 +1,4 @@
-import { cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,7 +12,6 @@ export { resolveErrorPageLinks } from "./routes.mjs";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const source = path.join(root, "src", "site");
 const destination = path.join(root, "dist");
-const branchDestination = path.join(root, "docs");
 
 function escapeXml(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&apos;");
@@ -53,9 +52,7 @@ async function build() {
     await writeFile(path.join(destination, "sitemap.xml"), sitemap(siteUrl));
   }
   await writeFile(path.join(destination, "robots.txt"), `${robots.join("\n")}\n`);
-  await rm(branchDestination, { recursive: true, force: true });
-  await cp(destination, branchDestination, { recursive: true });
-  console.log(`Built matching public sites in docs and dist${siteUrl ? ` for ${siteUrl}` : " (SITE_URL unset; sitemap omitted)"}.`);
+  console.log(`Built public site in dist${siteUrl ? ` for ${siteUrl}` : " (SITE_URL unset; sitemap omitted)"}.`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

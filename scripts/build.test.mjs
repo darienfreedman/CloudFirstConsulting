@@ -9,6 +9,46 @@ import { publicCopy } from "./public-copy.mjs";
 import { syncAppearance } from "./navigation.mjs";
 import { rewritePageLinks } from "./routes.mjs";
 import { pagePath } from "../shared/urls.mjs";
+import { createHash } from "node:crypto";
+import { clarityScriptBody, clarityScriptHash, injectClarity } from "./clarity.mjs";
+import { readSettings } from "./integrations.mjs";
+
+test("Clarity CSP hashes the exact bootstrap instead of a manually copied digest", () => {
+  const actual = `'sha256-${createHash("sha256").update(clarityScriptBody).digest("base64")}'`;
+  assert.equal(clarityScriptHash, actual);
+  assert.equal(actual, "'sha256-nGKrGl7M/84A2KTHEg2G2lWVtplcww+qdkKDKzFLWtc='");
+  const policy = contentPolicy({ contactFormUrl: "", bookingUrl: "", contactEndpoint: "https://contact.example.com/api" });
+  assert(policy.includes(actual));
+  const scripts = policy.match(/(?:^|; )script-src ([^;]+)/)[1];
+  assert(scripts.includes("https://*.clarity.ms"));
+  assert(!scripts.includes("'unsafe-inline'") && !scripts.includes("'unsafe-eval'"));
+  assert(policy.includes("img-src 'self' data: https://*.clarity.ms https://c.bing.com"));
+  assert(policy.includes("connect-src 'self' https://*.clarity.ms https://contact.example.com"));
+  assert(policy.startsWith("default-src 'none';"));
+  const html = injectClarity("<html><head></head><body></body></html>");
+  assert.equal(injectClarity(html), html);
+  assert.throws(() => injectClarity("<body></body>"), /page head/);
+});
+
+test("every published page head includes one hash-authorized Clarity bootstrap after its CSP", async () => {
+  const settings = await readSettings();
+  const pages = readdirSync(new URL("../src/site/", import.meta.url)).filter(name => name.endsWith(".html"));
+  for (const page of pages) {
+    const route = pagePath(page);
+    const filename = route.endsWith("/") || !route ? `${route}index.html` : route;
+    const html = readFileSync(new URL(`../dist/${filename}`, import.meta.url), "utf8");
+    const head = html.match(/<head>([\s\S]*?)<\/head>/)[1];
+    const scripts = [...html.matchAll(/<script id="clarity-bootstrap"[^>]*>([\s\S]*?)<\/script>/g)];
+    assert.equal(scripts.length, 1, filename);
+    const hash = `'sha256-${createHash("sha256").update(scripts[0][1].replace(/\r\n?/g, "\n")).digest("base64")}'`;
+    const policies = [...head.matchAll(/http-equiv="Content-Security-Policy" content="([^"]+)"/g)];
+    assert.equal(policies.length, 1, filename);
+    assert.equal(policies[0][1], contentPolicy(settings), filename);
+    assert(policies[0][1].includes(hash), filename);
+    assert(head.indexOf("Content-Security-Policy") < head.indexOf('id="clarity-bootstrap"'), filename);
+    assert(head.includes(scripts[0][0]), filename);
+  }
+});
 
 test("retired menu, orbital hero, and resource layouts do not leave unused styles", () => {
   const styles = readdirSync(new URL("../src/site/assets", import.meta.url))
