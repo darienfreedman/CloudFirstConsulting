@@ -5,17 +5,23 @@ import {
   MessageBar, MessageBarBody, Option, Select, Spinner, Tab, TabList,
   Textarea, ToggleButton, webDarkTheme, webLightTheme
 } from "@fluentui/react-components";
-import { ClipboardTask24Regular, ShieldLock24Regular } from "@fluentui/react-icons";
 import { serviceOptions, validateInquiry } from "../shared/inquiry.mjs";
 import { microsoftFormsUrls } from "../shared/forms.mjs";
 import { industryGroups } from "../shared/industry-groups.mjs";
 import { pageHref, localContactEndpoint } from "../shared/urls.mjs";
+import { MobileServiceExplorer } from "./service-carousel.jsx";
+import { AIFocusGuide } from "./ai-focus-guide.jsx";
+import { useMobileLayout } from "./use-mobile-layout.js";
+import { serviceAreas, serviceAreaByKey } from "../shared/services.mjs";
 import "./ui.css";
 
 const pageLink = value => pageHref(value, document.documentElement.dataset.siteRoot);
 
+const brandFont = '"Inter", "Inter Fallback", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+
 const theme = {
   ...webLightTheme,
+  fontFamilyBase: brandFont,
   fontSizeBase200: "14px",
   lineHeightBase200: "20px",
   fontSizeBase300: "16px",
@@ -36,6 +42,7 @@ const theme = {
 
 const darkTheme = {
   ...webDarkTheme,
+  fontFamilyBase: brandFont,
   fontSizeBase200: theme.fontSizeBase200,
   lineHeightBase200: theme.lineHeightBase200,
   fontSizeBase300: theme.fontSizeBase300,
@@ -95,46 +102,6 @@ function mount(element, content) {
   createRoot(element).render(<SiteThemeProvider>{content}</SiteThemeProvider>);
 }
 
-const aiPriorities = {
-  copilot: {
-    label: "We're adopting AI",
-    introduction: "Start with the information people can access and the uses your business is ready to support.",
-    security: "Review access to sensitive files, identify oversharing, and check that AI use follows the intended data boundaries.",
-    governance: "Agree on approved uses, responsible owners, and the checks needed before extending the rollout."
-  },
-  agents: {
-    label: "We're building AI agents",
-    introduction: "Understand what each agent can read, which business tools it can use, and when an action needs approval.",
-    security: "Review Model Context Protocol servers and tool permissions, and test how the agent handles harmful instructions in documents or tool results.",
-    governance: "Define who approves integrations and how orchestration frameworks coordinate handoffs, exceptions, and human review."
-  },
-  scale: {
-    label: "We're expanding AI use",
-    introduction: "Keep visibility and accountability as more teams, applications, and tools become involved.",
-    security: "Monitor identity, data, and application risks across deployments, then address gaps in the controls that protect them.",
-    governance: "Maintain an AI inventory, review changes, evaluate releases, and keep ownership and exception decisions current."
-  }
-};
-
-function AIFocusGuide() {
-  const [selected, setSelected] = useState("copilot");
-  const priority = aiPriorities[selected];
-  return <div className="react-ai-focus">
-    <div className="section-heading"><div><p className="eyebrow">Your AI starting point</p><h2>Move AI forward.<br />Keep control.</h2></div><p>Choose where you are in your AI journey.</p></div>
-    <TabList selectedValue={selected} onTabSelect={(_, data) => setSelected(data.value)} size="large" className="ai-priority-tabs" aria-label="Your AI priority">
-      {Object.entries(aiPriorities).map(([key, value]) => <Tab key={key} id={`ai-priority-${key}`} value={key} data-ai-priority={key} aria-controls="ai-focus-panel">{value.label}</Tab>)}
-    </TabList>
-    <div id="ai-focus-panel" role="tabpanel" aria-labelledby={`ai-priority-${selected}`}>
-      <p className="ai-focus-introduction">{priority.introduction}</p>
-      <div className="ai-focus-cards">
-        <Card appearance="outline" className="ai-focus-card"><span className="capability-icon"><ShieldLock24Regular aria-hidden="true" /></span><h3>AI Security</h3><p>{priority.security}</p><a className="text-link" href={pageLink("security.html#ai-security")}>Explore AI Security</a></Card>
-        <Card appearance="outline" className="ai-focus-card"><span className="capability-icon"><ClipboardTask24Regular aria-hidden="true" /></span><h3>AI Governance</h3><p>{priority.governance}</p><a className="text-link" href={pageLink("security.html#ai-governance")}>Explore AI Governance</a></Card>
-      </div>
-      <a className="text-link" href={pageLink("technology-explained.html")}>Connected tools, AI agents, and orchestration explained</a>
-    </div>
-  </div>;
-}
-
 const emptyInquiry = { name: "", email: "", company: "", service: "", message: "", consent: false };
 
 function ContactExperience() {
@@ -150,10 +117,6 @@ function ContactExperience() {
   );
   return (
     <section className="microsoft-contact-form" aria-label="Contact inquiry">
-      <div className="microsoft-form-tools">
-        <p>Your response is submitted through Forms.</p>
-        <Button as="a" id="microsoft-form-open" href={form.responseUrl} target="_blank" rel="noopener noreferrer" appearance="subtle">Open form in a new tab</Button>
-      </div>
       <iframe
         id="microsoft-contact-frame"
         className="microsoft-form-frame"
@@ -162,7 +125,6 @@ function ContactExperience() {
         referrerPolicy="no-referrer"
         allowFullScreen
       />
-      <p className="microsoft-form-help">If the form does not load in your browser, use the link above to open it directly.</p>
     </section>
   );
 }
@@ -295,6 +257,15 @@ function CatalogControls({ element, controls, cards, filters, groups, originalSt
     ? industryGroups.find(group => `#${group.id}` === window.location.hash) : undefined;
   const [category, setCategory] = useState(() => initialIndustryGroup()?.title || "all");
   useEffect(() => {
+    const reveal = event => {
+      if (!element.contains(event.detail)) return;
+      setQuery("");
+      setCategory("all");
+    };
+    document.addEventListener("cloud-first:catalog-reveal", reveal);
+    return () => document.removeEventListener("cloud-first:catalog-reveal", reveal);
+  }, [element]);
+  useEffect(() => {
     if (element.dataset.catalog !== "industry") return;
     const followGroup = () => {
       const group = industryGroups.find(group => `#${group.id}` === window.location.hash);
@@ -332,22 +303,42 @@ function CatalogControls({ element, controls, cards, filters, groups, originalSt
     element.querySelector("#catalog-empty").hidden = count !== 0;
     element.querySelector("#catalog-status").textContent = !term && category === "all" ? originalStatus : `${count} ${units[count === 1 ? 0 : 1]} match your selection.`;
   }, [query, category, element, cards, groups, originalStatus, units]);
+  const filtered = query.trim() !== "" || category !== "all";
   return <div className="react-catalog-controls">
-    <Field label={{ children: controls.label, htmlFor: "catalog-search" }} className="react-catalog-search"><Input id="catalog-search" type="search" size="large" placeholder={element.dataset.catalog === "brief" ? "Search topics or technologies" : "Search topics, technologies, or frameworks"} value={query} onChange={(_, data) => setQuery(data.value)} /></Field>
+    <Field label={{ children: controls.label, htmlFor: "catalog-search" }} className="react-catalog-search"><Input id="catalog-search" type="search" size="large" placeholder={element.dataset.catalog === "brief" ? "Topic or technology" : "Topic, product, or framework"} value={query} onChange={(_, data) => setQuery(data.value)} /></Field>
     <div className="react-filter-group" role="group" aria-label="Filter catalog">{filters.map(filter => <ToggleButton key={filter.value} data-filter={filter.value} appearance={category === filter.value ? "primary" : "secondary"} checked={category === filter.value} onClick={() => setCategory(filter.value)}>{filter.label}</ToggleButton>)}</div>
-    <Button id="catalog-clear" appearance="subtle" onClick={() => { setQuery(""); setCategory("all"); document.getElementById("catalog-search").focus(); }}>Clear filters</Button>
+    <Field label={{ children: element.dataset.catalog === "industry" ? "Industry group" : "Service area", htmlFor: "mobile-catalog-category" }} className="mobile-catalog-filter"><Select id="mobile-catalog-category" value={category} onChange={event => setCategory(event.target.value)}>{filters.map(filter => <option key={filter.value} value={filter.value}>{filter.label}</option>)}</Select></Field>
+    {filtered && <Button id="catalog-clear" appearance="subtle" onClick={() => { setQuery(""); setCategory("all"); document.getElementById("catalog-search").focus(); }}>Clear filters</Button>}
   </div>;
 }
 
 function ServicesControls({ sections }) {
   const [selected, setSelected] = useState("all");
-  const choices = [["all", "All services"], ["security", "Security"], ["business", "AI Business Solutions"], ["cloud", "Cloud and AI Platforms"]];
+  const mobile = useMobileLayout();
+  const choices = [["all", "All services"], ...serviceAreas.map(area => [area.key, area.label])];
   useEffect(() => {
     for (const [key, section] of sections) section.hidden = selected !== "all" && selected !== key;
     const panel = document.getElementById("service-directory");
+    panel.hidden = mobile;
     panel.setAttribute("role", "tabpanel");
     panel.setAttribute("aria-labelledby", `service-tab-${selected}`);
-  }, [selected, sections]);
+  }, [selected, sections, mobile]);
+  if (mobile) {
+    const headlines = ["Protect what matters.", "Make room for better work.", "Build for your next chapter."];
+    const areas = [...sections].map(([key, section], index) => ({
+      key, headline: headlines[index],
+      // Tabs share a row on phones, so long area names use their first words.
+      shortLabel: serviceAreaByKey[key].label.replace(/ Solutions$/, ""),
+      label: serviceAreaByKey[key].label,
+      description: section.dataset.mobileSummary,
+      href: section.querySelector(".button").href,
+      cta: serviceAreaByKey[key].cta,
+      links: [...section.querySelectorAll("nav a")].map(link => ({
+        href: link.href, label: link.childNodes[0].textContent.trim()
+      }))
+    }));
+    return <MobileServiceExplorer areas={areas} />;
+  }
   return <TabList selectedValue={selected} onTabSelect={(_, data) => setSelected(data.value)} size="large" className="react-service-tabs" aria-label="Service areas">
     {choices.map(([value, label]) => <Tab id={`service-tab-${value}`} key={value} value={value} data-service-filter={value} aria-controls="service-directory">{label}</Tab>)}
   </TabList>;
@@ -357,7 +348,7 @@ const priorities = {
   security: ["Security", "security-plan", "exposure, identity, device protection, and response readiness"],
   data: ["Data protection and Copilot", "data-plan", "information access, protection policies, and Copilot readiness"],
   ai: ["AI strategy and governance", "ai-plan", "use cases, ownership, integrations, and evaluation"],
-  cloud: ["Cloud and data platforms", "cloud-plan", "application dependencies, platform design, data, and operations"]
+  cloud: [serviceAreaByKey.cloud.label, "cloud-plan", "application dependencies, platform design, data, and operations"]
 };
 const stages = {
   assess: ["Understand our needs", "Start with an assessment", "Establish the current state, identify gaps, and agree on priorities."],
@@ -385,7 +376,7 @@ function EngagementFinder() {
 }
 
 mount(document.querySelector("[data-react-contact]"), <ContactExperience />);
-mount(document.querySelector("[data-react-ai-focus]"), <AIFocusGuide />);
+mount(document.querySelector("[data-react-ai-focus]"), <AIFocusGuide pageLink={pageLink} />);
 const catalog = document.querySelector("[data-catalog]");
 if (catalog) {
   const target = catalog.querySelector("[data-catalog-controls]");

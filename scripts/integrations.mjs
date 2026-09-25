@@ -21,7 +21,7 @@ export function contentPolicy(settings) {
   const connections = ["'self'", ...clarityConnectOrigins];
   if (settings.contactEndpoint) connections.push(new URL(settings.contactEndpoint).origin);
   const frames = microsoftFormsUrls(settings.contactFormUrl) ? microsoftFormsOrigins.join(" ") : "'none'";
-  return `default-src 'none'; script-src 'self' ${clarityScriptOrigins.join(" ")} ${clarityScriptHash}; style-src 'self' 'unsafe-inline'; img-src 'self' data: ${clarityImageOrigins.join(" ")}; font-src 'self'; connect-src ${connections.join(" ")}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src ${frames}`;
+  return `default-src 'none'; script-src 'self' ${clarityScriptOrigins.join(" ")} ${clarityScriptHash}; style-src 'self' 'unsafe-inline'; img-src 'self' data: ${clarityImageOrigins.join(" ")}; media-src 'self'; font-src 'self'; connect-src ${connections.join(" ")}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src ${frames}`;
 }
 
 export async function writeSettings(settings) {

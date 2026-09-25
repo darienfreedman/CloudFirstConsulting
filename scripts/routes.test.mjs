@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import vm from "node:vm";
 import { pagePath, pageHref, localContactEndpoint } from "../shared/urls.mjs";
-import { rewritePageLinks } from "./routes.mjs";
+import { rewritePageLinks, socialMeta } from "./routes.mjs";
 
 test("the Actions artifact contains generated directory indexes, not flat authoring pages", () => {
   const source = new URL("../src/site/", import.meta.url);
@@ -114,4 +114,18 @@ test("React links and the native contact API resolve at project and domain roots
   assert.equal(localContactEndpoint("http://127.0.0.1:1234/contact.html"), "http://127.0.0.1:1234/api/contact");
   const ui = readFileSync(new URL("../ui/index.jsx", import.meta.url), "utf8");
   assert(!/href="[^"]+\.html/.test(ui), "React must not bypass the public route helper");
+});
+
+test("deployed pages get canonical and share previews with absolute URLs", () => {
+  const source = '<html><head><title>Security consulting | CFC</title><meta name="description" content="Protect people &amp; data."></head><body></body></html>';
+  const html = socialMeta(source, "security.html", "https://demo.github.io/demo/");
+  assert(html.includes('<link rel="canonical" href="https://demo.github.io/demo/security/">'));
+  assert(html.includes('<meta property="og:title" content="Security consulting">'));
+  assert(html.includes('<meta property="og:description" content="Protect people &amp; data.">'));
+  assert(html.includes('<meta property="og:image" content="https://demo.github.io/demo/assets/images/share-card.jpg">'));
+  assert(html.includes('<meta name="twitter:card" content="summary_large_image">'));
+  assert.equal(socialMeta(html, "security.html", "https://demo.github.io/demo/"), html);
+  assert(socialMeta(source, "index.html", "https://demo.github.io/demo/").includes('href="https://demo.github.io/demo/"'));
+  assert.equal(socialMeta(source, "404.html", "https://demo.github.io/demo/"), source);
+  assert.equal(socialMeta(source, "security.html", null), source, "Local previews do not invent a public URL");
 });

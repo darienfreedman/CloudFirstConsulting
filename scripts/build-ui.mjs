@@ -44,6 +44,10 @@ export async function buildUI() {
     if (!license) throw new Error(`Missing distribution license for ${metadata.name}.`);
     notices.push(`${metadata.name} ${metadata.version}\n${license}`);
   }
+  // The self-hosted typeface ships under the SIL Open Font License, which travels with the fonts.
+  for (const [name, file] of [["Inter (assets/fonts/inter-*.woff2)", "inter-OFL.txt"]]) {
+    notices.push(`${name}\n${await readFile(path.join(root, "licenses", file), "utf8")}`);
+  }
   await writeFile(path.join(root, "src", "site", "assets", "THIRD_PARTY_NOTICES.txt"), notices.join("\n\n"));
   console.log("Built React and Fluent UI controls.");
 }

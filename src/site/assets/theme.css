@@ -1,29 +1,75 @@
 .header-controls{display:none;align-items:center;gap:8px;order:3;flex-shrink:0}
-.header-controls:has(>button:not([hidden])){display:flex}
 .site-header>#primary-nav{order:2;margin-left:auto}
-.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text)}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;padding:10px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--text)}
 .theme-toggle:hover{background:var(--panel-light);border-color:var(--accent)}
-.theme-toggle svg{display:block;width:20px;height:20px}
-.theme-toggle .theme-icon-light{display:none}
+.theme-toggle svg{display:block;width:20px;height:20px;flex-shrink:0}
+.theme-toggle .theme-icon-light,.theme-toggle-label{display:none}
+.menu-toggle{align-items:center;justify-content:center;gap:8px}
+.menu-toggle svg{display:block;flex-shrink:0}
+.menu-toggle .menu-icon-close,.menu-toggle[aria-expanded="true"] .menu-icon-open{display:none}
+.menu-toggle[aria-expanded="true"] .menu-icon-close{display:block}
+.nav-trigger{gap:6px}
+.nav-chevron{flex-shrink:0;transition:transform .2s ease}
+.nav-trigger[aria-expanded="true"] .nav-chevron{transform:rotate(180deg)}
+/* Scripted controls take their final size at first paint instead of shifting the header later. */
+.js .theme-toggle[hidden]{display:inline-flex!important;visibility:hidden}
+.js .nav-trigger[hidden]{display:flex!important}
+.js .nav-fallback{display:none}
 .error-header{display:flex;align-items:center;justify-content:space-between;width:100%;gap:16px;margin-bottom:64px}
-@media(min-width:901px) and (max-width:1100px){
-  .site-header{gap:12px}
+.error-header .header-controls{display:flex}
+@media(min-width:901px){
+  /* Theme and search lead the navigation as a pair of icon buttons, set apart from the page links by a hairline. */
+  #primary-nav>.search-toggle{position:relative;margin-left:-14px;margin-right:12px}
+  #primary-nav>.search-toggle::after{content:"";position:absolute;top:10px;bottom:10px;right:-19px;width:1px;background:var(--line);pointer-events:none}
+}
+/* Narrower desktops tighten spacing in steps so the brand and every link stay on one line. */
+@media(min-width:901px) and (max-width:1180px){
+  .site-header{gap:12px;--header-inset:32px}
+  :is(.site-header,.editorial-site .site-header){padding-inline:32px}
   .site-header>#primary-nav{gap:8px}
   .site-header .nav-trigger,.site-header .nav-direct:not(.button){padding-inline:8px}
+  #primary-nav>.search-toggle{margin-left:-2px;margin-right:6px}
+  #primary-nav>.search-toggle::after{right:-8px}
+}
+@media(min-width:901px) and (max-width:1000px){
+  .site-header{--header-inset:24px}
+  :is(.site-header,.editorial-site .site-header){padding-inline:24px}
+  .site-header>.brand{font-size:24px}
+  .site-header .brand-mark{width:44px;height:44px}
+  .site-header>#primary-nav{gap:6px}
+  .site-header .nav-trigger,.site-header .nav-direct:not(.button){padding-inline:6px}
+  .site-header .nav-direct.button{padding-inline:14px}
+  #primary-nav>.search-toggle{margin-left:0;margin-right:6px}
+  #primary-nav>.search-toggle::after{right:-6px}
 }
 @media(max-width:900px){
   .site-header{column-gap:12px}
+  .js .site-header>.header-controls{display:flex}
   .site-header>.header-controls{order:1;margin-left:auto}
   .site-header>#primary-nav{order:2;margin-left:0}
+  .js .menu-toggle{display:inline-flex}
+  .nav-trigger{justify-content:space-between}
+  .nav-trigger .nav-chevron{width:16px;height:16px}
+  #primary-nav>.theme-toggle{width:100%;height:auto;min-height:48px;justify-content:flex-start;gap:12px;margin-top:12px;padding:12px;font:inherit;font-size:16px;font-weight:500}
+  #primary-nav>.theme-toggle .theme-toggle-label{display:inline}
+  body.navigation-open::after{content:"";position:fixed;inset:0;z-index:15;background:rgba(6,12,24,.45)}
 }
 @media(max-width:480px){
   .header-controls .menu-toggle{width:44px;min-width:44px;height:44px;padding:8px}
   .menu-toggle-label{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   .error-header{margin-bottom:40px}
 }
-@media(max-width:360px){
-  .site-header{column-gap:8px}
-  .site-header>.brand{font-size:22px;gap:8px}
+/* Phones: the logo scales with the header so it always shares one row with the three buttons.
+   The vw size is the fallback for browsers without container units. */
+@media(max-width:480px){
+  .site-header{container-type:inline-size;column-gap:8px;padding-inline:max(clamp(12px,5% - 4px,20px),env(safe-area-inset-left)) max(clamp(12px,5% - 4px,20px),env(safe-area-inset-right))}
+  .site-header>.brand{gap:.4em;font-size:clamp(16px,12.6vw - 21.6px,26px);font-size:clamp(16px,14cqi - 22.7px,26px)}
+  .site-header .brand-mark{width:1.92em;height:1.92em}
+  /* At .56em the letter-spaced line is never wider than "Cloud First", so the logo width is a fixed multiple of its size. */
+  .site-header .brand-sub{font-size:clamp(9px,.56em,12px)}
+}
+@media(max-width:340px){
+  .site-header>.header-controls{gap:6px}
 }
 @media print{
   .header-controls{display:none!important}
@@ -61,7 +107,7 @@
   :root[data-theme="dark"] :is(input,textarea)::placeholder{color:#a9bdd1;opacity:1}
   :root[data-theme="dark"] :is(.button:disabled){background:#263449;color:#a9bdd1;border-color:var(--line)}
   :root[data-theme="dark"] :is(.site-header,.site-footer,.footer-bottom,.page-hero,.card-link,.engagement-card dl,.directory-row,.directory-row nav a,.outcome-strip,.practice-nav,.practice,.capability-library,.service-next aside>a,.nav-panel-heading,.blueprint-context,.use-case-measure){border-color:var(--line)}
-  :root[data-theme="dark"] :is(.blueprint-context,.blueprint-note,.contact-form-heading p,.receipt-reference,.contact-form-loading,.microsoft-form-tools p,.microsoft-form-help){color:var(--muted)}
+  :root[data-theme="dark"] :is(.blueprint-context,.blueprint-note,.contact-form-heading p,.receipt-reference,.contact-form-loading){color:var(--muted)}
   :root[data-theme="dark"] .react-surface{color:var(--text)}
   :root[data-theme="dark"] .react-surface a:not(.fui-Button){color:var(--accent)}
   :root[data-theme="dark"] .integration-error{background:#3a1d29;color:#ffc4c4;border-color:#b66675}

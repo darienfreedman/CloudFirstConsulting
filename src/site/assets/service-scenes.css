@@ -1,0 +1,370 @@
+/* Service scenes (scripts/service-visuals.mjs). One illustration per capability, each with its own motion.
+   The first half is the resting state: a complete picture for reduced motion and print.
+   All movement lives in the prefers-reduced-motion:no-preference block below. */
+
+.practice-visual{max-width:480px;margin-top:28px;padding:14px 18px;border:1px solid rgba(128,202,255,.16);border-radius:16px;background:var(--night,#0b1220)}
+.practice-visual .sv{max-width:none}
+.mobile-practices .practice-visual{max-width:none;margin-top:18px;padding:8px 10px;border-radius:14px}
+@media print{.practice-visual{display:none}}
+
+.sv .sv-glyph{fill:none;stroke:#80caff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.sv .sv-node{fill:rgba(128,202,255,.08);stroke:#35557a;stroke-width:1.5}
+.sv .sv-chip{fill:#0078d4;stroke:#80caff;stroke-width:2}
+.sv .sv-spark{fill:#fff}
+.sv .sv-bar{fill:#2c4665}
+.sv .sv-bar-hi{fill:#4a6d92}
+.sv .sv-sheet{fill:rgba(255,255,255,.05);stroke:#2a4868;stroke-width:1.5}
+.sv .sv-ground{fill:none;stroke:#35557a;stroke-width:2;stroke-linecap:round}
+.sv .sv-okline{fill:none;stroke:#6ee7b7;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.sv .sv-t{fill:#dde6f0;font-size:20px;font-weight:600}
+.sv .sv-appmark{fill:#80caff;opacity:.85}
+.sv .sv-cloud{fill:rgba(128,202,255,.1);stroke:#80caff;stroke-width:2;stroke-linejoin:round}
+.sv .sv-idface{fill:#80caff}
+.sv .sv-device{fill:rgba(128,202,255,.08);stroke:#80caff;stroke-width:2}
+.sv .sv-device-base{fill:#35557a}
+.sv .sv-screen{fill:rgba(128,202,255,.06);stroke:#80caff;stroke-width:2}
+.sv .sv-app-body{fill:#10223a;stroke:#35557a;stroke-width:1.5}
+.sv .sv-app-head{fill:#80caff}
+.sv .sv-app-glyph{fill:none;stroke:#9fb3c8;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.sv .sv-ah0{fill:#0078d4}.sv .sv-ah1{fill:#6ee7b7}.sv .sv-ah2{fill:#80caff}.sv .sv-ah3{fill:#facc15}
+.sv .sv-finish-tick{fill:none;stroke:#0b1220;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.sv .sv-rim{fill:#35557a}
+
+/* AI Security: tethers and snapping locks */
+.sv .sv-tether{fill:none;stroke:#80caff;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:0}
+.sv .sv-lock{transform-box:fill-box;transform-origin:center}
+.sv .sv-lock-pad{fill:#0b1220;stroke:#35557a;stroke-width:1.5}
+.sv .sv-shackle{fill:none;stroke:#dde6f0;stroke-width:2.4;stroke-linecap:round}
+.sv .sv-lock-body{fill:#6ee7b7}
+
+/* AI Governance: ticks and the approval stamp */
+.sv .sv-box{fill:none;stroke:#80caff;stroke-width:1.8}
+.sv .sv-tickmark{fill:none;stroke:#6ee7b7;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:0}
+.sv .sv-imprint{transform-box:fill-box;transform-origin:center}
+.sv .sv-imprint rect{fill:rgba(110,231,183,.08);stroke:#6ee7b7;stroke-width:2.5}
+.sv .sv-imprint-text{fill:#6ee7b7;font-size:20px;font-weight:700;letter-spacing:.04em}
+.sv .sv-stamp{transform-origin:292px 76px}
+.sv .sv-stamp-knob{fill:#80caff}
+.sv .sv-stamp-neck{fill:#35557a}
+.sv .sv-stamp-base{fill:#0078d4;stroke:#80caff;stroke-width:1.5}
+.sv .sv-stamp-pad{fill:#6ee7b7}
+
+/* Threat protection: ricochets off the shield */
+.sv .sv-trail{fill:none;stroke:rgba(255,138,138,.28);stroke-width:1.5;stroke-dasharray:3 7;stroke-linecap:round}
+.sv .sv-threat{fill:#ff8a8a}
+.sv .sv-ripple{fill:none;stroke:#ff8a8a;stroke-width:2;opacity:0;transform-box:fill-box;transform-origin:center}
+.sv .sv-asset{fill:rgba(128,202,255,.12);stroke:#80caff;stroke-width:1.5}
+.sv .sv-shield{fill:rgba(0,120,212,.35);stroke:#80caff;stroke-width:2.5;stroke-linejoin:round}
+.sv-d0{--hx:154px;--bx:104px;--by:-36px}.sv-d1{--hx:154px;--bx:96px;--by:28px}.sv-d2{--hx:164px;--bx:118px;--by:32px}
+
+/* Identity and access: badge, reader, and pocket doors */
+.sv .sv-doorframe{fill:#0b1220;stroke:#35557a;stroke-width:1.5}
+.sv .sv-tile{fill:rgba(128,202,255,.16);stroke:#80caff;stroke-width:1.5}
+.sv .sv-tile0{fill:rgba(0,120,212,.45)}.sv .sv-tile1{fill:rgba(110,231,183,.2);stroke:#6ee7b7}.sv .sv-tile2{fill:rgba(250,204,21,.18);stroke:#facc15}.sv .sv-tile3{fill:rgba(128,202,255,.16)}
+.sv .sv-door>rect:first-child{fill:#1d3553;stroke:#35557a;stroke-width:1.5}
+.sv .sv-handle{fill:#80caff}
+.sv .sv-door-l{transform:translateX(-52px)}
+.sv .sv-door-r{transform:translateX(52px)}
+.sv .sv-reader{fill:#10223a;stroke:#80caff;stroke-width:1.5}
+.sv .sv-led{fill:#6ee7b7}
+.sv .sv-waves{fill:none;stroke:#9fb3c8;stroke-width:2;stroke-linecap:round}
+.sv .sv-idcard{fill:#0078d4;stroke:#80caff;stroke-width:1.5}
+.sv .sv-badge .sv-idface{fill:#dbeeff}
+.sv .sv-badge .sv-bar{fill:rgba(255,255,255,.55)}
+
+/* Secure network access: private tunnel and checkpoint */
+.sv .sv-noise{fill:rgba(255,138,138,.45)}
+.sv .sv-tube{fill:rgba(128,202,255,.06);stroke:#35557a;stroke-width:2}
+.sv .sv-gate{fill:none;stroke:#6ee7b7;stroke-width:2.5;transform-box:fill-box;transform-origin:center}
+.sv .sv-pkt{fill:#6ee7b7}
+.sv .sv-p0{fill:#80caff;transform:translateX(12px)}.sv .sv-p1{transform:translateX(56px)}.sv .sv-p2{transform:translateX(100px)}.sv .sv-p3{transform:translateX(142px)}
+
+/* Endpoints: dropped updates clear each device */
+.sv .sv-notch{fill:#35557a}
+.sv .sv-warn{opacity:0}
+.sv .sv-warn circle{fill:#facc15}
+.sv .sv-warn path{fill:none;stroke:#0b1220;stroke-width:3;stroke-linecap:round}
+.sv .sv-fixed{transform-box:fill-box;transform-origin:center}
+.sv .sv-fixed circle{fill:#6ee7b7}
+.sv .sv-fixed-tick{fill:none;stroke:#0b1220;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.sv .sv-pkg{opacity:0}
+.sv .sv-pkg rect{fill:#0078d4;stroke:#80caff;stroke-width:1.5}
+.sv .sv-pkg path{fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.sv-e0{--dy:57px}.sv-e1{--dy:61px}.sv-e2{--dy:65px}
+
+/* Data security: labels, dial, and bolts */
+.sv .sv-vbolt{fill:#80caff}
+.sv .sv-vault-rim{fill:#10223a;stroke:#6ee7b7;stroke-width:2.5}
+.sv .sv-vault-door{fill:#162c47;stroke:#35557a;stroke-width:1.5}
+.sv .sv-spoke{fill:none;stroke:#9fb3c8;stroke-width:4;stroke-linecap:round}
+.sv .sv-spoke-end{fill:#9fb3c8}
+.sv .sv-dial{transform-origin:110px 75px;transform:rotate(30deg)}
+.sv .sv-dial-face{fill:#0b1220;stroke:#80caff;stroke-width:2}
+.sv .sv-dial-ticks{fill:none;stroke:#9fb3c8;stroke-width:1.6;stroke-linecap:round}
+.sv .sv-dial-mark{fill:none;stroke:#facc15;stroke-width:3;stroke-linecap:round}
+.sv .sv-label{transform-box:fill-box;transform-origin:left center}
+.sv .sv-l0{fill:#ff8a8a}.sv .sv-l1{fill:#facc15}.sv .sv-l2{fill:#80caff}
+
+/* Cloud security: honeycomb dome */
+.sv .sv-hex{fill:rgba(128,202,255,.12);stroke:rgba(128,202,255,.5);stroke-width:1.2}
+.sv .sv-hex-flag{fill:rgba(110,231,183,.22);stroke:#6ee7b7}
+.sv-hb0,.sv-hb1,.sv-hb2,.sv-hb3,.sv-hb4,.sv-hb5,.sv-hb6,.sv-hb7{stroke-linejoin:round}
+
+/* Modern work: a hand of app windows */
+.sv .sv-app{transform-origin:180px 230px}
+.sv-a0{--a:-36deg}.sv-a1{--a:-12deg}.sv-a2{--a:12deg}.sv-a3{--a:36deg}
+.sv .sv-app{transform:rotate(var(--a))}
+
+/* Copilot readiness: battery segments and the spark */
+.sv .sv-batt{fill:#0b1220;stroke:#80caff;stroke-width:2.5}
+.sv .sv-batt-cap{fill:#80caff}
+.sv .sv-cell{fill:#6ee7b7;transform-box:fill-box;transform-origin:left center}
+.sv-c0,.sv-c1,.sv-c2,.sv-c3{transform-origin:left center}
+.sv .sv-ray{fill:none;stroke:#facc15;stroke-width:2.5;stroke-linecap:round;opacity:0;transform-origin:314px 66px}
+.sv .sv-burst{fill:#facc15;transform-box:fill-box;transform-origin:center}
+.sv .sv-ready{fill:#dde6f0}
+
+/* Business processes: dominoes */
+.sv .sv-dom{transform-box:fill-box;transform-origin:100% 100%;transform:rotate(var(--fall))}
+.sv .sv-dom rect{fill:#dde6f0}
+.sv .sv-dom path{fill:none;stroke:#0b1220;stroke-width:1.5}
+.sv-m0{--fall:53.7deg}.sv-m1{--fall:54.8deg}.sv-m2{--fall:56.6deg}.sv-m3{--fall:59.7deg}.sv-m4{--fall:64.9deg}.sv-m5{--fall:74.2deg}
+.sv .sv-finish{transform-box:fill-box;transform-origin:center}
+.sv .sv-finish circle{fill:#6ee7b7}
+
+/* Custom AI: the flask */
+.sv .sv-glass{fill:rgba(128,202,255,.05);stroke:#80caff;stroke-width:2.5;stroke-linejoin:round}
+.sv .sv-liquid{fill:rgba(0,120,212,.55)}
+.sv .sv-bub{fill:rgba(219,238,255,.85);transform-box:fill-box;transform-origin:center}
+.sv .sv-b0{transform:translateY(-4px)}.sv .sv-b1{transform:translateY(-16px)}.sv .sv-b2{transform:translateY(-10px)}.sv .sv-b3{transform:translateY(-20px)}.sv .sv-b4{transform:translateY(-6px)}.sv .sv-b5{transform:translateY(-13px)}
+.sv .sv-wisp{transform-box:fill-box;transform-origin:center}
+
+/* Adoption: the sprout and the people around it */
+.sv .sv-person :is(circle,path){fill:#80caff}
+.sv-u0,.sv-u1,.sv-u2,.sv-u3,.sv-u4,.sv-u5,.sv-u6,.sv-u7{opacity:1}
+.sv .sv-stem{fill:none;stroke:#6ee7b7;stroke-width:4;stroke-linecap:round;transform-box:fill-box;transform-origin:50% 100%}
+.sv .sv-leaf{fill:#6ee7b7}
+.sv-f0{transform-origin:180px 100px}.sv-f1{transform-origin:180px 86px}.sv-f2{transform-origin:180px 72px}.sv-f3{transform-origin:180px 60px}
+.sv .sv-coin{transform-box:fill-box;transform-origin:center}
+.sv .sv-coin circle{fill:#facc15}
+.sv .sv-coin path{fill:none;stroke:#0b1220;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.sv .sv-pot{fill:#35557a}
+
+/* Cloud foundations: pillars, deck, and cloud */
+.sv .sv-slab{fill:#35557a}
+.sv .sv-pillar{transform-box:fill-box;transform-origin:50% 100%}
+.sv .sv-pillar rect{stroke:#80caff;stroke-width:1.5}
+.sv .sv-q0 rect{fill:#0078d4}.sv .sv-q1 rect{fill:#1f5f9e}.sv .sv-q2 rect{fill:#0e6f5c}.sv .sv-q3 rect{fill:#26405f}
+.sv .sv-pillar-glyph *{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sv .sv-deck{fill:#80caff}
+.sv .sv-land{fill:rgba(128,202,255,.18)}
+
+/* Modernization: through the slot */
+.sv .sv-mono{transform:translateY(96px)}
+.sv .sv-mono rect{fill:#2a3b52;stroke:#9fb3c8;stroke-width:1.5}
+.sv .sv-mono path{fill:none;stroke:#9fb3c8;stroke-width:2;stroke-linecap:round}
+.sv .sv-mono circle{fill:#facc15}
+.sv .sv-crate rect{fill:#0078d4;stroke:#80caff;stroke-width:1.5}
+.sv .sv-crate path{fill:none;stroke:#dbeeff;stroke-width:1.8;stroke-linejoin:round}
+.sv-x0,.sv-x1,.sv-x2{transform:none}
+.sv .sv-slot{fill:none;stroke:#80caff;stroke-width:3;stroke-linecap:round}
+.sv .sv-slot-glow{fill:rgba(128,202,255,.16)}
+
+/* Governed data: sorting bars and the trend */
+.sv .sv-sbar{fill:#80caff;stroke:#0b1220;stroke-width:2}
+.sv-s0{--o:114px}.sv-s1{--o:190px}.sv-s2{--o:-76px}.sv-s3{--o:76px}.sv-s4{--o:-114px}.sv-s5{--o:-38px}.sv-s6{--o:-152px}
+.sv .sv-trend{fill:none;stroke:#6ee7b7;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:0}
+.sv .sv-seal-badge{transform-box:fill-box;transform-origin:center}
+.sv .sv-seal-badge circle{fill:#6ee7b7}
+
+/* AI platforms: the turntable */
+.sv .sv-track{fill:rgba(128,202,255,.05);stroke:#35557a;stroke-width:1.5;stroke-dasharray:4 6}
+.sv .sv-o0{transform:translate(180px,118px) scale(1)}
+.sv .sv-o1{transform:translate(275.3px,67px) scale(.7);opacity:.59}
+.sv .sv-o2{transform:translate(84.7px,67px) scale(.7);opacity:.59}
+.sv .sv-spin .sv-app-glyph{stroke:#dde6f0}
+
+/* Reliability and cost: budget trim and live health */
+.sv .sv-ghost{fill:none;stroke:rgba(255,138,138,.5);stroke-width:1.5;stroke-dasharray:4 4}
+.sv .sv-cost{fill:#80caff;transform-box:fill-box;transform-origin:50% 100%}
+.sv-g0{--s:1.655}.sv-g1{--s:1.565}.sv-g2{--s:1.677}.sv-g3{--s:1.6}.sv-g4{--s:1.63}
+.sv .sv-token{fill:#facc15;opacity:0}
+.sv .sv-budget{fill:none;stroke:#6ee7b7;stroke-width:2.5;stroke-dasharray:8 6;stroke-linecap:round}
+.sv .sv-status{fill:#10223a;stroke:#35557a;stroke-width:1.5}
+.sv .sv-pulse{fill:#6ee7b7;transform-box:fill-box;transform-origin:center}
+.sv .sv-ticker rect{fill:#6ee7b7}
+
+@media(prefers-reduced-motion:no-preference){
+  .hv-reach .sv-tether{animation:sv-reach-draw 7s ease-out infinite}
+  .hv-reach .sv-lock{animation:sv-reach-lock 7s ease infinite}
+  .hv-reach .sv-shackle{animation:sv-reach-shackle 7s ease infinite}
+  .hv-reach .sv-lock-body{animation:sv-reach-body 7s ease infinite}
+  .hv-reach .sv-t0{animation-delay:0s}
+  .hv-reach :is(.sv-t1,.sv-t1 *){animation-delay:.6s}
+  .hv-reach :is(.sv-t2,.sv-t2 *){animation-delay:1.2s}
+
+  .hv-seal .sv-tickmark{animation:sv-seal-tick 7s ease infinite}
+  .hv-seal .sv-k0{animation-delay:0s}
+  .hv-seal .sv-k1{animation-delay:.5s}
+  .hv-seal .sv-stamp{animation:sv-seal-stamp 7s cubic-bezier(.45,0,.3,1) infinite}
+  .hv-seal .sv-imprint{animation:sv-seal-imprint 7s ease infinite}
+
+  .hv-deflect .sv-threat{animation:sv-deflect-hit 6s cubic-bezier(.55,0,.45,1) infinite backwards}
+  .hv-deflect .sv-ripple{animation:sv-deflect-ripple 6s ease-out infinite backwards}
+  .hv-deflect .sv-d1{animation-delay:2s}
+  .hv-deflect .sv-d2{animation-delay:4s}
+
+  .hv-keycard .sv-badge{animation:sv-key-tap 6s cubic-bezier(.4,0,.2,1) infinite}
+  .hv-keycard .sv-led{animation:sv-key-led 6s step-end infinite}
+  .hv-keycard .sv-waves{animation:sv-key-waves 6s ease infinite}
+  .hv-keycard .sv-door-l{animation:sv-key-door-l 6s cubic-bezier(.6,0,.2,1) infinite}
+  .hv-keycard .sv-door-r{animation:sv-key-door-r 6s cubic-bezier(.6,0,.2,1) infinite}
+  .hv-keycard .sv-tile{animation:sv-key-tile 6s ease infinite}
+
+  .hv-tunnel .sv-pkt{animation:sv-tunnel-flow 4s linear infinite}
+  .hv-tunnel .sv-p1{animation-delay:-1s}
+  .hv-tunnel .sv-p2{animation-delay:-2s}
+  .hv-tunnel .sv-p3{animation-delay:-3s}
+  .hv-tunnel .sv-gate{animation:sv-tunnel-gate 1s ease-out infinite}
+
+  .hv-fleet .sv-pkg{animation:sv-fleet-drop 7s ease-in infinite backwards}
+  .hv-fleet .sv-warn{animation:sv-fleet-warn 7s ease infinite backwards}
+  .hv-fleet .sv-fixed{animation:sv-fleet-fixed 7s ease infinite backwards}
+  .hv-fleet .sv-e1{animation-delay:.8s}
+  .hv-fleet .sv-e2{animation-delay:1.6s}
+
+  .hv-vault .sv-label{animation:sv-vault-label 8s cubic-bezier(.3,1.4,.5,1) infinite backwards}
+  .hv-vault .sv-l1{animation-delay:.35s}
+  .hv-vault .sv-l2{animation-delay:.7s}
+  .hv-vault .sv-dial{animation:sv-vault-dial 8s infinite}
+  .hv-vault .sv-vbolt{animation:sv-vault-bolt 8s ease infinite}
+  .hv-vault .sv-vault-rim{animation:sv-vault-rim 8s ease infinite}
+
+  .hv-dome .sv-hex{animation:sv-dome-wave 6s ease-in-out infinite}
+  .hv-dome .sv-hb1{animation-delay:.12s}.hv-dome .sv-hb2{animation-delay:.24s}.hv-dome .sv-hb3{animation-delay:.36s}.hv-dome .sv-hb4{animation-delay:.48s}.hv-dome .sv-hb5{animation-delay:.6s}.hv-dome .sv-hb6{animation-delay:.72s}.hv-dome .sv-hb7{animation-delay:.84s}
+  .hv-dome .sv-hex-flag{animation:sv-dome-flag 6s ease infinite;animation-delay:0s}
+
+  .hv-fan .sv-app{animation:sv-fan 7s cubic-bezier(.5,0,.2,1) infinite backwards}
+  .hv-fan .sv-a1{animation-delay:.08s}.hv-fan .sv-a2{animation-delay:.16s}.hv-fan .sv-a3{animation-delay:.24s}
+
+  .hv-charge .sv-cell{animation:sv-charge-cell 7s ease-out infinite backwards}
+  .hv-charge .sv-c1{animation-delay:.5s}.hv-charge .sv-c2{animation-delay:1s}.hv-charge .sv-c3{animation-delay:1.5s}
+  .hv-charge .sv-burst{animation:sv-charge-burst 7s ease infinite}
+  .hv-charge .sv-ray{animation:sv-charge-ray 7s ease-out infinite}
+  .hv-charge .sv-ready{animation:sv-charge-ready 7s ease infinite}
+
+  .hv-domino .sv-dom{animation:sv-domino 8s infinite backwards}
+  .hv-domino .sv-m1{animation-delay:.22s}.hv-domino .sv-m2{animation-delay:.44s}.hv-domino .sv-m3{animation-delay:.66s}.hv-domino .sv-m4{animation-delay:.88s}.hv-domino .sv-m5{animation-delay:1.1s}
+  .hv-domino .sv-finish{animation:sv-domino-finish 8s ease infinite}
+
+  .hv-flask .sv-bub{animation:sv-flask-rise 3s ease-in infinite backwards}
+  .hv-flask .sv-b1{animation-delay:.5s}.hv-flask .sv-b2{animation-delay:1s}.hv-flask .sv-b3{animation-delay:1.5s}.hv-flask .sv-b4{animation-delay:2s}.hv-flask .sv-b5{animation-delay:2.5s}
+  .hv-flask .sv-wisp{animation:sv-flask-wisp 6s ease infinite}
+
+  .hv-sprout .sv-stem{animation:sv-sprout-stem 8s ease-out infinite}
+  .hv-sprout .sv-leaf{animation:sv-sprout-leaf 8s cubic-bezier(.3,1.5,.5,1) infinite backwards}
+  .hv-sprout .sv-f1{animation-delay:.3s}.hv-sprout .sv-f2{animation-delay:.6s}.hv-sprout .sv-f3{animation-delay:.9s}
+  .hv-sprout .sv-coin{animation:sv-sprout-coin 8s ease infinite}
+  .hv-sprout .sv-person{animation:sv-sprout-person 8s ease infinite backwards}
+  .hv-sprout .sv-u4{animation-delay:.2s}.hv-sprout .sv-u3{animation-delay:.4s}.hv-sprout .sv-u6{animation-delay:.6s}.hv-sprout .sv-u0{animation-delay:.8s}.hv-sprout .sv-u5{animation-delay:1s}.hv-sprout .sv-u2{animation-delay:1.2s}.hv-sprout .sv-u7{animation-delay:1.4s}
+
+  .hv-pillars .sv-pillar{animation:sv-pillar-rise 8s cubic-bezier(.3,1.3,.5,1) infinite backwards}
+  .hv-pillars .sv-q1{animation-delay:.25s}.hv-pillars .sv-q2{animation-delay:.5s}.hv-pillars .sv-q3{animation-delay:.75s}
+  .hv-pillars .sv-deck{animation:sv-pillar-deck 8s ease infinite}
+  .hv-pillars .sv-land{animation:sv-pillar-cloud 8s ease infinite}
+
+  .hv-portal .sv-mono{animation:sv-portal-sink 8s cubic-bezier(.6,0,.4,1) infinite}
+  .hv-portal .sv-crate{animation:sv-portal-rise 8s cubic-bezier(.3,1.4,.5,1) infinite backwards}
+  .hv-portal .sv-x1{animation-delay:.25s}.hv-portal .sv-x2{animation-delay:.5s}
+  .hv-portal .sv-slot-glow{animation:sv-portal-glow 8s ease infinite}
+
+  .hv-sort .sv-sbar{animation:sv-sort 8s cubic-bezier(.6,0,.3,1) infinite backwards}
+  .hv-sort .sv-s1{animation-delay:.07s}.hv-sort .sv-s2{animation-delay:.14s}.hv-sort .sv-s3{animation-delay:.21s}.hv-sort .sv-s4{animation-delay:.28s}.hv-sort .sv-s5{animation-delay:.35s}.hv-sort .sv-s6{animation-delay:.42s}
+  .hv-sort .sv-trend{animation:sv-sort-trend 8s ease infinite}
+  .hv-sort .sv-seal-badge{animation:sv-sort-badge 8s ease infinite}
+
+  .hv-turntable .sv-spin{animation:sv-turn 12s linear infinite}
+  .hv-turntable .sv-o1{animation-delay:-4s}
+  .hv-turntable .sv-o2{animation-delay:-8s}
+  .hv-turntable .sv-spark{transform-box:fill-box;transform-origin:center;animation:sv-turn-twinkle 3s ease-in-out infinite}
+
+  .hv-trim .sv-budget{animation:sv-trim-line 8s cubic-bezier(.5,0,.3,1) infinite}
+  .hv-trim .sv-cost{animation:sv-trim-bar 8s cubic-bezier(.5,0,.3,1) infinite backwards}
+  .hv-trim .sv-token{animation:sv-trim-token 8s ease-out infinite backwards}
+  .hv-trim .sv-g1{animation-delay:.06s}.hv-trim .sv-g2{animation-delay:.12s}.hv-trim .sv-g3{animation-delay:.18s}.hv-trim .sv-g4{animation-delay:.24s}
+  .hv-trim .sv-pulse{animation:sv-trim-pulse 1.6s ease-out infinite}
+  .hv-trim .sv-ticker{animation:sv-trim-ticker 6s linear infinite}
+}
+
+@keyframes sv-reach-draw{0%{stroke-dashoffset:1;opacity:1}16%,86%{stroke-dashoffset:0;opacity:1}94%,100%{stroke-dashoffset:0;opacity:0}}
+@keyframes sv-reach-lock{0%,15%{opacity:0;transform:scale(.5)}21%{opacity:1;transform:scale(1.1)}25%,86%{opacity:1;transform:none}94%,100%{opacity:0;transform:none}}
+@keyframes sv-reach-shackle{0%,24%{transform:translateY(-6px)}29%{transform:translateY(1.5px)}32%,100%{transform:none}}
+@keyframes sv-reach-body{0%,26%{fill:#facc15}30%,100%{fill:#6ee7b7}}
+
+@keyframes sv-seal-tick{0%,4%{stroke-dashoffset:24}12%,88%{stroke-dashoffset:0}96%,100%{stroke-dashoffset:24}}
+@keyframes sv-seal-stamp{0%,14%{transform:none}30%{transform:translate(-142px,0) rotate(-8deg)}36%{transform:translate(-142px,38px) rotate(-8deg)}39%{transform:translate(-142px,40px) rotate(-8deg) scale(1.03,.94)}43%{transform:translate(-142px,38px) rotate(-8deg)}52%{transform:translate(-142px,-4px) rotate(-8deg)}68%,100%{transform:none}}
+@keyframes sv-seal-imprint{0%,37%{opacity:0;transform:scale(1.25)}41%{opacity:1;transform:none}88%{opacity:1;transform:none}96%,100%{opacity:0;transform:none}}
+
+@keyframes sv-deflect-hit{0%{transform:none;opacity:0}6%{opacity:1}34%{transform:translateX(var(--hx));opacity:1}60%,100%{transform:translate(var(--bx),var(--by));opacity:0}}
+@keyframes sv-deflect-ripple{0%,33%{opacity:0;transform:scale(.4)}36%{opacity:1}56%,100%{opacity:0;transform:scale(2)}}
+
+@keyframes sv-key-tap{0%{transform:translateX(-46px);opacity:.4}16%{transform:translateX(4px);opacity:1}20%{transform:none}78%{transform:none;opacity:1}92%,100%{transform:translateX(-46px);opacity:.4}}
+@keyframes sv-key-led{0%{fill:#facc15}20%{fill:#6ee7b7}84%{fill:#facc15}}
+@keyframes sv-key-waves{0%,10%,26%,100%{opacity:.35}16%,20%{opacity:1}}
+@keyframes sv-key-door-l{0%,22%{transform:none}38%,76%{transform:translateX(-52px)}90%,100%{transform:none}}
+@keyframes sv-key-door-r{0%,22%{transform:none}38%,76%{transform:translateX(52px)}90%,100%{transform:none}}
+@keyframes sv-key-tile{0%,30%{opacity:.3}44%,76%{opacity:1}90%,100%{opacity:.3}}
+
+@keyframes sv-tunnel-flow{0%{transform:none;opacity:0;fill:#80caff}6%{opacity:1}22%{fill:#80caff}27%{fill:#6ee7b7}92%{opacity:1}100%{transform:translateX(150px);opacity:0;fill:#6ee7b7}}
+@keyframes sv-tunnel-gate{0%{stroke:#6ee7b7;transform:scaleY(1.12)}35%,100%{stroke:#35557a;transform:none}}
+
+@keyframes sv-fleet-drop{0%{transform:translateY(-26px);opacity:0}6%{opacity:1}16%{transform:translateY(var(--dy));animation-timing-function:ease-out}19%{transform:translateY(calc(var(--dy) - 9px));animation-timing-function:ease-in}22%{transform:translateY(var(--dy));opacity:1}26%,100%{transform:translateY(var(--dy));opacity:0}}
+@keyframes sv-fleet-warn{0%,22%{opacity:1}26%,88%{opacity:0}95%,100%{opacity:1}}
+@keyframes sv-fleet-fixed{0%,22%{opacity:0;transform:scale(.4)}27%{opacity:1;transform:scale(1.15)}31%,88%{opacity:1;transform:none}95%,100%{opacity:0;transform:scale(.4)}}
+
+@keyframes sv-vault-label{0%,4%{transform:scaleX(0)}12%,88%{transform:none}96%,100%{transform:scaleX(0)}}
+@keyframes sv-vault-dial{0%,18%{transform:none;animation-timing-function:steps(4,end)}30%{transform:rotate(-120deg)}36%{transform:rotate(-120deg);animation-timing-function:steps(6,end)}50%{transform:rotate(90deg)}56%{transform:rotate(90deg);animation-timing-function:steps(2,end)}62%,92%{transform:rotate(30deg);animation-timing-function:ease}100%{transform:none}}
+@keyframes sv-vault-bolt{0%,62%{transform:translateX(-11px)}68%,90%{transform:none}98%,100%{transform:translateX(-11px)}}
+@keyframes sv-vault-rim{0%,64%{stroke:#80caff}68%,88%{stroke:#6ee7b7}96%,100%{stroke:#80caff}}
+
+@keyframes sv-dome-wave{0%,30%,100%{fill:rgba(128,202,255,.08);stroke:rgba(128,202,255,.35)}12%{fill:rgba(128,202,255,.42);stroke:#80caff}}
+@keyframes sv-dome-flag{0%,40%{fill:rgba(128,202,255,.08);stroke:rgba(128,202,255,.35)}46%,62%{fill:rgba(255,138,138,.55);stroke:#ff8a8a}70%{fill:rgba(110,231,183,.5);stroke:#6ee7b7}84%,100%{fill:rgba(128,202,255,.08);stroke:rgba(128,202,255,.35)}}
+
+@keyframes sv-fan{0%,10%{transform:none}32%,76%{transform:rotate(var(--a))}94%,100%{transform:none}}
+
+@keyframes sv-charge-cell{0%,3%{transform:scaleX(0)}12%,88%{transform:none}96%,100%{transform:scaleX(0)}}
+@keyframes sv-charge-burst{0%,34%{opacity:0;transform:scale(0) rotate(-90deg)}42%{opacity:1;transform:scale(1.25) rotate(10deg)}48%,88%{opacity:1;transform:none}96%,100%{opacity:0;transform:scale(.4)}}
+@keyframes sv-charge-ray{0%,38%{opacity:0;transform:scale(.6)}43%{opacity:1}58%,100%{opacity:0;transform:scale(1.4)}}
+@keyframes sv-charge-ready{0%,40%{opacity:0}48%,88%{opacity:1}96%,100%{opacity:0}}
+
+@keyframes sv-domino{0%,6%{transform:none;animation-timing-function:cubic-bezier(.55,0,1,.45)}14%,78%{transform:rotate(var(--fall))}86%,100%{transform:none}}
+@keyframes sv-domino-finish{0%,26%{transform:none;opacity:.35}29%{transform:scale(.86);opacity:1}33%,80%{transform:none;opacity:1}88%,100%{transform:none;opacity:.35}}
+
+@keyframes sv-flask-rise{0%{transform:none;opacity:0}12%{opacity:.9}80%{transform:translateY(-24px);opacity:.9}100%{transform:translateY(-27px) scale(1.6);opacity:0}}
+@keyframes sv-flask-wisp{0%,20%{transform:translateY(22px) scale(.3);opacity:0}34%{transform:translateY(-2px) scale(1.1);opacity:1}40%,80%{transform:none;opacity:1}88%,100%{transform:translateY(-6px) rotate(45deg);opacity:0}}
+
+@keyframes sv-sprout-stem{0%,4%{transform:scaleY(0);opacity:1}22%,86%{transform:none;opacity:1}94%{transform:none;opacity:0}100%{transform:scaleY(0);opacity:0}}
+@keyframes sv-sprout-leaf{0%,10%{transform:scale(0);opacity:1}20%,86%{transform:none;opacity:1}94%,100%{transform:scale(0);opacity:0}}
+@keyframes sv-sprout-coin{0%,30%{transform:scale(0);opacity:0}38%{transform:scale(1.15);opacity:1}42%{transform:none}50%{transform:scaleX(-1)}58%,86%{transform:none;opacity:1}94%,100%{transform:scale(0);opacity:0}}
+@keyframes sv-sprout-person{0%,18%{opacity:.25}26%,86%{opacity:1}94%,100%{opacity:.25}}
+
+@keyframes sv-pillar-rise{0%,4%{transform:scaleY(0);opacity:1}14%,86%{transform:none;opacity:1}94%,100%{transform:none;opacity:0}}
+@keyframes sv-pillar-deck{0%,24%{transform:translateY(-50px);opacity:0}34%{transform:translateY(2px);opacity:1}38%,86%{transform:none;opacity:1}94%,100%{transform:none;opacity:0}}
+@keyframes sv-pillar-cloud{0%,34%{transform:translateY(-30px);opacity:0}46%{transform:translateY(3px);opacity:1}52%,86%{transform:none;opacity:1}94%,100%{transform:none;opacity:0}}
+
+@keyframes sv-portal-sink{0%{transform:none;opacity:0}6%,12%{transform:none;opacity:1}34%,100%{transform:translateY(96px);opacity:1}}
+@keyframes sv-portal-rise{0%,32%{transform:translateY(60px);opacity:1}44%,90%{transform:none;opacity:1}97%,100%{transform:none;opacity:0}}
+@keyframes sv-portal-glow{0%,14%,50%,100%{fill:rgba(128,202,255,.12)}30%{fill:rgba(128,202,255,.45)}}
+
+@keyframes sv-sort{0%,14%{transform:translateX(var(--o));fill:#4a6d92}40%{transform:none;fill:#4a6d92}46%,88%{transform:none;fill:#80caff}97%,100%{transform:translateX(var(--o));fill:#4a6d92}}
+@keyframes sv-sort-trend{0%,46%{stroke-dashoffset:1;opacity:1}60%,88%{stroke-dashoffset:0;opacity:1}96%,100%{stroke-dashoffset:0;opacity:0}}
+@keyframes sv-sort-badge{0%,58%{transform:scale(0);opacity:1}64%{transform:scale(1.2);opacity:1}68%,88%{transform:none;opacity:1}96%,100%{transform:none;opacity:0}}
+
+@keyframes sv-turn{0%,100%{transform:translate(180px,118px) scale(1);opacity:1}12.5%{transform:translate(257.8px,108px) scale(.941);opacity:.92}25%{transform:translate(290px,84px) scale(.8);opacity:.73}37.5%{transform:translate(257.8px,60px) scale(.659);opacity:.53}50%{transform:translate(180px,50px) scale(.6);opacity:.45}62.5%{transform:translate(102.2px,60px) scale(.659);opacity:.53}75%{transform:translate(70px,84px) scale(.8);opacity:.73}87.5%{transform:translate(102.2px,108px) scale(.941);opacity:.92}}
+@keyframes sv-turn-twinkle{0%,100%{transform:none}50%{transform:scale(.7) rotate(45deg)}}
+
+@keyframes sv-trim-line{0%,6%{transform:translateY(-52px);opacity:0}12%{opacity:1}30%,86%{transform:none;opacity:1}94%,100%{transform:none;opacity:0}}
+@keyframes sv-trim-bar{0%,16%{transform:scaleY(var(--s));fill:#ff8a8a}32%,88%{transform:none;fill:#80caff}98%,100%{transform:scaleY(var(--s));fill:#ff8a8a}}
+@keyframes sv-trim-token{0%,28%{opacity:0;transform:none}32%{opacity:1}48%,100%{opacity:0;transform:translateY(-26px)}}
+@keyframes sv-trim-pulse{0%,100%{transform:none;opacity:.75}18%{transform:scale(1.45);opacity:1}40%{transform:none}}
+@keyframes sv-trim-ticker{to{transform:translateX(-60px)}}

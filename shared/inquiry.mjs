@@ -1,8 +1,10 @@
+import { serviceAreaByKey } from "./services.mjs";
+
 export const serviceOptions = [
-  ["security", "Security and threat protection"],
+  ["security", serviceAreaByKey.security.label],
   ["data", "Data protection and Copilot readiness"],
-  ["ai", "AI strategy and governance"],
-  ["cloud", "Cloud and data modernization"],
+  ["ai", serviceAreaByKey.business.label],
+  ["cloud", serviceAreaByKey.cloud.label],
   ["discovery", "Help choosing a starting point"]
 ];
 

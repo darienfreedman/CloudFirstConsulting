@@ -13,7 +13,7 @@
     "dev": "npm run build && node server/index.mjs",
     "start": "node server/index.mjs",
     "briefs": "node scripts/generate-briefs.mjs && node scripts/build.mjs",
-    "test": "node --check src/site/assets/app.js && node --check src/site/assets/contact.js && node --check src/site/assets/theme.js && node scripts/validate.mjs && node --test scripts/build.test.mjs scripts/routes.test.mjs scripts/validate-pages.test.mjs scripts/catalogs.test.mjs scripts/theme.test.mjs scripts/content-guidance.test.mjs scripts/page-navigation.test.mjs server/contact.test.mjs",
+    "test": "node --check src/site/assets/app.js && node --check src/site/assets/contact.js && node --check src/site/assets/theme.js && node --check src/site/assets/mobile.js && node scripts/validate.mjs && node --test scripts/build.test.mjs scripts/routes.test.mjs scripts/validate-pages.test.mjs scripts/catalogs.test.mjs scripts/theme.test.mjs scripts/content-guidance.test.mjs scripts/page-navigation.test.mjs scripts/mobile-services.test.mjs scripts/carousel.test.mjs scripts/service-names.test.mjs scripts/sheet-drag.test.mjs scripts/hero-visuals.test.mjs server/contact.test.mjs",
     "validate:pages": "node scripts/validate-pages.mjs"
   },
   "dependencies": {

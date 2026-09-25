@@ -1,16 +1,22 @@
 @charset "UTF-8";
+/* Self-hosted variable fonts (SIL OFL 1.1) keep typography identical on Windows, macOS, iOS, Android, and Linux. */
+@font-face{font-family:"Inter";font-style:normal;font-weight:300 700;font-display:swap;src:url("fonts/inter-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Inter";font-style:normal;font-weight:300 700;font-display:swap;src:url("fonts/inter-arrows.woff2") format("woff2");unicode-range:U+2190-2193,U+2196-2199}
+/* Metric-matched fallback so text does not reflow when Inter finishes loading. */
+@font-face{font-family:"Inter Fallback";src:local("Arial"),local("ArialMT"),local("Helvetica Neue"),local("Helvetica"),local("Roboto");size-adjust:107.4%;ascent-override:90.2%;descent-override:22.48%;line-gap-override:0%}
 :root{
   color-scheme:light;
-  --colorNeutralBackground1:#ffffff;--colorNeutralBackground2:#fafafa;--colorNeutralBackground3:#f5f5f5;
-  --colorNeutralForeground1:#242424;--colorNeutralForeground2:#51565e;--colorNeutralStroke1:#d1d1d1;
+  --font-sans:"Inter","Inter Fallback",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --colorNeutralBackground1:#ffffff;--colorNeutralBackground2:#f8fafc;--colorNeutralBackground3:#f1f5f9;
+  --colorNeutralForeground1:#0f172a;--colorNeutralForeground2:#475569;--colorNeutralStroke1:#e2e8f0;
   --colorBrandBackground:#0078d4;--colorBrandBackgroundHover:#106ebe;--colorBrandBackgroundPressed:#005a9e;
   --colorBrandForegroundLink:#005a9e;--colorBrandBackground2:#eff6fc;--colorBrandStroke2:#b4d6f0;
   --borderRadiusMedium:4px;--borderRadiusLarge:8px;--shadow4:0 2px 4px #0000000a,0 0 2px #00000014;--shadow16:0 8px 16px #00000014,0 0 2px #0000001f;
   --bg:var(--colorNeutralBackground1);--panel:var(--colorNeutralBackground2);--panel-light:var(--colorBrandBackground2);--text:var(--colorNeutralForeground1);--muted:var(--colorNeutralForeground2);--line:var(--colorNeutralStroke1);--accent:var(--colorBrandForegroundLink);--ink:#fff;--radius:var(--borderRadiusLarge);--max:1280px;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:32px}
-body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI Variable","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;scroll-padding-top:32px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 a{color:inherit;text-decoration:none}
 button,input,select,textarea{font:inherit}
 button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
@@ -33,7 +39,7 @@ p{color:var(--muted)}
 .site-header{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:88px;max-width:var(--max);width:calc(100% - 96px);margin:auto;position:relative;z-index:20;background:var(--bg);border-bottom:1px solid #ebebeb}
 .brand{display:inline-flex;align-items:center;gap:12px;font-size:28px;font-weight:600;letter-spacing:-1px;line-height:1;color:var(--text)}
 .brand-sub{display:block;font-size:9px;font-weight:600;letter-spacing:2px;line-height:1.5;margin-top:6px}
-.brand-mark{display:block;flex-shrink:0;width:52px;height:52px;background:url("images/Logo.png") center/contain no-repeat}
+.brand-mark{display:block;flex-shrink:0;width:52px;height:52px;background:url("images/logo-mark-160.webp") center/contain no-repeat}
 .site-header nav{display:flex;align-items:center;gap:24px;font-size:14px}
 .site-header nav>a:not(.button){color:var(--text);padding-block:12px}
 .site-header nav>a[aria-current]:not(.button){color:var(--accent);text-decoration:underline;text-underline-offset:8px;text-decoration-thickness:2px}

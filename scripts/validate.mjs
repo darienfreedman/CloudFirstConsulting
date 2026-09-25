@@ -8,6 +8,10 @@ import { normalizeProductNames } from "./public-copy.mjs";
 import { products, productLink, homepageProductGroups, homepageProductsInGroup } from "./products.mjs";
 import { expandAcronyms } from "./acronyms.mjs";
 import { technologyTopics } from "../shared/resource-topics.mjs";
+import { aboutCardPhotos } from "../src/site/assets/about-card-photos.js";
+import { siteVideo, sitePhotoFiles } from "../shared/media.mjs";
+import { escapeHtml } from "../shared/html.mjs";
+import { standardizeServiceNames } from "../shared/services.mjs";
 
 const site = fileURLToPath(new URL("../src/site", import.meta.url));
 const catalogs = await readCatalogs();
@@ -29,11 +33,18 @@ async function collect(directory) {
 
 const files = await collect(site);
 assert(!files.some(file => /^(?:sample-.+|deliverables)\.html$/.test(path.basename(file))), "Removed sample pages must not be published");
-const approvedImages = new Set(["ai-planning-640.webp", "ai-planning-1440.webp", "Logo.png"]);
+const approvedImages = new Set(["Logo.png", "darien-freedman.jpg", ...sitePhotoFiles, ...Object.values(aboutCardPhotos).map(photo => photo.file)]);
 assert(!files.some(file => file.startsWith(path.join(site, "assets", "images") + path.sep) && !approvedImages.has(path.basename(file))), "Unexpected image asset");
+assert(!files.some(file => file.endsWith(".mp4") && file !== path.join(site, "assets", "media", siteVideo.file)), "Unexpected video asset");
 const htmlFiles = files.filter((file) => file.endsWith(".html"));
 const pages = new Map();
 for (const file of files) {
+  if (file.endsWith(".jpg")) {
+    const bytes = await readFile(file);
+    assert.equal(bytes.subarray(0, 3).toString("hex"), "ffd8ff", `Invalid JPEG: ${file}`);
+    assert(bytes.length < 500000, `Image needs optimization: ${file}`);
+    continue;
+  }
   if (file.endsWith(".png")) {
     const bytes = await readFile(file);
     assert.equal(bytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a", `Invalid PNG: ${file}`);
@@ -44,6 +55,19 @@ for (const file of files) {
     assert.equal(bytes.subarray(0, 4).toString(), "RIFF", `Invalid image container: ${file}`);
     assert.equal(bytes.subarray(8, 12).toString(), "WEBP", `Invalid WebP: ${file}`);
     assert(bytes.length < 500000, `Image needs optimization: ${file}`);
+    continue;
+  }
+  if (file.endsWith(".mp4")) {
+    const bytes = await readFile(file);
+    assert.equal(bytes.subarray(4, 8).toString(), "ftyp", `Invalid MP4: ${file}`);
+    assert(bytes.length < siteVideo.maxBytes, `Video needs optimization: ${file}`);
+    continue;
+  }
+  if (file.endsWith(".woff2")) {
+    const bytes = await readFile(file);
+    assert.equal(path.dirname(file), path.join(site, "assets", "fonts"), `Font outside fonts directory: ${file}`);
+    assert.equal(bytes.subarray(0, 4).toString(), "wOF2", `Invalid WOFF2: ${file}`);
+    assert(bytes.length < 120000, `Font needs subsetting: ${file}`);
     continue;
   }
   if (file.endsWith(".pdf")) {
@@ -58,6 +82,8 @@ for (const file of files) {
   const text = await readFile(file, "utf8");
   assert(!/microsoft(?:-my)?\.sharepoint\.com|catalog\.ms|BEGIN (?:RSA |EC )?PRIVATE KEY|gh[pousr]_[A-Za-z0-9]{20}/i.test(text), `Review possible internal content or credentials: ${file}`);
   if (file.endsWith(".html")) {
+    assert.equal([...text.matchAll(/<script src="assets\/mobile\.js" type="module"><\/script>/g)].length, 1, `Missing shared mobile interactions: ${file}`);
+    assert.equal([...text.matchAll(/href="assets\/mobile\.css"/g)].length, 1, `Missing shared mobile layout: ${file}`);
     assert.equal([...text.matchAll(/<script src="assets\/theme\.js"><\/script>/g)].length, 1, `Missing early appearance script: ${file}`);
     assert(text.indexOf('src="assets/theme.js"') < text.indexOf('href="assets/styles.css"'), `Theme must initialize before styles load: ${file}`);
     assert.equal([...text.matchAll(/class="theme-toggle"/g)].length, 1, `Expected one appearance toggle: ${file}`);
@@ -88,7 +114,7 @@ for (const file of files) {
     assert(!/<\/[a-z][a-z0-9]*\s+[^>\s]/i.test(text), `Malformed closing tag: ${file}`);
     assert(!/\b(?:fictional|illustrative|preview|demonstration|partners?)\b|Patriot|BlueVoyant|Netrix|[—–·]|&(?:mdash|ndash|middot);|&#(?:183|8211|8212);/i.test(text), `Non-production copy or punctuation: ${file}`);
     assert(!/\bEASM\b|external-attack-surface-management|external attack surface management/i.test(text), `Out-of-scope EASM content: ${file}`);
-    for (const match of text.matchAll(/\bcloud\s+(?:and|&amp;)\s+ai\b/gi)) assert.equal(match[0], "Cloud and AI", `Inconsistent terminology: ${file}`);
+    assert.equal(standardizeServiceNames(copy, { html: true }), copy, `Inconsistent service names: ${file}`);
     assert(!/\b(?:than|with|for|to|build|create|start|make|use|define)\s+A\s+[a-z]/.test(text), `Incorrect article capitalization: ${file}`);
     for (const image of text.matchAll(/<img\b[^>]*>/g)) {
       assert(/\balt="[^"]+"/.test(image[0]), `Image needs descriptive alt text: ${file}`);
@@ -100,7 +126,7 @@ for (const file of files) {
 
 let links = 0;
 for (const [file, { text, ids }] of pages) {
-  for (const match of text.matchAll(/\b(?:href|src)="([^"]+)"/g)) {
+  for (const match of text.matchAll(/\b(?:href|src|poster)="([^"]+)"/g)) {
     const value = match[1].replaceAll("&amp;", "&");
     if (/^https:\/\//.test(value)) continue;
     assert(!value.startsWith("/") && !/^[a-z][a-z0-9+.-]*:/i.test(value), `Nonportable or unsupported URL in ${file}: ${value}`);
@@ -129,13 +155,13 @@ const homepage = pages.get(path.join(site, "index.html")).text;
 const hero = homepage.match(/<section class="hero home-hero[^"]*"[^>]*>([\s\S]*?)<\/section>/)?.[1];
 assert(hero?.includes("AI Security &amp; AI Governance Consulting"), "Homepage must lead with AI Security and AI Governance consulting");
 assert(!hero.includes('class="hero-footnote"'), "Removed delivery-stage tagline must not return");
-assert(hero.includes("operationalize agentic AI."), "Preserve the homepage hero's explicit agentic AI exception");
-assert(!hero.includes("agentic <span"), "Do not expand the homepage hero's agentic AI wording");
+assert(hero.includes("operationalize AI."), "Homepage hero must say it helps operationalize AI");
+assert(!/agentic/i.test(homepage), "Homepage must not describe AI as agentic");
 assert(!homepage.includes("data-react-product"), "Homepage must not contain the removed sample widget");
 assert.equal([...homepage.matchAll(/class="service-card home-service"/g)].length, 3, "Expected three homepage service summaries");
 assert(homepage.indexOf('aria-labelledby="expertise-title"') < homepage.indexOf('aria-labelledby="platform-title"'), "Lead with services before the product ecosystem");
 assert(homepage.indexOf('aria-labelledby="platform-title"') < homepage.indexOf("data-react-ai-focus"), "Introduce the offering before the interactive AI guide");
-const platformGroups = [...homepage.matchAll(/<article class="platform-group" aria-labelledby="([^"]+)">([\s\S]*?)<\/article>/g)];
+const platformGroups = [...homepage.matchAll(/<article class="platform-group" aria-labelledby="([^"]+)"[^>]*>([\s\S]*?)<\/article>/g)];
 assert.equal(platformGroups.length, 4, "Group the Microsoft ecosystem into four customer capabilities");
 assert.deepEqual(platformGroups.map(([, id]) => id), [
   "platform-workplace-title", "platform-security-title", "platform-agents-title", "platform-cloud-title"
@@ -172,13 +198,13 @@ for (const [page, expectedPractices] of [["security.html", 8], ["ai-business.htm
   assert(homepage.includes(`href="${page}"`), `Service page not discoverable from homepage: ${page}`);
 }
 const directory = pages.get(path.join(site, "services.html")).text;
-assert.equal([...directory.matchAll(/<section class="directory-row"[^>]*>\s*<div><div class="icon-label">/g)].length, 3, "Every service directory heading needs an icon-label row");
+assert.equal([...directory.matchAll(/<section class="directory-row"[^>]*>\s*<div><img class="editorial-photo"[^>]*><div class="icon-label">/g)].length, 3, "Every service directory needs a photograph and labeled introduction");
 assert(!/<p class="eyebrow">\d+\s*\//.test(directory), "Numbered service directory label remains");
 const directoryRows = [...directory.matchAll(/<section class="directory-row"[^>]*>([\s\S]*?)<\/section>/g)];
 for (const [index, group] of serviceMenuGroups.entries()) {
   const content = pages.get(path.join(site, group.href)).text;
-  assert.equal(content.match(/<h1(?:\s[^>]*)?>([^<]+)<\/h1>/)?.[1], `${group.title} consulting`, `Standardize the consulting page title: ${group.href}`);
-  assert.equal(content.match(/<title>([^<]+)<\/title>/)?.[1], `${group.title} consulting | CFC`, `Standardize the browser title: ${group.href}`);
+  assert.equal(content.match(/<h1(?:\s[^>]*)?>([^<]+)<\/h1>/)?.[1], `${escapeHtml(group.title)} consulting`, `Standardize the consulting page title: ${group.href}`);
+  assert.equal(content.match(/<title>([^<]+)<\/title>/)?.[1], `${escapeHtml(group.title)} consulting | CFC`, `Standardize the browser title: ${group.href}`);
   const sections = [...content.matchAll(/<section class="practice" id="([^"]+)"[^>]*>([\s\S]*?)<\/section>/g)];
   assert.deepEqual(sections.map(([, id]) => `${group.href}#${id}`), group.links.map(([href]) => href), `Capability ordering differs from the service catalog: ${group.href}`);
   assert.deepEqual(sections.map(([, , section]) => section.match(/<p class="eyebrow">([^<]+)<\/p>/)?.[1]), group.links.map(([, title]) => title), `Capability titles differ from the service catalog: ${group.href}`);
@@ -187,13 +213,13 @@ for (const [index, group] of serviceMenuGroups.entries()) {
   const localLinks = [...practiceNav.matchAll(/<a href="([^"]+)">([^<]+)<\/a>/g)].map(([, href, title]) => [group.href + href, title]);
   assert.deepEqual(localLinks, group.links, `In-page navigation differs from capability sections: ${group.href}`);
   const row = directoryRows[index][1];
-  assert.equal(row.match(/<p class="eyebrow">([^<]+)<\/p>/)?.[1], group.title, "Service categories must use the same names and order");
+  assert.equal(row.match(/<p class="eyebrow">([^<]+)<\/p>/)?.[1], escapeHtml(group.title), "Service categories must use the same names and order");
   const nav = row.match(new RegExp(`<nav data-service-group="${group.key}"[^>]*>([\\s\\S]*?)</nav>`))?.[1];
   assert(nav, `Missing directory group ${group.key}`);
   const directoryLinks = [...nav.matchAll(/<a href="([^"]+)">([^<]+)<span/g)].map(([, href, title]) => [href, title.trim()]);
   assert.deepEqual(directoryLinks, group.links, `Service directory differs from consulting page: ${group.href}`);
   for (const html of [homepage, directory]) {
-    assert(html.includes(`href="${group.href}">${group.cta} <span`), `Inconsistent service CTA: ${group.href}`);
+    assert(html.includes(`href="${group.href}">${escapeHtml(group.cta)} <span`), `Inconsistent service CTA: ${group.href}`);
   }
 }
 const technologyGuide = pages.get(path.join(site, "technology-deep-dives.html")).text;
@@ -220,6 +246,12 @@ for (const [file, { text }] of pages) {
   }
   for (const row of text.matchAll(/<div class="icon-label">([\s\S]*?)<\/div>/g)) {
     assert(/^<span class="capability-icon"[^>]*><svg\b[\s\S]*?<\/svg><\/span><p class="(?:eyebrow|card-kicker)">[^<]*<\/p>$/.test(row[1]), `Malformed icon-label row: ${file}`);
+  }
+  const heroLabel = text.match(/<nav class="breadcrumbs"[^>]*>([\s\S]*?)<\/nav>(?:<!--[^>]*-->)*<p class="eyebrow">([^<]+)<\/p>/);
+  if (heroLabel) {
+    const singular = value => value.trim().toLowerCase().replace(/s$/, "");
+    const trail = [...heroLabel[1].matchAll(/<(?:a|span aria-current="page")[^>]*>([^<]+)</g)].map(([, crumb]) => singular(crumb));
+    assert(!heroLabel[2].split("/").some(part => trail.includes(singular(part))), `Hero label repeats the breadcrumb directly above it: ${file}`);
   }
 }
 const resources = pages.get(path.join(site, "sources.html"));

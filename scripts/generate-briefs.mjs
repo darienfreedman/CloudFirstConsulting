@@ -12,6 +12,11 @@ const root = fileURLToPath(new URL("../src/site", import.meta.url));
 const browser = process.env.CLOUD_FIRST_BROWSER || "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
 await access(browser);
 const { briefs } = await generateCatalogs();
+const requested = process.argv.slice(2);
+for (const slug of requested) {
+  if (!briefs.some(brief => brief.slug === slug)) throw new Error(`Unknown service brief: ${slug}`);
+}
+const selectedBriefs = requested.length ? briefs.filter(brief => requested.includes(brief.slug)) : briefs;
 await syncNavigation();
 await mkdir(path.join(root, "downloads"), { recursive: true });
 const profile = await mkdtemp(path.join(tmpdir(), "cloud-first-briefs-"));
@@ -65,7 +70,7 @@ try {
     });
   }
   await command("Page.enable");
-  for (const { slug: name } of briefs) {
+  for (const { slug: name } of selectedBriefs) {
     const url = `${origin}/brief-${name}.html`;
     await command("Page.navigate", { url });
     let ready = false;

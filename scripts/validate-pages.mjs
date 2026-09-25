@@ -62,7 +62,7 @@ export async function validatePages(directory, siteUrl) {
       continue;
     }
     assert(!/<base\b/i.test(text), `Do not override relative navigation with a base element: ${file}`);
-    const references = [...text.matchAll(/\b(?:href|src|action)="([^"]+)"/g)].map(([, value]) => value);
+    const references = [...text.matchAll(/\b(?:href|src|action|poster)="([^"]+)"/g)].map(([, value]) => value);
     for (const [, srcset] of text.matchAll(/\bsrcset="([^"]+)"/g)) {
       references.push(...srcset.split(",").map(candidate => candidate.trim().split(/\s+/)[0]));
     }

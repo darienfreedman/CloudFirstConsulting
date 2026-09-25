@@ -1,17 +1,20 @@
 import assert from "node:assert/strict";
+import { readdirSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { header, footer, resourceMenuGroups } from "./navigation.mjs";
+import { header, footer, perspectiveLinks, resourceMenuGroups } from "./navigation.mjs";
 import { publicCopy } from "./public-copy.mjs";
 import { escapeHtml as escape } from "../shared/html.mjs";
 import { renderIcon } from "./icons.mjs";
-import { productLink } from "./products.mjs";
+import { productLink, products } from "./products.mjs";
+import { technologyTopics } from "../shared/resource-topics.mjs";
 import { industryGroups } from "../shared/industry-groups.mjs";
 import { frameworkById, frameworkSearchText, renderFrameworkConnections } from "./frameworks.mjs";
+import { serviceAreas } from "../shared/services.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-export const categories = ["Security", "AI Business Solutions", "Cloud and AI Platforms"];
+export const categories = serviceAreas.map(area => area.label);
 const segments = industryGroups.map(group => group.title);
 const list = (items) => `<ul>${items.map((item) => `<li>${escape(item)}</li>`).join("")}</ul>`;
 const tags = (items) => `<div class="product-tags">${items.map((item) => `<span>${escape(item)}</span>`).join("")}</div>`;
@@ -34,7 +37,7 @@ export function validateCatalogs({ industries, briefs }) {
   for (const brief of briefs) {
     assert(categories.includes(brief.category));
     assert(["Overview", "Capability"].includes(brief.kind));
-    for (const key of ["title", "headline", "summary", "outcome", "startingPoint", "prepare", "service"]) text(brief[key]);
+    for (const key of ["title", "tab", "headline", "summary", "outcome", "startingPoint", "prepare", "service"]) text(brief[key]);
     for (const key of ["capabilities", "deliverables", "technologies"]) {
       assert(Array.isArray(brief[key]) && brief[key].length >= 3);
       brief[key].forEach(text);
@@ -44,6 +47,9 @@ export function validateCatalogs({ industries, briefs }) {
     const group = briefs.filter((brief) => brief.category === category);
     assert.equal(group.length, 4);
     assert.equal(group.filter((brief) => brief.kind === "Overview").length, 1);
+    // Tab labels share one phone-width row of two, so they stay short and distinct within a category.
+    assert.equal(new Set(group.map((brief) => brief.tab)).size, group.length, `Duplicate brief tab label in ${category}`);
+    for (const brief of group) assert(brief.tab.length <= 14, `Brief tab label is too long for a phone: ${brief.tab}`);
   }
   for (const industry of industries) {
     text(industry.name); text(industry.intro);
@@ -104,7 +110,16 @@ export function renderIndustries(industries) {
     <section class="section-wrap closing-section"><div><p class="eyebrow">Start with your priorities</p><h2>Turn a relevant use case<br>into a focused conversation.</h2></div><a class="button" href="contact.html">Contact us <span aria-hidden="true">&#8599;</span></a></section>`, "catalog.css", true);
 }
 
-export function renderIndustry(industry, briefs) {
+// Neighbouring industries in the same group, starting after this one alphabetically, keep visitors moving.
+export function renderRelatedIndustries(industry, allIndustries) {
+  const peers = allIndustries.filter(other => other.segment === industry.segment).sort((a, b) => a.name.localeCompare(b.name));
+  const start = peers.findIndex(other => other.slug === industry.slug);
+  const related = [1, 2, 3].map(offset => peers[(start + offset) % peers.length]).filter(other => other && other.slug !== industry.slug);
+  if (!related.length) return "";
+  return `<section class="section-wrap section-space related-industries" aria-labelledby="related-industries-title"><div class="section-heading"><div><p class="eyebrow">${escape(industry.segment)}</p><h2 id="related-industries-title">Related industries</h2></div></div><div class="related-grid">${[...new Map(related.map(other => [other.slug, other])).values()].map(other => `<a class="related-card" href="industry-${other.slug}.html">${renderIcon(other.slug)}<span class="related-name">${escape(other.name)}</span><span class="related-meta">${other.cases.length} use cases</span><span class="related-arrow" aria-hidden="true"><svg viewBox="0 0 18 18" width="18" height="18" focusable="false"><path d="M3.5 9h11M10 4.5 14.5 9 10 13.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>`).join("")}</div></section>`;
+}
+
+export function renderIndustry(industry, briefs, allIndustries = []) {
   const availableCategories = categories.filter((category) => industry.cases.some((item) => briefs.find((brief) => brief.slug === item.brief).category === category));
   const useCases = industry.cases.map((item, index) => {
     const brief = briefs.find((entry) => entry.slug === item.brief);
@@ -113,19 +128,19 @@ export function renderIndustry(industry, briefs) {
   return page(`industry-${industry.slug}.html`, `${industry.name} use cases`, industry.intro, `
     <section class="section-wrap page-hero">${crumbs(industry.name, ["industries.html", "Industries"])}${renderIcon(industry.slug)}<p class="eyebrow">Industry solutions</p><h1>${escape(industry.name)}</h1><p>${escape(industry.intro)}</p><div class="priority-tags">${industry.priorities.map((priority) => `<span>${escape(priority)}</span>`).join("")}</div></section>
     <section class="section-wrap section-space" data-catalog="use-case" aria-label="${escape(industry.name)} use cases">${controls(`Find a use case for ${industry.name}`, availableCategories)}<p class="catalog-status" id="catalog-status" role="status" aria-live="polite">${industry.cases.length} use cases across ${availableCategories.length} service areas</p><p class="framework-context">Framework connections explain relevant planning considerations, not a certification or a finding that a rule applies. Confirm scope and obligations with accountable stakeholders. <a href="insight-compliance-readiness.html">Explore the ten framework references</a>.</p><div class="use-case-grid" id="catalog-items">${useCases}</div><div class="catalog-empty" id="catalog-empty" hidden><h2>No matching use cases</h2><p>Try a broader topic, framework, or Microsoft technology, or clear the filters.</p></div></section>
-    <section class="section-wrap service-next"><div><p class="eyebrow">From context to a next step</p><h2>Choose the challenge<br>that matters to your organization.</h2><p>Bring the business owner, relevant systems and data, and your constraints. Define a bounded assessment or pilot with success criteria and an accountable decision.</p><a class="button" href="contact.html">Prepare a conversation <span aria-hidden="true">&#8599;</span></a></div><aside><h3>Explore further</h3><a href="engagements.html">Engagement options <span>&#8599;</span></a><a href="briefs.html">All service one-pagers <span>&#8599;</span></a><a href="industries.html">Browse all industries <span>&#8599;</span></a></aside></section>`, "catalog.css", true);
+    ${renderRelatedIndustries(industry, allIndustries)}<section class="section-wrap service-next"><div><p class="eyebrow">From context to a next step</p><h2>Choose the challenge<br>that matters to your organization.</h2><p>Bring the business owner, relevant systems and data, and your constraints. Define a bounded assessment or pilot with success criteria and an accountable decision.</p><a class="button" href="contact.html">Prepare a conversation <span aria-hidden="true">&#8599;</span></a></div><aside><h3>Explore further</h3><a href="engagements.html">Engagement options <span>&#8599;</span></a><a href="briefs.html">All service one-pagers <span>&#8599;</span></a><a href="industries.html">Browse all industries <span>&#8599;</span></a></aside></section>`, "catalog.css", true);
 }
 
 export function renderBrief(brief) {
   return page(`brief-${brief.slug}.html`, `${brief.title} brief`, brief.summary, `
     <div class="section-wrap brief-page">${crumbs(brief.title, ["briefs.html", "Service briefs"])}<p class="brief-format-note">Read the guide below or download it in Portable Document Format (PDF).</p>
-    <article class="brief-sheet"><p class="brief-brand">Cloud First <span>Consulting</span></p><p class="brief-kicker">${escape(brief.category)}</p><h1>${escape(brief.title)}</h1><p class="brief-lead">${escape(brief.summary)}</p><div class="brief-columns"><section><h2>Capabilities</h2>${list(brief.capabilities)}</section><section><h2>Deliverables</h2>${list(brief.deliverables)}<h2>Business value</h2><p>${escape(brief.outcome)}</p></section></div><section class="brief-next"><h2>${escape(brief.startingPoint)}</h2><p>${escape(brief.prepare)}</p></section><p class="brief-platforms">${brief.technologies.map(productLink).join(", ")}</p><p class="brief-disclosure">&copy; 2026 Cloud First Consulting</p></article>
+    <article class="brief-sheet"><p class="brief-brand">Cloud First <span>Consulting</span></p><p class="brief-kicker">${escape(brief.kind === "Overview" ? "Service overview" : brief.category)}</p><h1>${escape(brief.title)}</h1><p class="brief-lead">${escape(brief.summary)}</p><div class="brief-columns"><section><h2>Capabilities</h2>${list(brief.capabilities)}</section><section><h2>Deliverables</h2>${list(brief.deliverables)}<h2>Business value</h2><p>${escape(brief.outcome)}</p></section></div><section class="brief-next"><h2>${escape(brief.startingPoint)}</h2><p>${escape(brief.prepare)}</p></section><p class="brief-platforms">${brief.technologies.map(productLink).join(", ")}</p><p class="brief-disclosure">&copy; 2026 Cloud First Consulting</p></article>
     <div class="brief-actions"><a class="button" href="${escape(brief.service)}">Explore the related service <span aria-hidden="true">&#8599;</span></a><a class="text-link" href="downloads/cloud-first-${brief.slug}-brief.pdf" download>Download one-page PDF <span aria-hidden="true">&#8595;</span></a></div></div>`, "briefs.css");
 }
 
 export function renderBriefs(briefs) {
-  const groups = categories.map((category) => `<section class="catalog-group" data-catalog-group><div class="section-heading"><h2>${escape(category)}</h2><p>Service overviews and capability guides.</p></div><div class="brief-grid">${briefs.filter((brief) => brief.category === category).map((brief) => `<article class="catalog-card brief-card" data-category="${escape(category)}" data-search="${escape(`${brief.title} ${brief.summary} ${brief.technologies.join(" ")}`)}"><p class="eyebrow">${escape(brief.kind)} brief</p><h3>${escape(brief.title)}</h3><p>${escape(brief.summary)}</p><div class="brief-card-actions"><a class="button" href="brief-${brief.slug}.html">Read online <span aria-hidden="true">&#8599;</span></a><a class="text-link" href="downloads/cloud-first-${brief.slug}-brief.pdf" download>Download PDF <span aria-hidden="true">&#8595;</span></a></div></article>`).join("\n")}</div></section>`).join("\n");
-  return page("briefs.html", "Service briefs", "Twelve one-page service briefs covering Security, AI Business Solutions, and Cloud and AI Platforms, with accessible web versions.", `
+  const groups = categories.map((category) => `<section class="catalog-group" data-catalog-group><div class="section-heading"><h2>${escape(category)}</h2><p>Service overviews and capability guides.</p></div><div class="brief-grid">${briefs.filter((brief) => brief.category === category).map((brief) => `<article class="catalog-card brief-card" data-category="${escape(category)}" data-tab-label="${escape(brief.tab)}" data-search="${escape(`${brief.title} ${brief.summary} ${brief.technologies.join(" ")}`)}"><p class="eyebrow">${escape(brief.kind)} brief</p><h3>${escape(brief.title)}</h3><p>${escape(brief.summary)}</p><div class="brief-card-actions"><a class="button" href="brief-${brief.slug}.html">Read online <span aria-hidden="true">&#8599;</span></a><a class="text-link" href="downloads/cloud-first-${brief.slug}-brief.pdf" download>Download PDF <span aria-hidden="true">&#8595;</span></a></div></article>`).join("\n")}</div></section>`).join("\n");
+  return page("briefs.html", "Service briefs", `Twelve one-page service briefs covering ${categories.join(", ")}, with accessible web versions.`, `
     <section class="section-wrap page-hero">${crumbs("Service briefs", ["resources.html#plan-your-project", "Planning"])}<p class="eyebrow">Service guides</p><h1>Service briefs</h1><p>Explore the scope, deliverables, and requirements for each service. Read online or download a one-page guide in Portable Document Format (PDF).</p></section>
     <section class="section-wrap section-space" data-catalog="brief" aria-label="Service brief library">${controls("Find a service brief", categories)}<p class="catalog-status" id="catalog-status" role="status" aria-live="polite">12 briefs across 3 service areas</p><div id="catalog-items">${groups}</div><div class="catalog-empty" id="catalog-empty" hidden><h2>No matching briefs</h2><p>Try a broader term or clear the filters.</p></div></section>`, "catalog.css", true);
 }
@@ -142,21 +157,37 @@ export function renderProfessionalServicesHub(industries) {
     <section class="section-wrap section-space"><div class="sector-hub-grid">${sectors.map(sector => `<article class="service-card">${renderIcon(sector.slug)}<h2>${escape(sector.name)}</h2><p>${escape(sector.intro)}</p><a class="card-link" href="industry-${sector.slug}.html">Explore ${sector.cases.length} use cases <span aria-hidden="true">&#8599;</span></a></article>`).join("")}</div></section>`);
 }
 
-export function renderResources() {
+export function renderResources({ briefs = [] } = {}) {
+  const scenarios = readdirSync(path.join(root, "src", "site")).filter(name => /^scenario-.+\.html$/.test(name)).length;
+  const tiles = {
+    "engagements.html": ["4 starting points", "Scope, deliverables, and preparation for a focused first engagement."],
+    "faq.html": ["14 questions", "Delivery, business value, and responsible AI decisions answered plainly."],
+    "briefs.html": [`${briefs.length} briefs`, "One-page service guides to read online or download as a PDF."],
+    "perspectives.html": [`${perspectiveLinks.length} perspectives`, "Viewpoints on identity, data, governance, and AI Security."],
+    "solutions-in-practice.html": [`${scenarios} examples`, "How an approach comes together from challenge to outcome."],
+    "technology-deep-dives.html": [`${technologyTopics.length} deep dives`, "Plain-language explanations of the ideas behind modern AI and security."],
+    "sources.html": [`${products.length} products`, "What each product solves, where it fits, and which service supports it."],
+    "trust-center.html": ["Delivery", "How access, information, and security are handled during an engagement."],
+    "trust.html": ["This website", "What this site collects, including analytics disclosures."]
+  };
+  const tile = ([href, label]) => {
+    const [meta, text] = tiles[href] || ["", ""];
+    return `<a class="resource-tile" href="${escape(href)}">${meta ? `<span class="resource-tile-meta">${escape(meta)}</span>` : ""}<span class="resource-tile-title">${escape(label)}</span>${text ? `<span class="resource-tile-text">${escape(text)}</span>` : ""}<span class="resource-tile-arrow" aria-hidden="true"><svg viewBox="0 0 18 18" width="18" height="18" focusable="false"><path d="M3.5 9h11M10 4.5 14.5 9 10 13.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>`;
+  };
   return page("resources.html", "Resources", "Plan your project, explore insights, and find practical technology and product guidance.", `
     <section class="section-wrap page-hero">${crumbs("Resources")}<p class="eyebrow">Explore and prepare</p><h1>Resources</h1><p>Find the right starting point, understand your options, and prepare for the next decision.</p></section>
-    <div class="section-wrap section-space resource-hub">${resourceMenuGroups.map(group => `<section class="resource-hub-group" id="${group.id}" aria-labelledby="resource-title-${group.id}"><h2 id="resource-title-${group.id}">${escape(group.title)}</h2><p>${escape(group.description)}</p><div class="resource-hub-links">${group.links.map(([href, label]) => `<a href="${escape(href)}">${escape(label)} <span aria-hidden="true">&#8599;</span></a>`).join("")}</div></section>`).join("")}</div>`, "editorial.css");
+    <div class="section-wrap section-space resource-hub">${resourceMenuGroups.map(group => `<section class="resource-hub-group" id="${group.id}" aria-labelledby="resource-title-${group.id}"><h2 id="resource-title-${group.id}">${escape(group.title)}</h2><p>${escape(group.description)}</p><div class="resource-hub-links">${group.links.map(tile).join("")}</div></section>`).join("")}</div>`, "editorial.css");
 }
 
 export async function generateCatalogs() {
   const catalogs = await readCatalogs();
   validateCatalogs(catalogs);
   const outputs = [
-    ["resources.html", renderResources()],
+    ["resources.html", renderResources(catalogs)],
     ["industries.html", renderIndustries(catalogs.industries)],
     ["briefs.html", renderBriefs(catalogs.briefs)],
     ["industry-professional-services.html", renderProfessionalServicesHub(catalogs.industries)],
-    ...catalogs.industries.map((industry) => [`industry-${industry.slug}.html`, renderIndustry(industry, catalogs.briefs)]),
+    ...catalogs.industries.map((industry) => [`industry-${industry.slug}.html`, renderIndustry(industry, catalogs.briefs, catalogs.industries)]),
     ...catalogs.briefs.map((brief) => [`brief-${brief.slug}.html`, renderBrief(brief)])
   ];
   for (const [filename, content] of outputs) await writeFile(path.join(root, "src", "site", filename), content);

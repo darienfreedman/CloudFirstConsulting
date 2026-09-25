@@ -7,6 +7,7 @@ import { header, resourceMenuGroups, sentenceCaseLabel, serviceMenuGroups, syncS
 import { normalizeProductNames, publicCopy, standardizeTerminology } from "./public-copy.mjs";
 import { renderIcon } from "./icons.mjs";
 import { frameworks, frameworkById, frameworkHref, renderFrameworkConnections } from "./frameworks.mjs";
+import { escapeHtml } from "../shared/html.mjs";
 
 const catalogs = await readCatalogs();
 
@@ -45,7 +46,7 @@ test("industry pages preserve use-case details and related capability links", ()
     assert.equal([...html.matchAll(/class="use-case catalog-card"/g)].length, industry.cases.length);
     assert(html.includes('data-catalog="use-case"'));
     assert(html.includes('src="assets/react-ui.js"'));
-    for (const category of categories) assert(html.includes(`data-filter="${category}"`));
+    for (const category of categories) assert(html.includes(`data-filter="${escapeHtml(category)}"`));
     for (const useCase of industry.cases) {
       assert(html.includes(`href="brief-${useCase.brief}.html"`));
       assert(html.includes(useCase.service));
@@ -143,7 +144,7 @@ test("briefs have matching downloads, copyright, and straightforward service tit
     assert(html.includes(`downloads/cloud-first-${brief.slug}-brief.pdf`));
     assert(html.includes("&copy; 2026 Cloud First Consulting"));
     assert(html.includes("Capabilities") && html.includes("Deliverables"));
-    assert(html.includes(`<h1>${brief.title}</h1>`));
+    assert(html.includes(`<h1>${escapeHtml(brief.title)}</h1>`));
     assert(!/fictional|illustrative|[—–·]|&middot;/i.test(html));
   }
 });
@@ -160,7 +161,8 @@ test("service diagrams present an accessible reference workflow", () => {
     const html = serviceBlueprint(page);
     assert(html.includes('aria-labelledby="blueprint-title"'));
     assert(html.includes("Reference architecture"));
-    assert.equal([...html.matchAll(/<li>/g)].length, 4);
+    assert(html.includes('<ol class="blueprint-flow" data-card-style="type">'));
+    assert.equal([...html.matchAll(/<li[ >]/g)].length, 4);
     assert(!html.includes("<img"));
   }
   assert.equal(serviceBlueprint("contact.html"), "");
@@ -239,7 +241,7 @@ test("professional-services specialties have distinct pages without duplicating 
 });
 
 test("brand terminology is consistent without lowercasing legitimate sentence openings", () => {
-  assert.equal(standardizeTerminology("Microsoft cloud and ai platforms support ai security and ai governance."), "Cloud and AI Platforms support AI Security and AI Governance.");
+  assert.equal(standardizeTerminology("Microsoft cloud and ai platforms support ai security and ai governance."), "Cloud & AI support AI Security and AI Governance.");
   assert.equal(standardizeTerminology("More than A recommendation. Build A stronger foundation."), "More than a recommendation. Build a stronger foundation.");
   assert.equal(standardizeTerminology("A clear plan. Plan A remains available."), "A clear plan. Plan A remains available.");
   assert.equal(standardizeTerminology("AI business solutions / zero trust / finops / secops"), "AI Business Solutions / Zero Trust / FinOps / SecOps");
@@ -295,7 +297,7 @@ test("service catalog includes identity governance and distinct secure-access de
 test("consulting page headings and browser titles use the same X Consulting format", () => {
   for (const group of serviceMenuGroups) {
     const source = "<title>Old page title</title><h1>Inconsistent consulting heading</h1><p>Keep the body.</p>";
-    const expected = `<title>${group.title} consulting | CFC</title><h1>${group.title} consulting</h1><p>Keep the body.</p>`;
+    const expected = `<title>${escapeHtml(group.title)} consulting | CFC</title><h1>${escapeHtml(group.title)} consulting</h1><p>Keep the body.</p>`;
     assert.equal(publicCopy(source, group.href), expected);
     assert.equal(publicCopy(expected, group.href), expected);
   }

@@ -1,8 +1,9 @@
+import { serviceAreas, standardizeServiceNames } from "../shared/services.mjs";
+import { escapeHtml } from "../shared/html.mjs";
+
 const headings = {
   "about.html": "About Cloud First Consulting",
-  "security.html": "Security consulting",
-  "ai-business.html": "AI Business Solutions consulting",
-  "cloud-platforms.html": "Cloud and AI Platforms consulting",
+  ...Object.fromEntries(serviceAreas.map(area => [area.href, `${area.label} consulting`])),
   "insights.html": "Insights and practical guidance",
   "stories.html": "Solutions in practice",
   "faq.html": "Frequently asked questions",
@@ -26,13 +27,11 @@ export function normalizeProductNames(text) {
     .replace(/\bMicrosoft (?=cloud\b)/gi, "");
 }
 
-export function standardizeTerminology(text) {
-  return normalizeProductNames(text)
-    .replace(/\bcloud\s+(?:and|&(?:amp;)?)\s+ai\b/gi, "Cloud and AI")
-    .replace(/\bCloud and AI platforms\b/gi, "Cloud and AI Platforms")
+export function standardizeTerminology(text, options) {
+  return standardizeServiceNames(normalizeProductNames(text), options)
+    .replace(/\bBook time with me\b/g, "Book time with us")
     .replace(/\bai security\b/gi, "AI Security")
     .replace(/\bai governance\b/gi, "AI Governance")
-    .replace(/\bai business solutions\b/gi, "AI Business Solutions")
     .replace(/\bzero trust\b/gi, "Zero Trust")
     .replace(/\bfinops\b/gi, "FinOps")
     .replace(/\bsecops\b/gi, "SecOps")
@@ -47,9 +46,9 @@ export function publicCopy(html, filename) {
     "scenario-ai-governance.html": "An approach to enterprise AI governance, ownership, and controlled releases."
   }[filename];
   if (description) result = result.replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${description}">`);
-  if (headings[filename]) result = result.replace(/<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/, `<h1>${headings[filename]}</h1>`);
+  if (headings[filename]) result = result.replace(/<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/, `<h1>${escapeHtml(headings[filename])}</h1>`);
   if (["security.html", "ai-business.html", "cloud-platforms.html"].includes(filename)) {
-    result = result.replace(/<title>[\s\S]*?<\/title>/, `<title>${headings[filename]} | Cloud First Consulting</title>`);
+    result = result.replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(headings[filename])} | Cloud First Consulting</title>`);
   }
   if (filename === "index.html") {
     result = result.replace(/<title>[\s\S]*?<\/title>/, "<title>Cloud First Consulting</title>");
@@ -90,10 +89,11 @@ export function publicCopy(html, filename) {
   // Normalize displayed text without changing case-sensitive URLs or identifiers.
   return result.split(/(<[^>]+>)/g)
     .map(part => {
-      if (!part.startsWith("<")) return standardizeTerminology(part);
-      let tag = part.replace(/\b(aria-label|alt|title|placeholder)="([^"]*)"/g, (_, attribute, value) => `${attribute}="${normalizeProductNames(value)}"`);
+      if (!part.startsWith("<")) return standardizeTerminology(part, { html: true });
+      let tag = part.replace(/\b(aria-label|alt|title|placeholder|data-category|data-filter|data-search|data-mobile-summary)="([^"]*)"/g, (_, attribute, value) =>
+        `${attribute}="${standardizeServiceNames(attribute.startsWith("data-") ? value : normalizeProductNames(value), { html: true })}"`);
       if (/^<meta\b[^>]*\bname="description"/.test(tag)) {
-        tag = tag.replace(/\bcontent="([^"]*)"/, (_, value) => `content="${normalizeProductNames(value)}"`);
+        tag = tag.replace(/\bcontent="([^"]*)"/, (_, value) => `content="${standardizeServiceNames(normalizeProductNames(value), { html: true })}"`);
       }
       return tag;
     })

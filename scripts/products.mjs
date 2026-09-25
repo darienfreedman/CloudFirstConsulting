@@ -1,14 +1,17 @@
 import { readFileSync } from "node:fs";
 import { escapeHtml } from "../shared/html.mjs";
 import { normalizeProductNames } from "./public-copy.mjs";
+import { serviceAreaByKey, standardizeServiceNames } from "../shared/services.mjs";
+import { renderIcon } from "./icons.mjs";
 
-export const products = JSON.parse(readFileSync(new URL("../content/products.json", import.meta.url), "utf8"));
+export const products = JSON.parse(readFileSync(new URL("../content/products.json", import.meta.url), "utf8"))
+  .map(product => ({ ...product, group: standardizeServiceNames(product.group) }));
 const compareNames = new Intl.Collator("en", { sensitivity: "base", numeric: true }).compare;
 export const homepageProductGroups = {
   "platform-workplace-title": "Modern work",
   "platform-security-title": "Threat protection and data security",
   "platform-agents-title": "Copilot & agents",
-  "platform-cloud-title": "Cloud, data, and AI platforms"
+  "platform-cloud-title": serviceAreaByKey.cloud.label
 };
 
 export function productsInGroup(group) {
@@ -23,7 +26,7 @@ export function syncHomepageProducts(html) {
   for (const [id, group] of Object.entries(homepageProductGroups)) {
     const members = homepageProductsInGroup(group);
     if (!members.length) throw new Error(`Missing product category: ${group}`);
-    const section = new RegExp(`(<article class="platform-group" aria-labelledby="${id}">)([\\s\\S]*?)(</article>)`);
+    const section = new RegExp(`(<article class="platform-group" aria-labelledby="${id}"[^>]*>)([\\s\\S]*?)(</article>)`);
     if (!section.test(html)) throw new Error(`Missing homepage product box: ${id}`);
     html = html.replace(section, (_, open, body, close) => {
       if (!/<p class="eyebrow">/.test(body) || !/<ul class="platform-products">/.test(body)) {
@@ -72,9 +75,9 @@ export function linkProductNames(html) {
 export function renderProductGuide() {
   const groups = [...new Set(products.map(product => product.group))];
   const navigation = `<nav class="product-guide-nav" aria-label="Product groups">${groups.map((group, index) => `<a href="#product-group-${index}">${escapeHtml(group)}</a>`).join("")}</nav>`;
-  return `<section class="section-wrap section-space product-guide" aria-labelledby="product-guide-title"><p class="eyebrow">Products explained</p><h1 id="product-guide-title">Start with the problem, then choose the product.</h1><p>Select a product from a service page to learn what it helps solve, where it fits, and which consulting capability supports it. Features and licensing vary by product and configuration.</p>${navigation}${groups.map((group, index) =>
+  return `<section class="section-wrap page-hero product-guide-hero" aria-labelledby="product-guide-title"><!-- product-crumbs --><h1 id="product-guide-title">Start with the problem, then choose the product.</h1><p>Select a product from a service page to learn what it helps solve, where it fits, and which consulting capability supports it. Features and licensing vary by product and configuration.</p>${navigation}</section><section class="section-wrap section-space product-guide" aria-label="Products by group">${groups.map((group, index) =>
     `<section class="product-guide-group" aria-labelledby="product-group-${index}"><h2 id="product-group-${index}">${escapeHtml(group)}</h2><div class="source-list">${productsInGroup(group).map(product =>
-      `<article class="source-entry product-entry" id="${product.id}"><h3>${escapeHtml(product.name)}</h3><p><strong>The problem:</strong> ${escapeHtml(product.problem)}</p><p>${escapeHtml(product.solution)}</p>${product.details ? `<ul>${product.details.map(detail => `<li>${escapeHtml(detail)}</li>`).join("")}</ul>` : ""}<div class="product-resource-links"><a href="${escapeHtml(product.service)}">Explore related consulting</a><a href="${escapeHtml(product.docs)}" rel="noreferrer">Read official documentation</a>${(product.additionalDocs || []).map(([label, href]) => `<a href="${escapeHtml(href)}" rel="noreferrer">${escapeHtml(label)}</a>`).join("")}</div></article>`
+      `<article class="source-entry product-entry" id="${product.id}">${renderIcon(product.id)}<h3>${escapeHtml(product.name)}</h3><p><strong>The problem:</strong> ${escapeHtml(product.problem)}</p><p>${escapeHtml(product.solution)}</p>${product.details ? `<ul>${product.details.map(detail => `<li>${escapeHtml(detail)}</li>`).join("")}</ul>` : ""}<div class="product-resource-links"><a href="${escapeHtml(product.service)}">Explore related consulting</a><a href="${escapeHtml(product.docs)}" rel="noreferrer">Read official documentation</a>${(product.additionalDocs || []).map(([label, href]) => `<a href="${escapeHtml(href)}" rel="noreferrer">${escapeHtml(label)}</a>`).join("")}</div></article>`
     ).join("")}</div></section>`
   ).join("")}</section>`;
 }

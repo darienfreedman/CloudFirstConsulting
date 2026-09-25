@@ -1,6 +1,8 @@
 "use strict";
 
 (() => {
+  // Mark scripted pages before first paint so collapsed menus never render expanded first.
+  document.documentElement.classList?.add("js");
   const storageKey = "cloud-first-color-theme";
   const system = window.matchMedia("(prefers-color-scheme: dark)");
 

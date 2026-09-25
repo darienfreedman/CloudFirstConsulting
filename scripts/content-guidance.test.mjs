@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { expandAcronyms } from "./acronyms.mjs";
 import { normalizeProductNames } from "./public-copy.mjs";
 import { resourceMenuGroups, perspectiveLinks, header, syncResourceBreadcrumbs, syncInsightCards, consolidateResourceLinks } from "./navigation.mjs";
@@ -10,8 +10,86 @@ import { escapeHtml } from "../shared/html.mjs";
 import { frameworks, renderFrameworkGuide } from "./frameworks.mjs";
 import vm from "node:vm";
 import { linkProductNames, productLink, products, renderProductGuide, syncHomepageProducts, homepageProductGroups, productsInGroup } from "./products.mjs";
+import { syncEditorialDesign } from "./editorial.mjs";
+import { syncMobileSummaries } from "./mobile-summaries.mjs";
 
 const text = html => html.replace(/<[^>]+>/g, "");
+
+test("long service descriptions get concise mobile summaries without losing desktop detail", () => {
+  for (const page of ["security.html", "ai-business.html"]) {
+    const html = readFileSync(new URL(`../src/site/${page}`, import.meta.url), "utf8");
+    assert.equal(syncMobileSummaries(html, page), html);
+    for (const [, summary] of html.matchAll(/class="practice"[^>]*data-mobile-summary="([^"]+)"/g)) {
+      assert(summary.split(/\s+/).length >= 24);
+      assert(summary.split(/\s+/).length <= 34);
+    }
+  }
+  const business = readFileSync(new URL("../src/site/ai-business.html", import.meta.url), "utf8");
+  assert.match(business, /Viva Connections/);
+  assert.match(business, /organizational Viva Insights/);
+  assert.match(business, /Windows 365 Cloud PC provisioning/);
+});
+
+test("company copy uses us outside the founder biography", () => {
+  const directory = new URL("../src/site/", import.meta.url);
+  for (const page of readdirSync(directory).filter(file => file.endsWith(".html"))) {
+    const html = readFileSync(new URL(page, directory), "utf8");
+    const outsideBio = html.replace(/<div class="profile-story">[\s\S]*?<\/div>/, "");
+    assert.doesNotMatch(text(outsideBio), /\bme\b/i, page);
+    if (page === "about.html") {
+      assert.match(html, /A little about me/);
+      assert.match(html, /I&rsquo;m comfortable challenging the status quo/);
+      assert.match(outsideBio, /expect from us/);
+      assert.doesNotMatch(text(outsideBio), /\bI(?:'|&rsquo;)ll\b/);
+    }
+  }
+  const mobile = readFileSync(new URL("../src/site/assets/mobile.js", import.meta.url), "utf8");
+  assert.doesNotMatch(mobile, /Help me choose/);
+  const ui = readFileSync(new URL("../ui/index.jsx", import.meta.url), "utf8");
+  assert(ui.includes("I agree that Cloud First Consulting may use these details to respond to my inquiry."));
+});
+
+test("photography-led pages retain one image per card across repeated builds", () => {
+  for (const [page, count] of [["services.html", 3]]) {
+    const html = readFileSync(new URL(`../src/site/${page}`, import.meta.url), "utf8");
+    assert.equal(syncEditorialDesign(html, page), html, page);
+    assert.equal([...html.matchAll(/data-editorial-photo/g)].length, count, page);
+    assert(html.includes('<body class="editorial-site">'), page);
+  }
+  const untouched = "<html><body>Other page</body></html>";
+  assert.equal(syncEditorialDesign(untouched, "faq.html"), untouched);
+});
+
+test("homepage keeps its previous layout without the reverted editorial redesign", () => {
+  const html = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
+  assert.equal(syncEditorialDesign(html, "index.html"), html);
+  assert.match(html, /Secure your business\.<br><span class="accent">Put AI to work\./);
+  assert.match(html, /class="company-section home-company"/);
+  assert.match(html, /id="ai-starting-point"/);
+  assert.doesNotMatch(html, /editorial-site|data-editorial-photo|work-example-title|working-together-title|meet-darien-title|<figcaption>/);
+});
+
+test("desktop service comparison exposes every capability without expanding columns", () => {
+  const html = readFileSync(new URL("../src/site/services.html", import.meta.url), "utf8");
+  const groups = [...html.matchAll(/<nav data-service-group="[^"]+"[^>]*>([\s\S]*?)<\/nav>/g)];
+  assert.equal(groups.length, 3);
+  assert.deepEqual(groups.map(([, links]) => [...links.matchAll(/<a /g)].length), [8, 5, 5]);
+  assert.doesNotMatch(html, /service-directory-details/);
+  const css = readFileSync(new URL("../src/site/assets/experience.css", import.meta.url), "utf8");
+  assert.match(css, /grid-template-rows:subgrid;grid-row:span 6/);
+  assert.match(css, /\.editorial-site \.directory-row nav\{[^}]*flex-wrap:wrap/);
+});
+
+test("every explained product has its own subject-specific header icon", () => {
+  const cards = [...renderProductGuide().matchAll(/<article class="source-entry product-entry" id="([^"]+)">([\s\S]*?)<\/article>/g)];
+  assert.equal(cards.length, products.length);
+  const drawings = cards.map(([, id, body]) => {
+    assert(body.startsWith(`<span class="capability-icon" data-icon="${id}">`), id);
+    assert.match(body, /aria-hidden="true"/);
+    return body.match(/<svg\b[\s\S]*?<\/svg>/)[0];
+  });
+  assert.equal(new Set(drawings).size, products.length);
+});
 
 test("Clarity disclosure lives on the privacy page without adding footer copy", () => {
   const html = readFileSync(new URL("../src/site/trust.html", import.meta.url), "utf8");
@@ -75,21 +153,64 @@ test("contact embed sizes follow the form width without disabling scrolling or i
   const css = readFileSync(new URL("../ui/ui.css", import.meta.url), "utf8");
   const jsx = readFileSync(new URL("../ui/index.jsx", import.meta.url), "utf8");
   assert.match(css, /\.microsoft-contact-form\{[^}]*container:contact-form \/ inline-size/);
-  assert.match(css, /\.microsoft-form-frame\{[^}]*height:1340px/);
-  assert.match(css, /@container contact-form \(min-width:768px\)\{\.microsoft-form-frame\{height:1580px\}\}/);
-  assert.match(css, /@container contact-form \(max-width:500px\)\{\.microsoft-form-frame\{height:1380px\}\}/);
-  assert.match(css, /@container contact-form \(max-width:400px\)\{\.microsoft-form-frame\{height:1480px\}\}/);
-  assert.match(css, /@container contact-form \(max-width:350px\)\{\.microsoft-form-frame\{height:1520px\}\}/);
+  assert.match(css, /\.microsoft-form-frame\{[^}]*height:1440px/);
+  assert.match(css, /@container contact-form \(min-width:768px\)\{\.microsoft-form-frame\{height:1680px\}\}/);
+  assert.match(css, /@container contact-form \(max-width:500px\)\{\.microsoft-form-frame\{height:1480px\}\}/);
+  assert.match(css, /@container contact-form \(max-width:400px\)\{\.microsoft-form-frame\{height:1580px\}\}/);
+  assert.match(css, /@container contact-form \(max-width:350px\)\{\.microsoft-form-frame\{height:1620px\}\}/);
   assert.doesNotMatch(css, /\.microsoft-(?:contact-form|form-frame)\{[^}]*(?:overflow[^:]*:\s*(?:hidden|clip)|max-height)/);
   const iframe = jsx.match(/<iframe[\s\S]*?\/>/)[0];
   assert.match(iframe, /title="Contact Cloud First Consulting"/);
   assert.doesNotMatch(iframe, /scrolling\s*=\s*["']no/);
-  assert.match(jsx, /id="microsoft-form-open" href=\{form.responseUrl\}/);
+  assert.doesNotMatch(jsx, /submitted through Forms|Open form in a new tab|does not load in your browser|microsoft-form-(?:tools|help|open)/, "The embedded form stands on its own without helper text");
+  assert.doesNotMatch(css, /\.microsoft-contact-form\{[^}]*(?:width:calc|margin-inline:-)/);
+});
+
+test("personal pages use the supplied local portrait and a direct conversation route", () => {
+  const about = readFileSync(new URL("../src/site/about.html", import.meta.url), "utf8");
+  const contact = readFileSync(new URL("../src/site/contact.html", import.meta.url), "utf8");
+  assert.match(about, /aria-labelledby="darien-title"/);
+  assert.match(about, /alt="Darien Freedman, Cloud First Consulting"/);
+  assert.doesNotMatch(about, /Industrial Engineering|Software Engineering|Entrepreneurship|certificate in/i);
+  assert.match(about, /comfortable challenging the status quo/);
+  assert.match(about, /Sometimes the answer is automation or AI/);
+  assert.match(about, /without overlooking security or the people doing the work/);
+  const bio = about.match(/<div class="profile-story">([\s\S]*?)<\/div>/)[1];
+  assert.equal([...bio.matchAll(/<p>/g)].length, 2);
+  assert.doesNotMatch(about, /Behind every technology decision|That's where I start|with a simple belief/);
+  assert.match(about, /Founder &amp; CEO, Cloud First Consulting/);
+  assert.match(about, /Meet our leadership/);
+  assert.doesNotMatch(about, /The person behind the work|data-editorial-photo/);
+  assert.doesNotMatch(about, /\bdemos?\b|without making the conversation more complicated|class="delivery-expectations"/i);
+  assert.match(about, /Get to know the founder of Cloud First Consulting and what working together looks like/);
+  for (const label of ["Communication", "Collaboration", "Boundaries"]) assert(about.includes(`<p class="card-kicker">${label}</p>`));
+  const main = about.match(/<main\b[\s\S]*?<\/main>/)[0];
+  assert.equal([...main.matchAll(/<img\b/g)].length, 1);
+  assert.equal([...main.matchAll(/data-card-style="type"/g)].length, 2);
+  assert.deepEqual([...main.matchAll(/class="about-step-number" aria-hidden="true">(\d+)<\/span>/g)].map(([, number]) => number), ["01", "02", "03", "04"]);
+  assert.equal(syncEditorialDesign(about, "about.html"), about);
+  for (const page of [about, contact]) {
+    assert.match(page, /src="assets\/images\/darien-freedman.jpg"/);
+  }
+  assert.match(contact, /href="about.html#darien-profile"/);
+  assert.match(about, /class="section-wrap personal-profile" id="darien-profile"/);
+  const portrait = readFileSync(new URL("../src/site/assets/images/darien-freedman.jpg", import.meta.url));
+  assert.equal(portrait.subarray(0, 3).toString("hex"), "ffd8ff");
+  assert(portrait.length < 500000);
+});
+
+test("mobile headers span the viewport and leave embedded contact forms unobstructed", () => {
+  const css = readFileSync(new URL("../src/site/assets/production.css", import.meta.url), "utf8");
+  assert.match(css, /\.site-header\{width:100%;max-width:none;margin:0;/);
+  assert.match(css, /body:has\(\[data-react-contact\]\) \.site-header\{position:relative\}/);
+  assert.match(css, /max-height:calc\(100dvh - var\(--header-height,76px\)\)/);
 });
 
 test("footer links are alphabetical within categories without a duplicate Privacy link", () => {
   const html = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
   const footer = html.match(/<footer class="site-footer[\s\S]*?<\/footer>/)[0];
+  assert.doesNotMatch(footer, /footer-person|Discuss your project/);
+  assert.match(html, /class="section-wrap closing-section home-closing"[\s\S]*?>Discuss your project/);
   for (const [, group] of footer.matchAll(/<nav\b[^>]*>([\s\S]*?)<\/nav>/g)) {
     const labels = [...group.matchAll(/<a\b[^>]*>([^<]+)<\/a>/g)].map(([, label]) => label);
     assert.deepEqual(labels, [...labels].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })));
@@ -378,7 +499,7 @@ test("the compliance guide includes ten alphabetical anchored references and rea
   assert.deepEqual(labels, [...labels].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })));
   assert.equal([...html.matchAll(/class="framework-card source-entry editorial-card"/g)].length, 10);
   for (const framework of frameworks) {
-    const card = html.match(new RegExp(`<section class="framework-card source-entry editorial-card" id="${framework.id}">([\\s\\S]*?)</section>`))?.[1];
+    const card = html.match(new RegExp(`<section class="framework-card source-entry editorial-card" id="${framework.id}"[^>]*>([\\s\\S]*?)</section>`))?.[1];
     assert(card, framework.id);
     assert(card.includes("<h4>Industry examples</h4>"), framework.id);
     assert(html.includes(`href="#${framework.id}"`), framework.id);
@@ -501,7 +622,7 @@ test("homepage categories match the explanations with Azure services summarized 
   const home = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
   const seen = [];
   for (const [id, category] of Object.entries(homepageProductGroups)) {
-    const card = home.match(new RegExp(`<article class="platform-group" aria-labelledby="${id}">([\\s\\S]*?)</article>`))[1];
+    const card = home.match(new RegExp(`<article class="platform-group" aria-labelledby="${id}"[^>]*>([\\s\\S]*?)</article>`))[1];
     const names = [...card.matchAll(/<li><a[^>]+>([^<]+)<\/a><\/li>/g)].map(([, name]) => name);
     assert.deepEqual(names, productsInGroup(category).filter(product => !product.name.startsWith("Azure ")).map(product => product.name));
     seen.push(...names);
@@ -521,7 +642,7 @@ test("homepage categories match the explanations with Azure services summarized 
 test("Security Copilot is connected to security services and the operations brief", () => {
   const link = productLink("Security Copilot");
   const home = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
-  const card = home.match(/<article class="platform-group" aria-labelledby="platform-security-title">([\s\S]*?)<\/article>/)[1];
+  const card = home.match(/<article class="platform-group" aria-labelledby="platform-security-title"[^>]*>([\s\S]*?)<\/article>/)[1];
   assert(card.includes(link));
   const security = readFileSync(new URL("../src/site/security.html", import.meta.url), "utf8");
   const service = security.match(/<section class="practice" id="threat-protection"[\s\S]*?<\/section>/)[0];
@@ -537,7 +658,7 @@ test("Security Copilot is connected to security services and the operations brie
 test("GitHub Copilot connects developer services, product guidance, and the platform brief", () => {
   const product = products.find(product => product.id === "github-copilot");
   assert.equal(product.name, "GitHub Copilot");
-  assert.equal(product.group, "Cloud, data, and AI platforms");
+  assert.equal(product.group, "Cloud & AI");
   assert.equal(product.service, "cloud-platforms.html#ai-platforms");
   assert.equal(product.details.length, 3);
   const link = productLink("GitHub Copilot");
@@ -645,7 +766,7 @@ test("product explanations are alphabetical within the existing category order",
       .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base", numeric: true }));
     assert.deepEqual(names, expected);
   });
-  assert.equal(products.find(product => product.id === "power-bi").group, "Cloud, data, and AI platforms");
+  assert.equal(products.find(product => product.id === "power-bi").group, "Cloud & AI");
 });
 
 test("homepage introductions explain outcomes before products and match capability order", () => {
@@ -700,7 +821,7 @@ test("Defender for Cloud has a distinct explanation and service destination", ()
 
 test("cloud capabilities and briefs connect to Defender for Cloud", () => {
   const home = readFileSync(new URL("../src/site/index.html", import.meta.url), "utf8");
-  const securityCard = home.match(/<article class="platform-group" aria-labelledby="platform-security-title">([\s\S]*?)<\/article>/)[1];
+  const securityCard = home.match(/<article class="platform-group" aria-labelledby="platform-security-title"[^>]*>([\s\S]*?)<\/article>/)[1];
   assert(securityCard.includes(productLink("Defender for Cloud")));
   const cloud = readFileSync(new URL("../src/site/cloud-platforms.html", import.meta.url), "utf8");
   for (const id of ["landing-zones", "modernization", "operations"]) {

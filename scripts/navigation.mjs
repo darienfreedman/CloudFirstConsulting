@@ -4,21 +4,28 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { publicCopy } from "./public-copy.mjs";
 import { contentPolicy, readSettings, writeSettings } from "./integrations.mjs";
-import { serviceBlueprint } from "./product-visuals.mjs";
+import { serviceBlueprint, servicePhoto } from "./product-visuals.mjs";
+import { syncHeroVisual, syncSignalMap, withSceneStyles } from "./hero-visuals.mjs";
+import { compassScene } from "./scene-visuals.mjs";
+import { syncPracticeVisuals } from "./service-visuals.mjs";
+import { syncSearchIndex } from "./search-index.mjs";
 import { escapeHtml as escape } from "../shared/html.mjs";
 import { replaceIcons } from "./icons.mjs";
-import { linkProductNames, renderProductGuide, syncHomepageProducts } from "./products.mjs";
+import { linkProductNames, products, renderProductGuide, syncHomepageProducts } from "./products.mjs";
 import { industryGroups } from "../shared/industry-groups.mjs";
 import { migratedTechnologyFragment, technologyTopicIds, technologyTopics } from "../shared/resource-topics.mjs";
 import { expandAcronyms } from "./acronyms.mjs";
 import { renderFrameworkGuide } from "./frameworks.mjs";
+import { syncEditorialDesign } from "./editorial.mjs";
+import { serviceAreaByKey } from "../shared/services.mjs";
+import { syncMobileSummaries } from "./mobile-summaries.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const acronyms = new Set(["AI", "IT", "PDF", "HTML", "DLP", "XDR", "SIEM", "SOC", "MCP", "CRM", "ERP", "API", "ISO", "FAQ", "CSP", "ID", "BI", "SQL", "URL", "GPT", "IP", "VPN", "SASE", "SSE", "ZTNA", "SWG", "MITRE", "ATT", "CK"]);
 const industries = JSON.parse(readFileSync(new URL("../content/industries.json", import.meta.url), "utf8")).sort((a, b) => a.name.localeCompare(b.name));
 
 export const serviceMenuGroups = [
-  { key: "security", title: "Security", href: "security.html", cta: "Explore Security services", links: [
+  { key: "security", title: serviceAreaByKey.security.label, href: serviceAreaByKey.security.href, cta: serviceAreaByKey.security.cta, links: [
     ["security.html#ai-security", "AI Security"],
     ["security.html#ai-governance", "AI Governance"],
     ["security.html#threat-protection", "Threat protection"],
@@ -28,14 +35,14 @@ export const serviceMenuGroups = [
     ["security.html#data-security", "Data security and compliance readiness"],
     ["security.html#cloud-security", "Cloud security"]
   ] },
-  { key: "business", title: "AI Business Solutions", href: "ai-business.html", cta: "Explore AI Business services", links: [
+  { key: "business", title: serviceAreaByKey.business.label, href: serviceAreaByKey.business.href, cta: serviceAreaByKey.business.cta, links: [
     ["ai-business.html#modern-work", "Modern work and productivity"],
     ["ai-business.html#copilot", "Copilot readiness and enablement"],
     ["ai-business.html#processes", "Business process transformation"],
     ["ai-business.html#custom-ai", "Custom AI solutions"],
     ["ai-business.html#adoption", "Adoption and value realization"]
   ] },
-  { key: "cloud", title: "Cloud and AI Platforms", href: "cloud-platforms.html", cta: "Explore Cloud and AI services", links: [
+  { key: "cloud", title: serviceAreaByKey.cloud.label, href: serviceAreaByKey.cloud.href, cta: serviceAreaByKey.cloud.cta, links: [
     ["cloud-platforms.html#landing-zones", "Cloud foundations"],
     ["cloud-platforms.html#modernization", "Application and infrastructure modernization"],
     ["cloud-platforms.html#data-platforms", "Governed data and analytics"],
@@ -200,16 +207,80 @@ export function sentenceCaseLabel(value) {
   }).replace(/(^|\/\s*)([a-z])/g, (_, prefix, letter) => prefix + letter.toUpperCase());
 }
 
-export const themeToggle = '<button class="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" title="Switch to dark mode" hidden><svg class="theme-icon-dark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/></svg><svg class="theme-icon-light" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>';
+export const themeToggle = '<button class="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" title="Switch to dark mode" hidden><svg class="theme-icon-dark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/></svg><svg class="theme-icon-light" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><span class="theme-toggle-label" aria-hidden="true">Dark mode</span></button>';
+const searchIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+export const searchToggle = `<button class="search-toggle" type="button" data-search-open aria-haspopup="dialog" aria-label="Search the site" title="Search the site" hidden>${searchIcon}</button>`;
+const themeToggleCompact = themeToggle.replace('class="theme-toggle"', 'class="theme-toggle theme-toggle-compact"').replace(/<span class="theme-toggle-label"[^>]*>[^<]*<\/span>/, "");
+const searchToggleCompact = `<button class="search-toggle search-toggle-compact" type="button" data-search-open aria-haspopup="dialog" aria-label="Search the site" hidden>${searchIcon}</button>`;
+const menuToggle = '<button class="menu-toggle" type="button" aria-label="Navigation menu" aria-expanded="false" aria-controls="primary-nav"><svg class="menu-icon-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><svg class="menu-icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg></button>';
+const navChevron = '<svg class="nav-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m3 4.5 3 3 3-3"/></svg>';
+
+// Internal links move within the site; the northeast arrow is reserved for new tabs and other sites.
+export function syncLinkArrows(html) {
+  return html.replace(/<a\b([^>]*)>([\s\S]*?)<\/a>/g, (link, attributes, content) => {
+    if (!content.includes("&#8599;")) return link;
+    const leavesPage = /\bhref="(?:https?:)?\/\//.test(attributes) || /\btarget="_blank"/.test(attributes) || /\sdownload(?=[\s=>]|$)/.test(attributes);
+    return leavesPage ? link : `<a${attributes}>${content.replaceAll("&#8599;", "&#8594;")}</a>`;
+  });
+}
 
 export function syncAppearance(html) {
   return html
-    .replace(/<link rel="icon"[^>]*>/g, '<link rel="icon" href="assets/favicon.png" type="image/png" sizes="64x64">')
+    .replace(/<link rel="preload" href="assets\/fonts\/[^"]+"[^>]*>\s*/g, "")
+    .replace(/<link rel="icon"[^>]*>(?:<link rel="apple-touch-icon"[^>]*>)?/g, '<link rel="icon" href="assets/favicon.png" type="image/png" sizes="64x64"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png">')
     .replace(/<script src="assets\/theme\.js"><\/script>\s*/g, "")
     .replace(/<link rel="stylesheet" href="assets\/theme\.css">\s*/g, "")
+    .replace(/<link rel="stylesheet" href="assets\/mobile\.css">\s*/g, "")
+    .replace(/<link rel="stylesheet" href="assets\/experience\.css">\s*/g, "")
+    .replace(/<script src="assets\/mobile\.js" type="module"><\/script>\s*/g, "")
+    .replace(/<script src="assets\/motion\.js" defer><\/script>\s*/g, "")
+    .replace(/<script src="assets\/search\.js" defer><\/script>\s*/g, "")
     .replace('<!-- theme-toggle -->', themeToggle)
-    .replace('<link rel="stylesheet" href="assets/styles.css">', '<script src="assets/theme.js"></script>\n<link rel="stylesheet" href="assets/styles.css">')
-    .replace("</head>", '<link rel="stylesheet" href="assets/theme.css">\n</head>');
+    .replace('<link rel="stylesheet" href="assets/styles.css">', '<script src="assets/theme.js"></script>\n<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>\n<link rel="stylesheet" href="assets/styles.css">')
+    .replace("</head>", '<link rel="stylesheet" href="assets/mobile.css"><script src="assets/mobile.js" type="module"></script>\n<link rel="stylesheet" href="assets/experience.css">\n<script src="assets/motion.js" defer></script>\n<script src="assets/search.js" defer></script>\n<link rel="stylesheet" href="assets/theme.css">\n</head>');
+}
+
+export function syncHomepageStats(html) {
+  const pattern = /<!-- home-stats:start -->[\s\S]*?<!-- home-stats:end -->/;
+  if (!pattern.test(html)) throw new Error("Missing homepage stats region.");
+  const stats = [
+    [serviceMenuGroups.reduce((total, group) => total + group.links.length, 0), "service capabilities", "services.html"],
+    [industries.length, "industries covered", "industries.html"],
+    [industries.reduce((total, industry) => total + industry.cases.length, 0), "industry use cases", "industries.html"],
+    [products.length, "products explained", "sources.html"]
+  ];
+  const items = stats.map(([value, label, href]) => `<li><a href="${href}"><span class="stat-number" data-count-to="${value}" aria-hidden="true">${value}</span><span class="sr-only">${value} </span><span class="stat-label">${escape(label)}</span></a></li>`).join("");
+  return html.replace(pattern, `<!-- home-stats:start --><section class="section-wrap home-stats" aria-label="What you can explore"><ul>${items}</ul></section><!-- home-stats:end -->`);
+}
+
+// Deep dives and perspectives end with a link to the next article in the same series.
+// Service heroes set their copy over the service photograph, matching the homepage's cinematic hero.
+export function syncServiceBanner(html, page) {
+  const photo = servicePhoto(page);
+  if (!photo) return html;
+  const unwrapped = html
+    .replace(/<!-- service-banner:start -->[\s\S]*?<!-- service-banner:copy -->/g, "")
+    .replace(/<!-- service-banner:end --><\/div><\/div>/g, "")
+    .replace(/<!-- service-photo:start -->[\s\S]*?<!-- service-photo:end -->/g, "");
+  return unwrapped.replace(/(<section class="section-wrap service-hero">\s*)(<nav class="breadcrumbs"[\s\S]*?<div class="hero-actions">[\s\S]*?<\/div>)/, (_, open, copy) => `${open}<!-- service-banner:start --><div class="service-hero-banner">${photo}<div class="service-hero-copy"><!-- service-banner:copy -->${copy}<!-- service-banner:end --></div></div>`);
+}
+
+export function syncNextArticle(html, page) {
+  const region = /<!-- next-article:start -->[\s\S]*?<!-- next-article:end -->/g;
+  const series = [
+    ["Next deep dive", technologyTopics.map(topic => [`deep-dive-${topic.id}.html`, topic.name])],
+    ["Next perspective", perspectiveLinks]
+  ].find(([, links]) => links.some(([href]) => href === page));
+  html = html.replace(region, "");
+  // Long reference pages that end with their own full-width guide keep that guide as the final section.
+  if (!series || html.includes('class="section-wrap article-body framework-section"')) return html;
+  const [kind, links] = series;
+  const [href, label] = links[(links.findIndex(([link]) => link === page) + 1) % links.length];
+  const source = readFileSync(path.join(root, "src", "site", href), "utf8");
+  const title = (source.match(/<h1(?:\s[^>]*)?>([\s\S]*?)<\/h1>/)?.[1] || escape(label))
+    .replace(/<br\s*\/?>/g, " ").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  const block = `<!-- next-article:start --><section class="section-wrap next-article" aria-labelledby="next-article-title"><a class="next-article-card" href="${href}"><span class="eyebrow">${kind}: ${escape(label)}</span><span class="next-article-title" id="next-article-title">${title}</span><span class="next-article-cta">Keep reading <span aria-hidden="true">&#8594;</span></span></a></section><!-- next-article:end -->`;
+  return html.replace("</main>", `${block}</main>`);
 }
 
 export function header(page) {
@@ -229,12 +300,12 @@ export function header(page) {
   ];
   const nav = menus.map(([key, label, href, panel]) => {
     const active = group === key ? ' aria-current="location"' : "";
-    return `<div class="nav-entry" data-nav-section="${key}"><a class="nav-fallback" href="${href}"${active}>${label}</a><button class="nav-trigger" id="nav-trigger-${key}" type="button" data-nav-trigger="${key}" aria-expanded="false" aria-controls="nav-panel-${key}"${active} hidden>${label}</button><div class="nav-panel" id="nav-panel-${key}" role="region" aria-labelledby="nav-trigger-${key}" hidden><div class="nav-panel-heading"><h2>${label}</h2><a href="${href}">View all ${label.toLowerCase()}</a></div>${panel}</div></div>`;
+    return `<div class="nav-entry" data-nav-section="${key}"><a class="nav-fallback" href="${href}"${active}>${label}</a><button class="nav-trigger" id="nav-trigger-${key}" type="button" data-nav-trigger="${key}" aria-expanded="false" aria-controls="nav-panel-${key}"${active} hidden>${label}${navChevron}</button><div class="nav-panel" id="nav-panel-${key}" role="region" aria-labelledby="nav-trigger-${key}" hidden><div class="nav-panel-heading"><h2>${label}</h2><a href="${href}">View all ${label.toLowerCase()}</a></div>${panel}</div></div>`;
   }).join("") + `<a class="nav-direct" href="about.html"${page === "about.html" ? ' aria-current="page"' : ""}>About us</a><a class="button button-small nav-direct" href="contact.html"${["contact.html", "booking.html"].includes(page) ? ' aria-current="location"' : ""}>Contact us</a>`;
-  return `<header class="site-header"><a class="brand" href="index.html" aria-label="Cloud First Consulting home"><span class="brand-mark" aria-hidden="true"></span><span>Cloud First<span class="brand-sub">CONSULTING</span></span></a><div class="header-controls">${themeToggle}<button class="menu-toggle" type="button" aria-label="Navigation menu" aria-expanded="false" aria-controls="primary-nav" hidden><span class="menu-toggle-label">Menu</span> <span aria-hidden="true">+</span></button></div><nav id="primary-nav" aria-label="Main navigation">${nav}</nav></header>`;
+  return `<header class="site-header"><a class="brand" href="index.html" aria-label="Cloud First Consulting home"><span class="brand-mark" aria-hidden="true"></span><span>Cloud First<span class="brand-sub">CONSULTING</span></span></a><div class="header-controls">${themeToggleCompact}${searchToggleCompact}${menuToggle}</div><nav id="primary-nav" aria-label="Main navigation">${themeToggle}${searchToggle}${nav}</nav></header>`;
 }
 
-export const footer = `<footer class="site-footer section-wrap"><div class="footer-directory"><div><a class="brand" href="index.html" aria-label="Cloud First Consulting home"><span class="brand-mark" aria-hidden="true"></span><span>Cloud First<span class="brand-sub">CONSULTING</span></span></a><p>Intelligence, with trust built in.</p></div><nav aria-label="Company"><h2>Explore</h2><a href="about.html">About us</a><a href="engagements.html">Engagements</a><a href="industries.html">Industries</a><a href="services.html">Services</a></nav><nav aria-label="Resources"><h2>Learn</h2><a href="faq.html">FAQs</a><a href="resources.html#insights">Insights</a><a href="briefs.html">Service briefs</a><a href="solutions-in-practice.html">Solutions in practice</a></nav><nav aria-label="Contact and trust"><h2>Connect</h2><a href="booking.html" data-provider="bookingUrl" hidden>Book time with me</a><a href="contact.html">Contact us</a><a href="trust.html">Privacy information</a><a href="sources.html">Products explained</a><a href="trust-center.html">Security and privacy</a></nav></div><div class="footer-bottom"><span>&copy; 2026 Cloud First Consulting</span></div></footer>`;
+export const footer = `<footer class="site-footer section-wrap"><div class="footer-directory"><div><a class="brand" href="index.html" aria-label="Cloud First Consulting home"><span class="brand-mark" aria-hidden="true"></span><span>Cloud First<span class="brand-sub">CONSULTING</span></span></a><p>Intelligence, with trust built in.</p></div><nav aria-label="Company"><h2>Explore</h2><a href="about.html">About us</a><a href="engagements.html">Engagements</a><a href="industries.html">Industries</a><a href="services.html">Services</a></nav><nav aria-label="Resources"><h2>Learn</h2><a href="faq.html">FAQs</a><a href="resources.html#insights">Insights</a><a href="briefs.html">Service briefs</a><a href="solutions-in-practice.html">Solutions in practice</a></nav><nav aria-label="Contact and trust"><h2>Connect</h2><a href="booking.html" data-provider="bookingUrl" hidden>Book time with us</a><a href="contact.html">Contact us</a><a href="trust.html">Privacy information</a><a href="sources.html">Products explained</a><a href="trust-center.html">Security and privacy</a></nav></div><div class="footer-bottom"><span>&copy; 2026 Cloud First Consulting</span></div></footer>`;
 
 export async function syncNavigation() {
   const settings = await readSettings();
@@ -245,7 +316,10 @@ export async function syncNavigation() {
     const filename = path.join(site, page);
     const content = await readFile(filename, "utf8");
     if (page === "404.html") {
-      const updated = syncAppearance(content.replace(/http-equiv="Content-Security-Policy" content="[^"]+"/, `http-equiv="Content-Security-Policy" content="${contentPolicy(settings)}"`));
+      let updated = syncAppearance(content.replace(/http-equiv="Content-Security-Policy" content="[^"]+"/, `http-equiv="Content-Security-Policy" content="${contentPolicy(settings)}"`));
+      // A compass wavers, then settles on home: a small, calm moment on an otherwise frustrating screen.
+      updated = withSceneStyles(updated.replace(/<!-- page-visual:start -->[\s\S]*?<!-- page-visual:end -->/g, "")
+        .replace('<p class="error-disclosure">', `<!-- page-visual:start --><div class="page-visual page-visual-compass not-found-visual">${compassScene()}</div><!-- page-visual:end --><p class="error-disclosure">`), true);
       if (updated !== content) await writeFile(filename, updated);
       continue;
     }
@@ -268,10 +342,14 @@ export async function syncNavigation() {
     if (page === "sources.html") {
       const marker = /<!-- product-guide:start -->[\s\S]*?<!-- product-guide:end -->/;
       if (!marker.test(source)) throw new Error("Missing product guide region in Technical resources.");
-      source = source.replace(marker, `<!-- product-guide:start -->${renderProductGuide()}<!-- product-guide:end -->`);
+      // Breadcrumbs sit inside the generated hero, so capture them wherever the previous build left them.
+      const crumbs = source.match(/<nav class="breadcrumbs"[\s\S]*?<\/nav>/)?.[0] || "";
+      source = source.replace(/<div class="section-wrap product-breadcrumbs">[\s\S]*?<\/div>\s*/, "");
+      source = source.replace(marker, `<!-- product-guide:start -->${renderProductGuide().replace("<!-- product-crumbs -->", crumbs)}<!-- product-guide:end -->`);
       source = source.replace(/<a\b[^>]*id="legacy-topic-destination"[\s\S]*?<\/a>/g, "")
         .replace("</main>", `<a id="legacy-topic-destination" href="insights.html#technology-deep-dives" data-topics="${technologyTopicIds.join(" ")}" hidden>Technology deep dives</a></main>`);
     }
+    source = syncMobileSummaries(source, page);
     let updated = replaceIcons(publicCopy(syncResourceBreadcrumbs(syncServiceNavigation(source, page), page)
       .replace(/<!-- site-header -->|<header class="site-header">[\s\S]*?<\/header>/, header(page))
       .replace(/<!-- site-footer -->|<footer class="site-footer section-wrap">[\s\S]*?<\/footer>/, footer)
@@ -287,10 +365,15 @@ export async function syncNavigation() {
     if (visual) {
       updated = updated.replace(/<!-- service-(?:photo|visual):start -->[\s\S]*?<!-- service-(?:photo|visual):end -->/g, "").replace('<div class="outcome-strip">', `${visual}<div class="outcome-strip">`);
     }
-    if (page === "index.html") updated = syncHomepageProducts(updated);
-    updated = syncAppearance(expandAcronyms(consolidateResourceLinks(linkProductNames(updated)), page));
+    if (page === "index.html") updated = syncHomepageStats(syncHomepageProducts(updated));
+    updated = syncLinkArrows(syncAppearance(syncEditorialDesign(expandAcronyms(syncNextArticle(consolidateResourceLinks(linkProductNames(updated)), page), page), page)));
+    // Hero media is added last so text transforms never reach diagram labels.
+    updated = page === "index.html" ? syncSignalMap(updated) : syncHeroVisual(syncServiceBanner(updated, page), page);
+    updated = syncPracticeVisuals(updated, page);
     if (updated !== content) await writeFile(filename, updated);
   }
+  // The search index reads the finished pages, so it is written after every page is in its final form.
+  await syncSearchIndex(root);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await syncNavigation();

@@ -1,6 +1,6 @@
 [
   {
-    "slug":"security","category":"Security","kind":"Overview","title":"Security services","headline":"Stronger protection.|Clearer priorities.",
+    "slug":"security","category":"Security","kind":"Overview","title":"Security services","tab":"Overview","headline":"Stronger protection.|Clearer priorities.",
     "summary":"Disconnected controls, excess access, and unclear ownership leave critical services exposed even when security tools are in place. Identify the risks that matter most and turn them into a coordinated protection plan across identities, devices, data, cloud workloads, and AI.",
     "capabilities":["Assess critical-service exposure, existing controls, and gaps in detection and response.","Govern human and agent access through lifecycle controls, access reviews, and risk-based policies.","Plan Zero Trust Network Access, secure web gateway controls, and staged replacement of eligible legacy VPN access.","Align device compliance, endpoint protection, and sensitive-data handling with business requirements.","Prioritize cloud and AI risks with accountable owners, response procedures, and evidence requirements."],
     "deliverables":["A risk register linking exposures to business impact, affected services, and accountable owners.","A control and detection coverage map showing gaps, dependencies, and licensing considerations.","A phased remediation roadmap with effort estimates, priorities, and acceptance criteria.","An operating model defining control ownership, escalation, exceptions, and review cadence."],
@@ -10,7 +10,7 @@
     "technologies":["Defender XDR","Sentinel","Entra Suite","Intune","Purview"],"service":"security.html"
   },
   {
-    "slug":"threat-protection","category":"Security","kind":"Capability","title":"Threat protection","headline":"Reduce exposure.|Strengthen your defense.",
+    "slug":"threat-protection","category":"Security","kind":"Capability","title":"Threat protection","tab":"Threats","headline":"Reduce exposure.|Strengthen your defense.",
     "summary":"Unprotected assets, inconsistent policies, and disconnected threat signals create avoidable exposure. Strengthen prevention and connect investigation through Defender XDR, while addressing cloud-workload protection as a distinct part of the agreed scope.",
     "capabilities":["Map critical services to identities, endpoints, email, applications, and protection requirements.","Review onboarding, policy configuration, sensor health, and coverage across supported workloads.","Prioritize exploitable weaknesses and high-risk configurations using business impact and exposure.","Connect related signals to investigation workflows with clear containment and escalation decisions.","Pilot hardening changes with operational owners, user-impact assessment, and rollback criteria."],
     "deliverables":["An asset-to-protection coverage map identifying unmanaged, unsupported, or partially protected systems.","A risk-ranked hardening backlog with remediation owners, dependencies, and verification steps.","A protection design documenting policy intent, exceptions, and required product capabilities.","A phased rollout plan with pilot acceptance, change approvals, and operational handover."],
@@ -20,7 +20,7 @@
     "technologies":["Defender XDR","Defender for Cloud","Microsoft Entra","Intune"],"service":"security.html#threat-protection"
   },
   {
-    "slug":"data-security","category":"Security","kind":"Capability","title":"Data security","headline":"Know your information.|Protect how it is used.",
+    "slug":"data-security","category":"Security","kind":"Capability","title":"Data security","tab":"Data","headline":"Know your information.|Protect how it is used.",
     "summary":"Overshared documents, unclear ownership, and inconsistent handling make sensitive information difficult to protect. Establish practical data boundaries that support collaboration and AI adoption without treating every document or business process the same.",
     "capabilities":["Identify sensitive repositories, accountable owners, excess access, and external-sharing patterns.","Define classifications and sensitivity labels around business handling needs and user workflows.","Design supported data loss prevention policies, starting with observation and controlled enforcement.","Align retention, audit, investigation, and insider-risk requirements with legal and privacy owners.","Review how assistants access protected information and where workload-specific controls differ."],
     "deliverables":["A repository risk assessment identifying priority data, exposure paths, and remediation owners.","A classification and handling model with label definitions, examples, and ownership.","A policy rollout plan covering test cases, user impact, exceptions, and enforcement gates.","A control-to-evidence matrix and operating procedures for reviews, investigations, and policy changes."],
@@ -30,7 +30,7 @@
     "technologies":["Microsoft Purview","Microsoft 365","Microsoft Entra","Microsoft Fabric"],"service":"security.html#data-security"
   },
   {
-    "slug":"modern-secops","category":"Security","kind":"Capability","title":"Modern security operations","headline":"Connect the signals.|Operationalize the response.",
+    "slug":"modern-secops","category":"Security","kind":"Capability","title":"Modern security operations","tab":"Operations","headline":"Connect the signals.|Operationalize the response.",
     "summary":"Alert volume is not the same as threat coverage. When signals lack context and response ownership is unclear, important incidents compete with noise. Build a security operating model that connects relevant telemetry, useful detections, and accountable action.",
     "capabilities":["Assess triage, investigation, escalation, and handoffs against priority business threats.","Select Sentinel data sources with explicit coverage, ingestion-cost, and retention requirements.","Engineer and tune detections using Defender XDR context and representative investigation scenarios.","Pilot Security Copilot for evidence summaries and investigation assistance, with analyst validation and scoped access.","Design response automation with approval gates for disruptive actions and recoverable failure paths.","Exercise runbooks, capture lessons, and establish a recurring detection-improvement process."],
     "deliverables":["A threat-coverage and operating-model assessment identifying gaps, bottlenecks, and ownership.","A prioritized detection backlog with data dependencies, tuning criteria, and validation scenarios.","Investigation and response runbooks with evidence requirements, escalation paths, and approvals.","An operations handover and scorecard covering alert quality, investigation time, and detection health."],
@@ -40,7 +40,7 @@
     "technologies":["Microsoft Sentinel","Defender XDR","Security Copilot","Azure Logic Apps"],"service":"security.html#threat-protection"
   },
   {
-    "slug":"ai-business","category":"AI Business Solutions","kind":"Overview","title":"AI Business Solutions","headline":"Better ways to work.|A clearer case for AI.",
+    "slug":"ai-business","category":"AI Business Solutions","kind":"Overview","title":"AI Business Solutions","tab":"Overview","headline":"Better ways to work.|A clearer case for AI.",
     "summary":"Repeated tasks, fragmented knowledge, and disconnected handoffs slow teams down. Identify where better collaboration, simpler processes, and useful AI can improve everyday work, then build the business case and adoption path before expanding investment.",
     "capabilities":["Improve modern work productivity through Microsoft 365 collaboration, content ownership, and Viva employee experience.","Prioritize role-based Copilot and agent use cases around real tasks and approved information.","Redesign business processes before automating decisions, approvals, and system handoffs.","Design custom AI with bounded access, representative evaluation, and accountable operational owners.","Equip users and managers with role-based learning, support, and privacy-aware adoption measures."],
     "deliverables":["A ranked opportunity portfolio comparing business value, feasibility, readiness, and change effort.","A current-state assessment and future-state blueprint for the selected workplace or process scope.","A pilot charter with baseline measures, success criteria, controls, and expansion decisions.","An adoption and delivery roadmap with training, support responsibilities, and ownership."],
@@ -50,7 +50,7 @@
     "technologies":["Microsoft 365","Viva","Microsoft 365 Copilot","Power Apps","Power Automate","Foundry"],"service":"ai-business.html"
   },
   {
-    "slug":"copilot-readiness","category":"AI Business Solutions","kind":"Capability","title":"Copilot readiness and adoption","headline":"Prepare the foundation.|Make adoption useful.",
+    "slug":"copilot-readiness","category":"AI Business Solutions","kind":"Capability","title":"Copilot readiness and adoption","tab":"Copilot","headline":"Prepare the foundation.|Make adoption useful.",
     "summary":"Licenses alone do not make Copilot useful. Poor information access, weak task selection, and limited user support can undermine adoption. Prepare Microsoft 365 Copilot around representative roles, trusted content, and clear expectations for reviewing results.",
     "capabilities":["Select role-based tasks where drafting, discovery, or analysis can address a recurring work problem.","Review licensing, identity, device, application, and information-access prerequisites.","Identify oversharing, stale content, and protection gaps that affect permission-aware responses.","Design practical learning, manager support, feedback collection, and issue escalation.","Evaluate output quality and task usefulness with representative users before widening access."],
     "deliverables":["A role-and-task opportunity map with baseline effort, quality expectations, and content dependencies.","A readiness report and ranked remediation backlog with accountable owners.","A pilot charter defining participants, safeguards, evaluation tasks, and proceed-or-stop criteria.","An enablement playbook with learning scenarios, support routes, and privacy-aware adoption measures."],
@@ -60,7 +60,7 @@
     "technologies":["Microsoft 365 Copilot","Microsoft Purview","Microsoft Entra","Intune"],"service":"ai-business.html#copilot"
   },
   {
-    "slug":"business-processes","category":"AI Business Solutions","kind":"Capability","title":"Business process transformation","headline":"Reduce the handoffs.|Keep decisions accountable.",
+    "slug":"business-processes","category":"AI Business Solutions","kind":"Capability","title":"Business process transformation","tab":"Processes","headline":"Reduce the handoffs.|Keep decisions accountable.",
     "summary":"Manual re-entry, approval queues, and unclear handoffs create delays and rework. Redesign the process before adding automation, connecting records and decisions around a business outcome with explicit ownership for exceptions and consequential actions.",
     "capabilities":["Map current work, wait times, duplicate entry, and the causes of recurring exceptions.","Design a simpler future-state flow across sales, service, finance, or operations.","Connect approved business and collaboration systems with deliberate data ownership and access.","Define human decisions, automated actions, approval thresholds, and recovery from failed steps.","Plan representative acceptance tests, user adoption, release controls, and support handover."],
     "deliverables":["A current-state process map and baseline showing bottlenecks, handoffs, and rework drivers.","A future-state design with decision rights, approvals, and exception-routing rules.","An integration blueprint and prioritized implementation backlog with system dependencies.","Acceptance scenarios and operating runbooks covering failures, duplicate actions, and escalation."],
@@ -70,7 +70,7 @@
     "technologies":["Dynamics 365","Power Automate","Power Apps","Copilot Studio"],"service":"ai-business.html#processes"
   },
   {
-    "slug":"custom-ai","category":"AI Business Solutions","kind":"Capability","title":"Custom AI solutions and governance","headline":"Use your knowledge.|Bound the capability.",
+    "slug":"custom-ai","category":"AI Business Solutions","kind":"Capability","title":"Custom AI solutions and governance","tab":"Custom AI","headline":"Use your knowledge.|Bound the capability.",
     "summary":"Generic assistants may not understand your business context or safely execute the work you need. Design a focused assistant or agent around approved knowledge, bounded tools, and measurable task quality, with governance built into the delivery approach.",
     "capabilities":["Assess task feasibility, business ownership, source quality, and permitted data use.","Design permission-aware knowledge retrieval, source references, and handling of uncertain answers.","Connect approved tools and Model Context Protocol servers with scoped permissions and action approvals.","Test representative tasks, denied access, misleading inputs, and safe failure behavior.","Define release decisions, human escalation, monitoring, change review, and retirement."],
     "deliverables":["A solution blueprint defining task boundaries, knowledge sources, permissions, and decision ownership.","A scoped prototype demonstrating the agreed workflow and integration boundaries.","An evaluation dataset and results report covering task quality, groundedness, and failure cases.","A production-readiness backlog with release gates, monitoring requirements, and support ownership."],
@@ -80,7 +80,7 @@
     "technologies":["Copilot Studio","Microsoft Foundry","Microsoft Entra","Microsoft Purview"],"service":"ai-business.html#custom-ai"
   },
   {
-    "slug":"cloud-platforms","category":"Cloud and AI Platforms","kind":"Overview","title":"Cloud and AI Platforms","headline":"Modernize with purpose.|Innovate on solid ground.",
+    "slug":"cloud-platforms","category":"Cloud & AI","kind":"Overview","title":"Cloud & AI","tab":"Overview","headline":"Modernize with purpose.|Innovate on solid ground.",
     "summary":"Aging applications, fragmented data, and unpredictable costs make change harder than it needs to be. Establish cloud, data, and AI foundations around business priorities, with deliberate decisions about reliability, security, ownership, and ongoing operations.",
     "capabilities":["Design governed Azure foundations with identity, networking, policy, and Defender for Cloud posture and protection planning.","Assess application dependencies and prioritize retention, migration, or modernization decisions.","Connect data integration, shared definitions, quality, and access into trusted analytical foundations.","Plan AI application hosting, evaluation, integrations, and release controls.","Build recovery, monitoring, support, and cost accountability into the operating model."],
     "deliverables":["A landscape assessment linking platform constraints and technical debt to business priorities.","A target architecture with documented tradeoffs, dependencies, and responsibility boundaries.","A sequenced delivery roadmap with workload priorities, readiness gates, and effort estimates.","An operations plan covering recovery objectives, monitoring, cost ownership, and improvement reviews."],
@@ -90,7 +90,7 @@
     "technologies":["Microsoft Azure","Microsoft Fabric","Purview","Microsoft Foundry","Defender for Cloud"],"service":"cloud-platforms.html"
   },
   {
-    "slug":"cloud-modernization","category":"Cloud and AI Platforms","kind":"Capability","title":"Cloud modernization","headline":"Move the business forward.|Not just the workload.",
+    "slug":"cloud-modernization","category":"Cloud & AI","kind":"Capability","title":"Cloud modernization","tab":"Modernization","headline":"Move the business forward.|Not just the workload.",
     "summary":"Moving workloads without understanding dependencies can carry technical debt and operational risk into the cloud. Decide what to retain, retire, migrate, or redesign, then sequence change around business continuity and a governed Azure foundation.",
     "capabilities":["Discover workloads, dependencies, support constraints, and business criticality.","Assess disposition options against compatibility, risk, operating cost, and business value.","Design landing-zone identity, connectivity, policy, and workload responsibility boundaries.","Plan Defender for Cloud coverage alongside performance, recovery, and data residency requirements.","Plan migration waves, representative pilots, cutover decisions, rollback, and support transition."],
     "deliverables":["A workload inventory and dependency map with disposition recommendations and decision rationale.","A target architecture documenting platform controls, connectivity, and operational responsibilities.","A wave plan with prerequisites, risk treatment, effort estimates, and business change windows.","Cutover and acceptance criteria covering recovery tests, performance, support readiness, and rollback."],
@@ -100,7 +100,7 @@
     "technologies":["Microsoft Azure","Azure Migrate","Azure SQL","Azure Policy","Defender for Cloud"],"service":"cloud-platforms.html#modernization"
   },
   {
-    "slug":"governed-data","category":"Cloud and AI Platforms","kind":"Capability","title":"Governed data and analytics","headline":"Connect the information.|Preserve its meaning.",
+    "slug":"governed-data","category":"Cloud & AI","kind":"Capability","title":"Governed data and analytics","tab":"Data","headline":"Connect the information.|Preserve its meaning.",
     "summary":"Conflicting reports and disconnected data force teams to reconcile numbers before making decisions. Build governed data products with shared meaning, reliable pipelines, and accountable ownership so analytics and AI use information people can trust.",
     "capabilities":["Trace priority business questions to source systems, data owners, and integration constraints.","Design lakehouse, warehouse, and semantic models around agreed analytical needs.","Define quality rules, freshness expectations, lineage, classification, and access boundaries.","Deliver a bounded reporting or analytical pilot with business validation of key measures.","Establish pipeline monitoring, issue resolution, change control, and data-product ownership."],
     "deliverables":["A source-to-consumption blueprint showing integration paths, responsibilities, and dependencies.","A prioritized data-product backlog with shared metric definitions and business acceptance criteria.","A quality and access control plan with exception handling and traceable evidence.","A reporting pilot and operating model covering refresh failures, ownership, and change approval."],
@@ -110,7 +110,7 @@
     "technologies":["Microsoft Fabric","OneLake","Power BI","Microsoft Purview"],"service":"cloud-platforms.html#data-platforms"
   },
   {
-    "slug":"ai-platforms","category":"Cloud and AI Platforms","kind":"Capability","title":"AI application platforms","headline":"Make innovation deployable.|Make it operable.",
+    "slug":"ai-platforms","category":"Cloud & AI","kind":"Capability","title":"AI application platforms","tab":"AI platforms","headline":"Make innovation deployable.|Make it operable.",
     "summary":"A successful AI prototype can still lack the controls needed for a dependable service. Establish a deployable platform for models, knowledge, and tools with explicit evaluation, release, monitoring, and cost responsibilities before production use.",
     "capabilities":["Select hosting and supported model options against quality, latency, region, and cost requirements.","Design identity, secrets handling, knowledge access, and approved Model Context Protocol integrations.","Define orchestration boundaries, workflow handoffs, retries, and human escalation paths.","Create representative evaluations and release gates for quality, access controls, and failure behavior.","Use GitHub Copilot for development assistance with human code review and tests.","Plan budgets, monitoring, recovery, version changes, and accountable support."],
     "deliverables":["A reference architecture with hosting choices, trust boundaries, and documented tradeoffs.","A scoped platform foundation with environment configuration and repeatable deployment steps.","An evaluation and release plan with test datasets, acceptance thresholds, and rollback criteria.","An operations runbook covering monitoring, cost alerts, incidents, and model or application changes."],

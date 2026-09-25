@@ -5,12 +5,32 @@ import vm from "node:vm";
 
 const script = readFileSync(new URL("../src/site/assets/app.js", import.meta.url), "utf8");
 
+test("scroll offsets track sticky headers without reserving space for a flowing contact header", () => {
+  for (const position of ["sticky", "relative"]) {
+    const properties = new Map();
+    const header = { getBoundingClientRect: () => ({ height: 76 }) };
+    vm.runInNewContext(script, {
+      document: {
+        documentElement: { classList: { add() {} }, style: { setProperty: (key, value) => properties.set(key, value) } },
+        querySelector: selector => selector === ".site-header" ? header : null,
+        querySelectorAll: () => [], getElementById: () => null, addEventListener() {}
+      },
+      window: { location: { hash: "" }, addEventListener() {} },
+      getComputedStyle: () => ({ position }),
+      ResizeObserver: class { observe(element) { assert.equal(element, header); } }
+    });
+    assert.equal(properties.get("--header-height"), "76px");
+    assert.equal(properties.get("--header-scroll-offset"), position === "sticky" ? "76px" : "0px");
+  }
+});
+
 function fixture(hash = "#entra") {
   const events = { window: new Map(), document: new Map() };
   const cards = new Map([
     ["entra", "product-entry"], ["purview", "product-entry"], ["ai-security", "editorial-card"],
     ["insights", "resource-hub-group"], ["identity", "practice"], ["business-services", "catalog-group"],
-    ["product-group", "product-guide-group"], ["main", ""], ["use-case-1", "use-case"]
+    ["product-group", "product-guide-group"], ["main", ""], ["use-case-1", "use-case"],
+    ["darien-profile", "personal-profile"]
   ].map(([id, className]) => {
     const classes = new Set([className]);
     const card = { classList: {
@@ -20,13 +40,14 @@ function fixture(hash = "#entra") {
     return [id, card];
   }));
   const heading = { closest: selector => cards.get("product-group").closest(selector), scrollIntoView: options => { heading.scrolled = options; } };
+  const profileHeading = { closest: selector => cards.get("darien-profile").closest(selector), scrollIntoView() { throw new Error("Scroll to the full profile, not the heading"); } };
   const location = new URL(`https://demo.github.io/demo/sources/${hash}`);
   const document = {
     hidden: false,
     documentElement: { classList: { add() {} } },
     querySelector: () => null,
     querySelectorAll: selector => selector === "[data-resource-fragment]" ? [] : [...cards.values()].filter(card => card.classList.contains("is-highlighted")),
-    getElementById: id => id === "product-group-0" ? heading : cards.get(id) || null,
+    getElementById: id => id === "darien-title" ? profileHeading : id === "product-group-0" ? heading : cards.get(id) || null,
     addEventListener: (name, callback) => events.document.set(name, callback)
   };
   const warnings = [];
@@ -47,6 +68,18 @@ test("linked products highlight exactly one card and follow changed fragments", 
   f.location.hash = "#unknown";
   f.emit("window", "hashchange");
   assert(!f.cards.get("purview").classList.contains("is-highlighted"));
+});
+
+test("new and legacy profile links scroll to the whole profile above the portrait", () => {
+  for (const id of ["darien-profile", "darien-title"]) {
+    const f = fixture(`#${id}`);
+    f.emit("window", "load");
+    assert.equal(f.cards.get("darien-profile").scrolled.block, "start");
+    assert.equal(f.cards.get("darien-profile").scrolled.behavior, "instant");
+    f.emit("window", "hashchange");
+    f.emit("document", "click", { target: { closest: () => ({ href: f.location.href, hasAttribute: () => false }) } });
+    assert(!f.cards.get("darien-profile").classList.contains("is-highlighted"));
+  }
 });
 
 test("switching tabs clears the product highlight without restoring it on return", () => {

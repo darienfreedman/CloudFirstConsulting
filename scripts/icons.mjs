@@ -18,7 +18,25 @@ const names = {
   "accounting-advisory": "Calculator24Regular", "architecture-engineering": "DesignIdeas24Regular",
   "staffing-recruitment": "PeopleSearch24Regular", "travel-hospitality": "Airplane24Regular",
   "construction-real-estate": "Building24Regular", nonprofits: "Heart24Regular",
-  "transportation-logistics": "VehicleTruck24Regular", legal: "Scales24Regular", startups: "Rocket24Regular"
+  "transportation-logistics": "VehicleTruck24Regular", legal: "Scales24Regular", startups: "Rocket24Regular",
+  "microsoft-365": "Apps24Regular", viva: "PeopleCommunity24Regular",
+  teams: "ChatVideo24Regular", sharepoint: "FolderPeople24Regular",
+  onedrive: "CloudArrowUp24Regular", exchange: "Mail24Regular",
+  "windows-365": "Desktop24Regular", intune: "LaptopSettings24Regular",
+  "windows-autopilot": "DesktopArrowDown24Regular", entra: "PersonKey24Regular",
+  purview: "DocumentDataLock24Regular", defender: "ShieldCheckmark24Regular",
+  "security-copilot": "ShieldTask24Regular", sentinel: "EyeTracking24Regular",
+  "microsoft-365-copilot": "ChatSparkle24Regular", "copilot-studio": "BotAdd24Regular",
+  "agent-365": "Bot24Regular", "agent-framework": "Flowchart24Regular",
+  "dynamics-365": "BuildingShop24Regular", "power-apps": "WindowApps24Regular",
+  "power-automate": "Flow24Regular", "defender-for-cloud": "ShieldGlobe24Regular",
+  azure: "Cloud24Regular", "azure-policy": "ClipboardTask24Regular",
+  "azure-migrate": "CloudArrowRight24Regular", "azure-sql": "Database24Regular",
+  fabric: "DatabaseLink24Regular", onelake: "DataArea24Regular",
+  "power-bi": "DataBarVertical24Regular", foundry: "BrainCircuit24Regular",
+  github: "Code24Regular", "github-copilot": "BotSparkle24Regular",
+  "azure-monitor": "DesktopPulse24Regular", "azure-cost-management": "MoneyCalculator24Regular",
+  "azure-backup": "CloudArchive24Regular", "azure-logic-apps": "CloudFlow24Regular"
 };
 const cache = new Map();
 

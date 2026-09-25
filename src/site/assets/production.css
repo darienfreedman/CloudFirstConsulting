@@ -176,3 +176,45 @@ html{scroll-padding-top:var(--header-scroll-offset,112px)}
 @media screen and (max-width:900px){
   .nav-trigger,.site-header .nav-direct:not(.button){font-size:18px;min-height:52px}
 }
+.personal-profile{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:64px;align-items:center;padding-block:56px}
+.profile-portrait{margin:0;background:var(--panel-light);border:1px solid var(--line);border-radius:24px 24px 72px 24px;overflow:hidden}
+.profile-portrait img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover}
+.profile-portrait figcaption{padding:20px 28px;font-size:20px;font-weight:600}
+.profile-portrait figcaption span{display:block;font-size:16px;font-weight:400;color:var(--muted)}
+.profile-story{min-width:0}
+.profile-story h2{margin-bottom:20px}
+.profile-story>p:not(.eyebrow){font-size:18px;line-height:1.75}
+.profile-interests{padding:20px 24px;margin-block:24px;border-left:3px solid var(--accent);background:var(--panel-light);border-radius:0 16px 16px 0}
+.profile-interests h3{font-size:18px;margin-bottom:8px}
+.profile-interests ul{padding-left:20px;margin:0;color:var(--muted)}
+.profile-interests li+li{margin-top:6px}
+.profile-story .button{white-space:normal}
+.contact-person{display:inline-flex;align-items:center;gap:12px;margin-top:20px;min-height:48px;color:var(--accent);font-weight:600}
+.contact-person img{border-radius:50%;object-fit:cover}
+.contact-person:hover{text-decoration:underline;text-underline-offset:4px}
+.contact-layout>div{min-width:0}
+@media screen and (max-width:900px){
+  .site-header{width:100%;max-width:none;margin:0;padding:12px max(20px,env(safe-area-inset-right)) 12px max(20px,env(safe-area-inset-left));min-height:76px}
+  .site-header>.brand{min-width:0}
+  .site-header>.brand>span:last-child{white-space:nowrap}
+  .js #primary-nav{max-height:calc(100dvh - var(--header-height,76px))}
+  /* Embedded form focus and validation must never sit beneath a sticky header. */
+  body:has([data-react-contact]) .site-header{position:relative}
+  .personal-profile{gap:32px}
+  .services-hero{padding-block:8px 16px}
+  .services-hero .breadcrumbs{margin-bottom:8px}
+  .services-hero .eyebrow{display:none}
+  .services-hero h1{font-size:34px;line-height:1.15;margin-bottom:10px;max-width:560px}
+  .services-hero>p:last-child{font-size:16px;line-height:1.5}
+}
+@media screen and (max-width:600px){
+  .personal-profile{grid-template-columns:1fr;padding-block:28px 40px;gap:28px}
+  .profile-portrait{max-width:400px;width:100%;margin-inline:auto}
+  .profile-portrait img{max-height:340px;object-position:center 35%}
+  .profile-portrait figcaption{padding:16px 24px}
+  .profile-story>p:not(.eyebrow){font-size:16px;line-height:1.7}
+  .profile-story h2{font-size:30px}
+  .about-hero,.contact-hero{padding-block:12px 24px}
+  .about-hero h1,.contact-hero h1{font-size:34px}
+  .contact-hero>p:not(.eyebrow){font-size:16px;margin-bottom:0}
+}

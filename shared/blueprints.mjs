@@ -1,12 +1,13 @@
+// Steps are [title, description, context, optional short tab label for phones].
 export const blueprints = {
   "security.html": {
     title: "From security signals to an authorized response",
     description: "A reference workflow for aligning detection, investigation, and response responsibilities.",
     steps: [
-      ["Collect signals", "Identity, endpoint, application, and cloud telemetry.", "Entra and Defender XDR"],
-      ["Correlate activity", "Connect related events and prioritize relevant incidents.", "Defender XDR and Sentinel"],
+      ["Collect signals", "Identity, endpoint, application, and cloud telemetry.", "Entra and Defender XDR", "Collect"],
+      ["Correlate activity", "Connect related events and prioritize relevant incidents.", "Defender XDR and Sentinel", "Correlate"],
       ["Investigate", "Review evidence, business impact, and the proposed action.", "Security operations"],
-      ["Authorize response", "Apply approved actions and record the outcome.", "Incident and service owners"]
+      ["Authorize response", "Apply approved actions and record the outcome.", "Incident and service owners", "Authorize"]
     ],
     note: "Detection coverage, data sources, and response authority are defined for the agreed environment."
   },
@@ -14,10 +15,10 @@ export const blueprints = {
     title: "A governed path from knowledge to action",
     description: "A reference workflow for a business assistant that uses approved information and integrations.",
     steps: [
-      ["Define the task", "Agree on the business purpose and accountable owner.", "Business process"],
-      ["Check access", "Use approved sources and the appropriate identity context.", "Identity and knowledge"],
-      ["Produce a response", "Ground the result and evaluate usefulness and quality.", "Copilot or a custom solution"],
-      ["Review the action", "Apply the approval rules for the intended consequence.", "Business owner"]
+      ["Define the task", "Agree on the business purpose and accountable owner.", "Business process", "Define"],
+      ["Check access", "Use approved sources and the appropriate identity context.", "Identity and knowledge", "Check"],
+      ["Produce a response", "Ground the result and evaluate usefulness and quality.", "Copilot or a custom solution", "Respond"],
+      ["Review the action", "Apply the approval rules for the intended consequence.", "Business owner", "Review"]
     ],
     note: "A drafting assistant and an action-taking workflow need different control and approval decisions."
   },
